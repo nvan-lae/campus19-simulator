@@ -29,3 +29,29 @@ Each player takes turns rolling a **dice**, traversing a 42-tile board with obst
 * **Scrum Master**: [Name] - Removes blockers and tracks progress.
 * **Tech Lead**: [Name] - Oversees the architecture and code quality.
 * **Developers**: [All Names] - Implementing core features.
+
+
+## Directory Structure 🏗️
+
+```
+/transcendence
+├── docker-compose.yml       # Orchestrates App, API, and DB
+├── /frontend                # React App
+├── /backend                 # NestJS App
+└── /shared                  # (Optional) Shared Types/Interfaces
+```
+
+
+## Database Schema 📋
+
+* **Users**: `id`, `username`, `email`, `avatar`, `2fa_secret`, `oAuthToken`.
+* **Matches**: `id`, `startedAt`, `endedAt`, `winnerId`.
+* **MatchParticipants**: `matchId`, `userId`, `score`, `position` (links users to matches).
+* **Stats**: (Can be calculated dynamically from Matches, or stored as a running total in Users).
+
+
+## Game Loop Logic ➰
+
+* **Frontend**: A "dumb" renderer. It sends `user_rolled_dice` events and listens for `board_update` events. It does not calculate where the player lands.
+* **Backend**: Maintains the "State" of the board (Who is on which tile? Whose turn is it? Did they hit a trap?).
+* **State Store**: Game state should be held in memory (variables in a Service) while the game is active, and only be written to the DB (ORM) when the game finishes.
