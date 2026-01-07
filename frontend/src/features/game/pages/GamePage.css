@@ -1,0 +1,106 @@
+.game-content {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: clamp(8px, 2vw, 16px);
+  grid-auto-rows: auto;
+}
+
+.board-section {
+  grid-column: 1;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.sidebar {
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 2vw, 12px);
+  min-width: clamp(200px, 25vw, 300px);
+}
+
+.move-history {
+  background-color: #c0c0c0;
+  border: 2px solid;
+  border-top-color: #dfdfdf;
+  border-left-color: #dfdfdf;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  padding: clamp(8px, 2vw, 12px);
+  font-family: 'MS Sans Serif', Arial, sans-serif;
+  flex: 1;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.move-history h3 {
+  margin: 0 0 clamp(8px, 1.5vw, 12px) 0;
+  font-size: clamp(10px, 1.8vw, 14px);
+  font-weight: bold;
+  color: #000;
+  border-bottom: 1px solid #808080;
+  padding-bottom: 4px;
+}
+
+.history-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, 1vw, 6px);
+}
+
+.history-item {
+  background-color: #ffffff;
+  border: 1px solid;
+  border-top-color: #dfdfdf;
+  border-left-color: #dfdfdf;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  padding: clamp(4px, 1vw, 8px);
+  font-size: clamp(8px, 1.1vw, 10px);
+  color: #000;
+  line-height: 1.4;
+}
+
+.winner-text {
+  font-size: clamp(12px, 2vw, 16px) !important;
+  color: #ffff00 !important;
+  text-shadow: 1px 1px 2px #000000;
+  font-weight: bold !important;
+  animation: blink 0.5s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@media (max-width: 1024px) {
+  .game-content {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    grid-column: 1;
+    min-width: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(6px, 1.5vw, 10px);
+  }
+
+  .move-history {
+    grid-column: 1 / -1;
+    min-height: 150px;
+  }
+}
