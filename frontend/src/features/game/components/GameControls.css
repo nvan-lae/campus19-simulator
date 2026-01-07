@@ -1,0 +1,95 @@
+.game-controls {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 2vw, 12px);
+  background-color: #c0c0c0;
+  border: 2px solid;
+  border-top-color: #dfdfdf;
+  border-left-color: #dfdfdf;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  padding: clamp(8px, 2vw, 12px);
+  font-family: 'MS Sans Serif', Arial, sans-serif;
+}
+
+.controls-section {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, 1vw, 8px);
+}
+
+.controls-section h3 {
+  margin: 0;
+  font-size: clamp(10px, 1.8vw, 14px);
+  font-weight: bold;
+  color: #000;
+  border-bottom: 1px solid #808080;
+  padding-bottom: 4px;
+}
+
+.current-player {
+  font-size: clamp(11px, 1.8vw, 14px);
+  font-weight: bold;
+  color: #000080;
+  padding: clamp(6px, 1vw, 10px);
+  background-color: #ffffff;
+  border: 1px solid;
+  border-top-color: #dfdfdf;
+  border-left-color: #dfdfdf;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  text-align: center;
+}
+
+.dice-container {
+  display: flex;
+  gap: clamp(4px, 1vw, 8px);
+  align-items: center;
+}
+
+.dice-display {
+  flex: 1;
+  font-size: clamp(28px, 8vw, 48px);
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #000080;
+  border: 2px solid;
+  border-top-color: #dfdfdf;
+  border-left-color: #dfdfdf;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  padding: clamp(8px, 2vw, 16px);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+}
+
+.game-controls button {
+  padding: clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px);
+  font-size: clamp(9px, 1.4vw, 11px);
+  flex: 1;
+}
+
+.reset-button {
+  background-color: #008000 !important;
+  color: #ffffff !important;
+  font-weight: bold;
+}
+
+.reset-button:hover {
+  background-color: #00a000 !important;
+}
+
+@media (max-width: 768px) {
+  .game-controls {
+    padding: clamp(6px, 1.5vw, 10px);
+    gap: clamp(6px, 1.5vw, 10px);
+  }
+
+  .dice-display {
+    font-size: clamp(24px, 6vw, 40px);
+    padding: clamp(6px, 1.5vw, 12px);
+  }
+}
