@@ -1,15 +1,29 @@
+// 1. The Generator Block
 generator client {
   provider = "prisma-client-js"
 }
 
+// 2. The Datasource Block
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+// 3. The User Model
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   username  String   @unique
+  password  String?
+  avatarUrl String   @default("default-avatar.png")
+
+  // For 42 OAuth
+  intraId   String?  @unique
+
+  // For 2FA
+  isTwoFactorEnabled Boolean @default(false)
+  twoFactorSecret    String?
+
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
