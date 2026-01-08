@@ -44,6 +44,16 @@ clean:
 	@echo "$(GREEN)Cleaning containers and networks...$(RESET)"
 	docker-compose -f $(COMPOSE_FILE) down --rmi all --remove-orphans
 
+# Full clean including volumes
+fclean:
+	@echo "$(GREEN)Full clean: removing containers, images, and volumes...$(RESET)"
+	docker-compose -f $(COMPOSE_FILE) down --rmi all --volumes --remove-orphans
+
+# Prune unused Docker resources
+prune:
+	@echo "$(GREEN)Pruning unused Docker resources...$(RESET)"
+	docker system prune -f
+
 # Rebuild everything from scratch
 re: fclean all
 
