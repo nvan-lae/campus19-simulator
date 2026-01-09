@@ -2,11 +2,6 @@
 export const BOARD_SIZE = 42;
 export const SNAKES = {
   17: 4,
-  54: 31,
-  62: 18,
-  87: 36,
-  93: 73,
-  99: 79,
 };
 
 export const LADDERS = {
@@ -14,10 +9,6 @@ export const LADDERS = {
   5: 14,
   20: 39,
   32: 42,
-  42: 68,
-  50: 91,
-  57: 96,
-  72: 91,
 };
 
 export const TILE_EFFECTS = {

@@ -100,7 +100,7 @@ export const useGameLogic = () => {
       diceValue: null,
       gameOver: false,
       winner: null,
-      moveHistory: [],
+      moveHistory: [], 
     });
   }, []);
 
