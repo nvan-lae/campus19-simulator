@@ -18,5 +18,5 @@ COPY . .
 # Expose the port the app runs on
 EXPOSE 3000
 
-# Start the application in development mode
-CMD ["npm", "run", "start:dev"]
+# Run migrations (with retry while DB starts) and then start the app
+CMD ["sh", "-c", "until npx prisma migrate deploy; do echo 'Waiting for database...'; sleep 3; done; npm run start:dev"]
