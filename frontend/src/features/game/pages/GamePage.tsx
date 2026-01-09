@@ -16,7 +16,7 @@ export const GamePage = () => {
   } = useGameLogic();
 
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-  const isRolling = gameState.diceValue === null && !gameState.gameOver;
+  const isRolling = gameState.diceValue !== null && !gameState.gameOver;
 
   // Auto-play CPU turns
   useEffect(() => {

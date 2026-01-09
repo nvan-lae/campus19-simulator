@@ -1,103 +1,43 @@
+@import "tailwindcss";
+
 .game-board-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  padding: clamp(8px, 2vw, 16px);
+  @apply flex justify-center items-center w-full p-4 md:p-6;
 }
 
 .game-board {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(4px, 1vw, 8px);
-  background-color: #c0c0c0;
-  border: 2px solid;
-  border-top-color: #dfdfdf;
-  border-left-color: #dfdfdf;
-  border-right-color: #808080;
-  border-bottom-color: #808080;
-  padding: clamp(8px, 2vw, 12px);
+  @apply flex flex-col gap-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 md:p-6 shadow-md;
 }
 
 .board-row {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(40px, 1fr));
-  gap: clamp(4px, 1vw, 8px);
+  @apply grid grid-cols-7 gap-2 md:gap-3;
 }
 
 .game-tile {
-  aspect-ratio: 1;
-  background-color: #ffffff;
-  border: 2px solid;
-  border-top-color: #dfdfdf;
-  border-left-color: #dfdfdf;
-  border-right-color: #808080;
-  border-bottom-color: #808080;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: none;
-  position: relative;
-  padding: clamp(2px, 0.5vw, 4px);
-  font-family: 'MS Sans Serif', Arial, sans-serif;
-  min-width: clamp(40px, 8vw, 60px);
-}
-
-.game-tile:hover {
-  background-color: #f0f0f0;
+  @apply aspect-square bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded flex flex-col items-center justify-center cursor-pointer transition-all hover:shadow-md hover:border-blue-400 dark:hover:border-blue-500 p-2 min-w-[40px] md:min-w-[60px];
 }
 
 .game-tile:active {
-  border-style: inset;
-  border-top-color: #808080;
-  border-left-color: #808080;
-  border-right-color: #dfdfdf;
-  border-bottom-color: #dfdfdf;
+  @apply scale-95;
 }
 
 .game-tile.snake {
-  background-color: #ffcccc;
-  border-top-color: #ff6b6b;
-  border-left-color: #ff6b6b;
-  border-right-color: #cc0000;
-  border-bottom-color: #cc0000;
+  @apply bg-red-100 dark:bg-red-900 border-red-400 dark:border-red-600;
 }
 
 .game-tile.ladder {
-  background-color: #ccffcc;
-  border-top-color: #6bff6b;
-  border-left-color: #6bff6b;
-  border-right-color: #00cc00;
-  border-bottom-color: #00cc00;
+  @apply bg-green-100 dark:bg-green-900 border-green-400 dark:border-green-600;
 }
 
 .game-tile.start {
-  background: linear-gradient(135deg, #00cc00, #66ff66);
-  border: 3px solid #008000;
-  font-weight: bold;
-  color: #ffffff;
-  text-shadow: 1px 1px 2px #000000;
+  @apply bg-gradient-to-br from-green-400 to-green-600 border-green-700 font-bold text-white shadow-lg;
 }
 
 .game-tile.end {
-  background: linear-gradient(135deg, #ffcc00, #ffff66);
-  border: 3px solid #ff9900;
-  font-weight: bold;
-  color: #000000;
+  @apply bg-gradient-to-br from-yellow-400 to-yellow-600 border-yellow-700 font-bold text-gray-900 shadow-lg;
 }
 
 .tile-number {
-  font-size: clamp(8px, 1.2vw, 11px);
-  font-weight: bold;
-  color: #000080;
-  text-align: center;
-  min-height: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
+  @apply text-xs md:text-sm font-bold text-gray-900 dark:text-gray-100 text-center min-h-4 flex items-center justify-center flex-1;
 }
 
 .game-tile.start .tile-number,
@@ -115,28 +55,15 @@
 }
 
 .player-token {
-  width: clamp(14px, 2vw, 20px);
-  height: clamp(14px, 2vw, 20px);
-  border-radius: 50%;
-  border: 2px solid #000080;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: clamp(8px, 1vw, 10px);
-  font-weight: bold;
-  color: #ffffff;
-  text-shadow: 0 0 2px #000000;
-  transition: transform 0.3s ease;
+  @apply w-5 h-5 md:w-6 md:h-6 rounded-full border-2 border-blue-900 flex items-center justify-center text-xs md:text-sm font-bold text-white drop-shadow-md transition-transform hover:scale-125;
 }
 
 .player-token:hover {
-  transform: scale(1.2);
+  @apply scale-125;
 }
 
 .player-token.winner {
-  border: 3px solid #ffff00;
-  box-shadow: 0 0 8px #ffff00;
-  animation: pulse 0.5s ease-in-out infinite;
+  @apply border-yellow-400 shadow-lg shadow-yellow-400 animate-pulse;
 }
 
 @keyframes pulse {
@@ -150,20 +77,18 @@
 
 @media (max-width: 768px) {
   .board-row {
-    grid-template-columns: repeat(7, minmax(35px, 1fr));
+    @apply grid-cols-7 gap-1;
   }
 
   .game-tile {
-    min-width: clamp(35px, 7vw, 50px);
+    @apply min-w-8 md:min-w-12;
   }
 
   .tile-number {
-    font-size: clamp(7px, 1vw, 9px);
+    @apply text-xs;
   }
 
   .player-token {
-    width: clamp(12px, 1.8vw, 16px);
-    height: clamp(12px, 1.8vw, 16px);
-    font-size: clamp(7px, 0.9vw, 8px);
+    @apply w-4 h-4 text-xs;
   }
 }

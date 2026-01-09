@@ -1,106 +1,55 @@
+@import "tailwindcss";
+
 .game-content {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: clamp(8px, 2vw, 16px);
-  grid-auto-rows: auto;
+  @apply grid grid-cols-1 lg:grid-cols-3 gap-6 auto-rows-auto;
 }
 
 .board-section {
-  grid-column: 1;
-  min-width: 0;
-  overflow-x: auto;
+  @apply lg:col-span-2 min-w-0 overflow-x-auto;
 }
 
 .sidebar {
-  grid-column: 2;
-  display: flex;
-  flex-direction: column;
-  gap: clamp(8px, 2vw, 12px);
-  min-width: clamp(200px, 25vw, 300px);
+  @apply lg:col-span-1 flex flex-col gap-4 md:gap-6 min-w-full;
 }
 
 .move-history {
-  background-color: #c0c0c0;
-  border: 2px solid;
-  border-top-color: #dfdfdf;
-  border-left-color: #dfdfdf;
-  border-right-color: #808080;
-  border-bottom-color: #808080;
-  padding: clamp(8px, 2vw, 12px);
-  font-family: 'MS Sans Serif', Arial, sans-serif;
-  flex: 1;
-  min-height: 200px;
-  display: flex;
-  flex-direction: column;
+  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 md:p-6 flex-1 min-h-[200px] flex flex-col shadow-md;
 }
 
 .move-history h3 {
-  margin: 0 0 clamp(8px, 1.5vw, 12px) 0;
-  font-size: clamp(10px, 1.8vw, 14px);
-  font-weight: bold;
-  color: #000;
-  border-bottom: 1px solid #808080;
-  padding-bottom: 4px;
+  @apply m-0 mb-4 text-base md:text-lg font-bold text-gray-900 dark:text-gray-50 border-b border-gray-300 dark:border-gray-600 pb-2;
 }
 
 .history-list {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: clamp(4px, 1vw, 6px);
+  @apply flex-1 overflow-y-auto flex flex-col gap-2;
 }
 
 .history-item {
-  background-color: #ffffff;
-  border: 1px solid;
-  border-top-color: #dfdfdf;
-  border-left-color: #dfdfdf;
-  border-right-color: #808080;
-  border-bottom-color: #808080;
-  padding: clamp(4px, 1vw, 8px);
-  font-size: clamp(8px, 1.1vw, 10px);
-  color: #000;
-  line-height: 1.4;
+  @apply bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded p-3 text-xs md:text-sm text-gray-900 dark:text-gray-50 leading-relaxed;
 }
 
 .winner-text {
-  font-size: clamp(12px, 2vw, 16px) !important;
-  color: #ffff00 !important;
-  text-shadow: 1px 1px 2px #000000;
-  font-weight: bold !important;
-  animation: blink 0.5s ease-in-out infinite;
-}
-
-@keyframes blink {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
+  @apply text-lg md:text-2xl text-yellow-500 font-bold animate-pulse;
 }
 
 @media (max-width: 1024px) {
   .game-content {
-    grid-template-columns: 1fr;
+    @apply grid-cols-1;
   }
 
   .sidebar {
-    grid-column: 1;
-    min-width: auto;
+    @apply lg:col-span-1 min-w-auto;
   }
 }
 
 @media (max-width: 768px) {
   .sidebar {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: clamp(6px, 1.5vw, 10px);
+    @apply grid grid-cols-1 md:grid-cols-2 gap-3;
   }
+}
 
   .move-history {
     grid-column: 1 / -1;
     min-height: 150px;
   }
-}
+

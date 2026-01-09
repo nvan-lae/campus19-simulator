@@ -1,271 +1,82 @@
+@import "tailwindcss";
+
 .page-container {
-  padding: clamp(6px, 2vw, 16px);
-  max-width: none;
-  margin: 0;
-  animation: none;
-  background-color: #c0c0c0;
-  min-height: calc(100vh - 28px);
-  font-family: 'MS Sans Serif', Arial, sans-serif;
-  font-size: clamp(9px, 1.5vw, 14px);
+  @apply px-4 py-6 max-w-full mx-auto min-h-[calc(100vh-28px)] bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50;
 }
 
 .page-header {
-  margin-bottom: clamp(12px, 3vw, 20px);
-  text-align: center;
-  animation: none;
-  background-color: #000080;
-  color: #ffffff;
-  padding: 2px 2px;
-  border: 2px solid;
-  border-top-color: #dfdfdf;
-  border-left-color: #dfdfdf;
-  border-right-color: #808080;
-  border-bottom-color: #808080;
+  @apply mb-6 text-center bg-blue-600 dark:bg-blue-900 text-white p-4 rounded-lg shadow-sm;
 }
 
 .page-header h1 {
-  font-size: clamp(16px, 4vw, 24px);
-  margin: clamp(2px, 1vw, 6px) clamp(2px, 1vw, 6px);
-  background: none;
-  -webkit-background-clip: unset;
-  -webkit-text-fill-color: unset;
-  background-clip: unset;
-  color: #ffffff;
-  font-weight: bold;
+  @apply text-3xl md:text-4xl font-bold my-2 text-white;
 }
 
 .page-header p {
-  font-size: clamp(9px, 1.5vw, 12px);
-  color: #ffffff;
-  margin: clamp(2px, 1vw, 4px);
-  animation: none;
+  @apply text-sm md:text-base text-blue-100 my-1;
 }
 
-/* Box placeholder styling */
 .box {
-  background-color: #c0c0c0;
-  border: 2px solid;
-  border-top-color: #dfdfdf;
-  border-left-color: #dfdfdf;
-  border-right-color: #808080;
-  border-bottom-color: #808080;
-  border-radius: 0;
-  padding: clamp(4px, 1vw, 8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: clamp(80px, 15vh, 150px);
-  font-size: clamp(10px, 1.5vw, 13px);
-  color: #000;
-  font-weight: normal;
-  transition: none;
-  position: relative;
-  overflow: hidden;
-  animation: none;
-  font-family: 'MS Sans Serif', Arial, sans-serif;
+  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex items-center justify-center min-h-[100px] text-gray-900 dark:text-gray-50 font-normal transition-all hover:shadow-md hover:border-blue-300 dark:hover:border-blue-500;
 }
 
-.box::before {
-  content: none;
-}
-
-.box:hover {
-  border-top-color: #dfdfdf;
-  border-left-color: #dfdfdf;
-  border-right-color: #808080;
-  border-bottom-color: #808080;
-  background-color: #c0c0c0;
-  box-shadow: none;
-  color: #000;
-  transform: none;
-}
-
-.box:hover::before {
-  opacity: 0;
-}
-
-/* Stagger animation for each box */
-.box:nth-child(1) { animation: none; }
-.box:nth-child(2) { animation: none; }
-.box:nth-child(3) { animation: none; }
-.box:nth-child(4) { animation: none; }
-.box:nth-child(5) { animation: none; }
-
-/* Home Page Layout */
 .home-content {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: clamp(8px, 2vw, 12px);
-  grid-auto-rows: auto;
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 auto-rows-auto;
 }
 
 /* Lobby Page Layout */
 .lobby-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(8px, 2vw, 12px);
-  grid-auto-rows: auto;
-}
-
-/* Game Page Layout */
-.game-content {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: clamp(8px, 2vw, 12px);
-  grid-auto-rows: auto;
-}
-
-/* Profile Page Layout */
-.profile-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(8px, 2vw, 12px);
-  grid-auto-rows: auto;
+  @apply grid grid-cols-1 lg:grid-cols-2 gap-6 auto-rows-auto;
 }
 
 /* Login Page Layout */
 .login-content {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(8px, 2vw, 12px);
-  max-width: 300px;
-  margin: clamp(12px, 3vw, 20px) auto;
-}
-
-.login-content .box {
-  min-height: clamp(60px, 12vh, 100px);
+  @apply flex flex-col gap-4 max-w-xs mx-auto my-6;
 }
 
 @media (max-width: 1024px) {
   .game-content {
-    grid-template-columns: 1fr;
+    @apply grid-cols-1;
   }
 
   .profile-content {
-    grid-template-columns: 1fr;
+    @apply grid-cols-1;
   }
 
   .lobby-content {
-    grid-template-columns: 1fr;
+    @apply grid-cols-1;
   }
 }
 
 @media (max-width: 768px) {
   .page-container {
-    padding: clamp(4px, 1vw, 8px);
+    @apply px-2 py-3;
   }
 
   .home-content {
-    grid-template-columns: 1fr;
+    @apply grid-cols-1;
   }
 
   .page-header h1 {
-    font-size: clamp(14px, 3.5vw, 20px);
+    @apply text-2xl md:text-3xl;
   }
 
   .page-header p {
-    font-size: clamp(8px, 1.2vw, 10px);
+    @apply text-xs md:text-sm;
   }
 
   .box {
-    min-height: clamp(60px, 12vh, 120px);
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes fadeInDown {
-  from {
-    opacity: 1;
-    transform: none;
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 1;
-    transform: none;
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 1;
-    transform: none;
-  }
-  to {
-    opacity: 1;
-    transform: none;
+    @apply min-h-20 md:min-h-24;
   }
 }
 
 .box:hover::before {
   opacity: 0;
 }
-
-/* Stagger animation for each box */
-.box:nth-child(1) { animation: none; }
 .box:nth-child(2) { animation: none; }
 .box:nth-child(3) { animation: none; }
 .box:nth-child(4) { animation: none; }
 .box:nth-child(5) { animation: none; }
-
-@keyframes fadeIn {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes fadeInDown {
-  from {
-    opacity: 1;
-    transform: none;
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 1;
-    transform: none;
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 1;
-    transform: none;
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
 
 /* Home Page Layout */
 .home-content {
