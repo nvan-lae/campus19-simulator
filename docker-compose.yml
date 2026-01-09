@@ -30,6 +30,8 @@ services:
       # Mount source code for "Hot Reloading" during development
       - ./backend:/usr/src/app
       - /usr/src/app/node_modules
+      # Store user uploads in a named volume to avoid polluting the repo
+      - uploads_data:/usr/src/app/uploads
     networks:
       - transcendence_network
 
@@ -50,6 +52,7 @@ services:
 # Define persistent storage for the DB
 volumes:
   postgres_data:
+  uploads_data:
 
 # Define a shared network so containers can talk to each other
 networks:
