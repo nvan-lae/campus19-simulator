@@ -50,6 +50,7 @@ export class AuthController {
   @UseGuards(AuthGuard('42'))
   async callback(@Req() req, @Res() res) {
     const { access_token } = await this.authService.login(req.user);
-    res.redirect(`http://localhost:5173/login?token=${access_token}`);
+    const frontend = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
+    res.redirect(`${frontend}/login?token=${access_token}`);
   }
 }
