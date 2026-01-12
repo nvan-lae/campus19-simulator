@@ -49,9 +49,18 @@ export class AuthService {
   // 4. Register (for Email/Password users)
   async register(data: any) {
     const hashedPassword = await bcrypt.hash(data.password, 10);
-    return this.usersService.create({
+    const user = await this.usersService.create({
       ...data,
       password: hashedPassword,
     });
+
+    // Exclude the password before returning
+    const { password, ...safeUser } = user;
+
+    // Generate a JWT for the new user
+    const payload = { username: safeUser.username, sub: safeUser.id };
+    const access_token = this.jwtService.sign(payload);
+
+    return { access_token, user: safeUser };
   }
 }

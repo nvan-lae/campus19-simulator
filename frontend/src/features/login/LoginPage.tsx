@@ -1,5 +1,5 @@
-import { useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState, FormEvent } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import '../../styles/pages.css';
 
@@ -10,6 +10,11 @@ export const LoginPage = () => {
   const apiBase = useMemo(() => {
     return import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'http://localhost:3000';
   }, []);
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -24,26 +29,92 @@ export const LoginPage = () => {
     }
   }, [navigate, initializeWithToken]);
 
+  const handleEmailLogin = async (e: FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      const res = await fetch(`${apiBase}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data?.message || 'Invalid credentials');
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (data?.access_token) {
+        await initializeWithToken(data.access_token);
+        navigate('/', { replace: true });
+      } else {
+        setError('No access token returned from server');
+      }
+    } catch (err) {
+      setError('Network error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="page-container">
       <div className="page-header">
         <h1>Login</h1>
-        <p className="text-sm text-gray-200/90">Use your 42 account to sign in.</p>
+        <p className="text-sm text-gray-200/90">Sign in with 42 or with an email/password account.</p>
       </div>
 
       <div className="login-content">
-        <div className="box flex flex-col gap-3">
-          <div className="text-sm text-gray-700 dark:text-gray-200">Continue with 42</div>
-          <a
-            className="btn btn-primary w-full text-center"
-            href={`${apiBase}/auth/login`}
-          >
-            Login with 42
-          </a>
+        <div className="auth-grid">
+          <div className="auth-card">
+            <div className="text-sm text-gray-700 dark:text-gray-200 text-center">Continue with 42</div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center">Use your 42 account to quickly sign in.</p>
+            <a
+              className="btn btn-primary w-full text-center mt-2"
+              href={`${apiBase}/auth/login`}
+            >
+              Login with 42
+            </a>
+          </div>
+
+          <form className="auth-card" onSubmit={handleEmailLogin}>
+            <div className="text-sm text-gray-700 dark:text-gray-200 text-center">Sign in with email</div>
+
+            <input
+              required
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              className="input"
+            />
+
+            <input
+              required
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className="input"
+            />
+
+            {error && <div className="error">{error}</div>}
+
+            <button className="btn btn-primary w-full mt-2" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Signing in...' : 'Sign in'}
+            </button>
+
+          </form>
         </div>
 
-        <div className="box text-center text-sm text-gray-500 dark:text-gray-400">
-          We only support 42 login for now.
+        <div className="box auth-footer flex items-center justify-center gap-3">
+          <span>Don’t have an account?</span>
+          <Link to="/register" className="btn btn-secondary">Register</Link>
         </div>
       </div>
     </div>
