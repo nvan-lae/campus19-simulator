@@ -5,8 +5,11 @@ import { GameBoard } from '../components/GameBoard';
 import { GameControls } from '../components/GameControls';
 import { PlayersList } from '../components/PlayersList';
 import { useGameLogic } from '../hooks/useGameLogic';
+import { useSocket } from '../../../hooks/useSocket';
 
 export const GamePage = () => {
+  useSocket();
+  
   const {
     gameState,
     rollDice,
