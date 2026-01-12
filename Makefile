@@ -39,6 +39,18 @@ shell-frontend:
 shell-db:
 	docker-compose -f $(COMPOSE_FILE) exec postgres psql -U postgres -d transcendence_db
 
+# Run database migrations (Required on new machines/fresh volumes)
+migrate:
+	@echo "$(GREEN)Running database migrations...$(RESET)"
+	docker-compose -f $(COMPOSE_FILE) exec backend npx prisma migrate dev
+
+# Start everything and initialize the database (First time setup)
+init:
+	@make up
+	@echo "$(GREEN)Waiting for Database to start...$(RESET)"
+	@sleep 5
+	@make migrate
+
 # Stop containers and remove networks
 clean:
 	@echo "$(GREEN)Cleaning containers and networks...$(RESET)"
