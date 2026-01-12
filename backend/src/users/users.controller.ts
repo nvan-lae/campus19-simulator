@@ -37,7 +37,9 @@ export class UsersController {
   @Get('me')
   getProfile(@Request() req) {
     console.log('[Users] GET /me - user:', req.user?.username);
-    return req.user;
+    // Strip password before returning
+    const { password, ...safeUser } = req.user || {};
+    return safeUser;
   }
 
   // Upload avatar (Protected)
@@ -61,7 +63,8 @@ export class UsersController {
       });
       
       console.log('[Avatar] Upload successful');
-      return updatedUser;
+      const { password, ...safeUser } = updatedUser || {};
+      return safeUser;
     } catch (error) {
       console.error('[Avatar] Upload error:', error);
       throw error;
@@ -80,7 +83,8 @@ export class UsersController {
       });
       
       console.log('[Avatar] Delete successful');
-      return updatedUser;
+      const { password, ...safeUser } = updatedUser || {};
+      return safeUser;
     } catch (error) {
       console.error('[Avatar] Delete error:', error);
       throw error;
@@ -88,6 +92,8 @@ export class UsersController {
   }  // Find a specific user by ID (Public or Protected, your choice)
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    const user = await this.usersService.findOne(+id);
+    const { password, ...safeUser } = user || {};
+    return safeUser;
   }
 }
