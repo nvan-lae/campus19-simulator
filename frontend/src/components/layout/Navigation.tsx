@@ -90,9 +90,14 @@ export const Navigation = () => {
               )}
             </div>
           ) : (
-            <Link to="/login" className="navbar-link">
-              Login
-            </Link>
+            <>
+              <Link to="/login" className="navbar-link">
+                Login
+              </Link>
+              <Link to="/register" className="navbar-link">
+                Register
+              </Link>
+            </>
           )}
         </div>
       </div>

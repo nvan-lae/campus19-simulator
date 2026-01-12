@@ -18,6 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException();
     }
-    return user; // attaches full user to req.user
+    const { password, ...safeUser } = user;
+    return safeUser; // attaches safe user (without password) to req.user
   }
 }

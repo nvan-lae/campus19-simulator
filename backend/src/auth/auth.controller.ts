@@ -1,6 +1,6 @@
 // backend/src/auth/auth.controller.ts
 
-import { Controller, Get, Post, Body, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Req, Res, UseGuards, BadRequestException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 
@@ -11,7 +11,24 @@ export class AuthController {
   // 1. Email/Password Registration
   @Post('register')
   async register(@Body() registerDto: any) {
-    return this.authService.register(registerDto);
+    // Basic validation
+    if (!registerDto?.email || !registerDto?.username) {
+      throw new BadRequestException('Email and username are required');
+    }
+
+    if (!registerDto?.password) {
+      throw new BadRequestException('Password is required');
+    }
+
+    try {
+      return await this.authService.register(registerDto);
+    } catch (err: any) {
+      // Prisma unique constraint error code
+      if (err?.code === 'P2002') {
+        throw new BadRequestException('Email or username already exists');
+      }
+      throw err;
+    }
   }
 
   // 2. Email/Password Login
@@ -33,6 +50,7 @@ export class AuthController {
   @UseGuards(AuthGuard('42'))
   async callback(@Req() req, @Res() res) {
     const { access_token } = await this.authService.login(req.user);
-    res.redirect(`http://localhost:5173/login?token=${access_token}`);
+    const frontend = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
+    res.redirect(`${frontend}/login?token=${access_token}`);
   }
 }

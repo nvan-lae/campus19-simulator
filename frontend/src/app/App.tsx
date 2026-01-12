@@ -7,6 +7,7 @@ import { LobbyPage } from '../features/lobby/LobbyPage';
 import { GamePage } from '../features/game/pages/GamePage';
 import { ProfilePage } from '../features/profile/ProfilePage';
 import { LoginPage } from '../features/login/LoginPage';
+import { RegisterPage } from '../features/login/RegisterPage';
 import '../styles/App.css';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route
             path="/lobby"
             element={
