@@ -1,5 +1,5 @@
 import './PlayersList.css';
-import type { GamePlayer } from '../hooks/useGameLogic';
+import type { GamePlayer } from '../../../types/game';
 
 interface PlayersListProps {
   players: GamePlayer[];
