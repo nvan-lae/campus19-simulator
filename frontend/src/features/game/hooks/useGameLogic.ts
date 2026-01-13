@@ -1,23 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useSocket } from '../../../hooks/useSocket';
+import { useSocket } from '../../../contexts/SocketContext';
 import { useParams } from 'react-router-dom';
-
-export interface GamePlayer {
-  id: number;
-  username: string;
-  color: string;
-  position: number;
-  order: number;
-}
-
-export interface GameState {
-  players: GamePlayer[];
-  currentPlayerIndex: number;
-  diceValue: number | null;
-  gameOver: boolean;
-  winner: GamePlayer | null;
-  lastMoveDescription: string | null;
-}
+import type { GameState } from '../../../types/game';
 
 export const useGameLogic = () => {
   const { socket } = useSocket();
@@ -31,7 +15,7 @@ export const useGameLogic = () => {
     socket.emit('join_game', { gameId });
 
     socket.on('game_state_update', (newState: GameState) => {
-      console.log('Game state updated:', newState);
+      // console.log('Game state updated:', newState);
       setGameState(newState);
     });
 
@@ -56,21 +40,20 @@ export const useGameLogic = () => {
     socket.emit('move_player', { gameId });
   }, [socket, gameId]);
   
-  // FIXED: Added missing function to prevent crash
   const autoPlayCPU = useCallback(() => {
     // console.log("CPU Auto-play triggered (not implemented)");
   }, []);
 
   const resetGame = useCallback(() => {
-    console.log("Reset game not implemented yet");
+    // console.log("Reset game not implemented yet");
   }, []);
 
   return {
     gameState,
     rollDice,
     movePlayer,
-    resetGame,
-    autoPlayCPU,
+    // resetGame,
+    // autoPlayCPU,
     players: gameState?.players || [],
     currentPlayer: gameState?.players[gameState?.currentPlayerIndex || 0],
     isMyTurn: false, // You can implement logic here: user.id === currentPlayer.id

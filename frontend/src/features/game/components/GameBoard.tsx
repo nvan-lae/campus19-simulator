@@ -1,6 +1,6 @@
 import './GameBoard.css';
 import { getEffectType, BOARD_SIZE } from '../utils/gameData';
-import type { GamePlayer } from '../hooks/useGameLogic';
+import type { GamePlayer } from '../../../types/game';
 
 interface GameBoardProps {
   players: GamePlayer[];

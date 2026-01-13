@@ -1,5 +1,10 @@
+import {
+  BOARD_SIZE, 
+  checkTileEffect, 
+  MAX_PLAYERS, 
+  COLORS 
+} from './game.constants';
 import { User } from '@prisma/client';
-import { BOARD_SIZE, checkTileEffect } from './game.constants';
 
 export interface GamePlayer {
   id: number; // db user id
@@ -20,11 +25,9 @@ export interface GameState {
 
 export class GameRoom {
   private state: GameState;
-  private readonly MAX_PLAYERS = 4;
+  private readonly MAX_PLAYERS = MAX_PLAYERS;
+  private readonly COLORS = COLORS;
   
-  // Pre-defined colors for players 1-4
-  private readonly COLORS = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3'];
-
   constructor(public readonly roomId: string) {
     this.state = {
       players: [],

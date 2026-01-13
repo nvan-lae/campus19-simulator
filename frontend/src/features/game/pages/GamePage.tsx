@@ -5,7 +5,7 @@ import { GameBoard } from '../components/GameBoard';
 import { GameControls } from '../components/GameControls';
 import { PlayersList } from '../components/PlayersList';
 import { useGameLogic } from '../hooks/useGameLogic';
-import { useSocket } from '../../../hooks/useSocket';
+import { useSocket } from '../../../contexts/SocketContext';
 
 export const GamePage = () => {
   // 1. CALL ALL HOOKS FIRST (Order must not change)

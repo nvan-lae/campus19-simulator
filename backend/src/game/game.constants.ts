@@ -1,4 +1,6 @@
 export const BOARD_SIZE = 42;
+export const MAX_PLAYERS = 4;
+export const COLORS = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3'];
 
 export const SNAKES = {
   17: 4,

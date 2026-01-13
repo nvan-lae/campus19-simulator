@@ -23,7 +23,7 @@ export class GameService {
     return this.activeGames.get(gameId);
   }
 
-  processMove(gameId: string, userId: number): GameState {
+  processRoll(gameId: string, userId: number): GameState {
     const game = this.activeGames.get(gameId);
     if (!game) throw new Error('Game not found');
     
@@ -34,7 +34,7 @@ export class GameService {
     this.activeGames.delete(gameId);
   }
 
-  processMakeMove(gameId: string, userId: number): GameState {
+  processMove(gameId: string, userId: number): GameState {
     const game = this.activeGames.get(gameId);
     if (!game) throw new Error('Game not found');
     return game.makeMove(userId);
