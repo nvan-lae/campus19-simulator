@@ -1,6 +1,6 @@
 import './GameBoard.css';
 import { getEffectType, BOARD_SIZE } from '../utils/gameData';
-import type { GamePlayer } from '../hooks/useGameLogic';
+import type { GamePlayer } from '../../../types/game';
 
 interface GameBoardProps {
   players: GamePlayer[];
@@ -43,9 +43,9 @@ export const GameBoard = ({ players, onTileClick }: GameBoardProps) => {
               key={player.id}
               className="player-token"
               style={{ backgroundColor: player.color }}
-              title={player.name}
+              title={player.username}
             >
-              {player.name.charAt(0)}
+              {player.username.charAt(0)}
             </div>
           ))}
         </div>
@@ -66,9 +66,9 @@ export const GameBoard = ({ players, onTileClick }: GameBoardProps) => {
                   key={player.id}
                   className="player-token"
                   style={{ backgroundColor: player.color }}
-                  title={player.name}
+                  title={player.username}
                 >
-                  {player.name.charAt(0)}
+                  {player.username.charAt(0)}
                 </div>
               ) : null
             )}
@@ -92,9 +92,9 @@ export const GameBoard = ({ players, onTileClick }: GameBoardProps) => {
                   key={player.id}
                   className="player-token winner"
                   style={{ backgroundColor: player.color }}
-                  title={player.name}
+                  title={player.username}
                 >
-                  {player.name.charAt(0)}
+                  {player.username.charAt(0)}
                 </div>
               ) : null
             )}
