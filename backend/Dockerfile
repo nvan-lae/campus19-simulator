@@ -19,4 +19,4 @@ COPY . .
 EXPOSE 3000
 
 # Run migrations (with retry while DB starts) and then start the app
-CMD ["sh", "-c", "until npx prisma migrate deploy; do echo 'Waiting for database...'; sleep 3; done; npm run start:dev"]
+CMD ["sh", "-c", "npx prisma generate && until npx prisma migrate deploy; do echo 'Waiting for database...'; sleep 3; done; npm run start:dev"]
