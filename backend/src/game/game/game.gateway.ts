@@ -2,7 +2,6 @@ import {
   WebSocketGateway, 
   SubscribeMessage, 
   MessageBody, 
-  OnGatewayInit, 
   OnGatewayConnection, 
   OnGatewayDisconnect,
   WebSocketServer,
@@ -12,28 +11,23 @@ import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../../users/users.service';
+import { GameService } from '../game.service';
 
 @WebSocketGateway({
-  cors: {
-    origin: 'http://localhost:5173',
-    credentials: true,
-  },
+  cors: { origin: 'http://localhost:5173', credentials: true },
 })
-export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('GameGateway');
 
   constructor(
     private readonly jwtService: JwtService,
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
+    private readonly gameService: GameService // Inject our new service
   ) {}
 
-  afterInit(server: Server) {
-    this.logger.log('WebSocket Gateway Initialized');
-  }
-
-  async handleConnection(client: Socket, ...args: any[]) {
+  async handleConnection(client: Socket) {
     try {
       // 1. Extract the token from the header: "Bearer <token>"
       const token = client.handshake.auth.token || client.handshake.headers.authorization;
@@ -70,12 +64,59 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.id}`);
+    // Optional: Handle player disconnect (pause game? auto-forfeit?)
   }
 
-  @SubscribeMessage('ping')
-  handleMessage(@MessageBody() data: string, @ConnectedSocket() client: Socket): string {
-    // Now we know EXACTLY who sent the message!
-    this.logger.log(`Message from ${client.data.user?.username}: ${data}`);
-    return 'pong';
+  @SubscribeMessage('join_game')
+  handleJoinGame(
+    @MessageBody() data: { gameId: string },
+    @ConnectedSocket() client: Socket
+  ) {
+    const user = client.data.user;
+    if (!user) return;
+
+    // 1. Join the Socket.IO room for this game
+    client.join(data.gameId);
+
+    // 2. Add player to the game logic
+    const gameState = this.gameService.createOrJoinGame(data.gameId, user);
+
+    // 3. Notify EVERYONE in the room that state updated
+    this.server.to(data.gameId).emit('game_state_update', gameState);
+    
+    this.logger.log(`User ${user.username} joined game ${data.gameId}`);
+  }
+
+  @SubscribeMessage('roll_dice')
+  handleRollDice(
+    @MessageBody() data: { gameId: string },
+    @ConnectedSocket() client: Socket
+  ) {
+    const user = client.data.user;
+    try {
+      // 1. Process logic
+      const newState = this.gameService.processMove(data.gameId, user.id);
+      
+      // 2. Broadcast result
+      this.server.to(data.gameId).emit('game_state_update', newState);
+      
+    } catch (e) {
+      // Send error only to the specific client
+      client.emit('game_error', { message: e.message });
+    }
+  }
+
+  @SubscribeMessage('move_player')
+  handleMovePlayer(
+    @MessageBody() data: { gameId: string },
+    @ConnectedSocket() client: Socket
+  ) {
+    const user = client.data.user;
+    try {
+      const newState = this.gameService.processMakeMove(data.gameId, user.id);
+      this.server.to(data.gameId).emit('game_state_update', newState);
+    } catch (e) {
+      client.emit('game_error', { message: e.message });
+    }
   }
 }

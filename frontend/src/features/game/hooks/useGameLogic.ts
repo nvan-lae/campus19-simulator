@@ -1,9 +1,10 @@
-import { useState, useCallback } from 'react';
-import { BOARD_SIZE, checkTileEffect, mockPlayers } from '../utils/gameData';
+import { useState, useEffect, useCallback } from 'react';
+import { useSocket } from '../../../hooks/useSocket';
+import { useParams } from 'react-router-dom';
 
 export interface GamePlayer {
-  id: string;
-  name: string;
+  id: number;
+  username: string;
   color: string;
   position: number;
   order: number;
@@ -15,108 +16,54 @@ export interface GameState {
   diceValue: number | null;
   gameOver: boolean;
   winner: GamePlayer | null;
-  moveHistory: string[];
+  lastMoveDescription: string | null;
 }
 
 export const useGameLogic = () => {
-  const [gameState, setGameState] = useState<GameState>({
-    players: mockPlayers.map((p) => ({ ...p })),
-    currentPlayerIndex: 0,
-    diceValue: null,
-    gameOver: false,
-    winner: null,
-    moveHistory: [],
-  });
+  const { socket } = useSocket();
+  const { gameId } = useParams<{ gameId: string }>(); 
+  
+  const [gameState, setGameState] = useState<GameState | null>(null);
+
+  useEffect(() => {
+    if (!socket || !gameId) return;
+
+    socket.emit('join_game', { gameId });
+
+    socket.on('game_state_update', (newState: GameState) => {
+      console.log('Game state updated:', newState);
+      setGameState(newState);
+    });
+
+    socket.on('game_error', (error: { message: string }) => {
+      console.error("Game Error:", error.message);
+    });
+
+    return () => {
+      socket.off('game_state_update');
+      socket.off('game_error');
+    };
+  }, [socket, gameId]);
 
   const rollDice = useCallback(() => {
-    if (gameState.gameOver) return;
+    if (!socket || !gameId) return;
+    socket.emit('roll_dice', { gameId });
+  }, [socket, gameId]);
 
-    const dice = Math.floor(Math.random() * 6) + 1;
-
-    setGameState((prev) => ({
-      ...prev,
-      diceValue: dice,
-    }));
-
-    return dice;
-  }, [gameState.gameOver]);
-
-  const movePlayer = useCallback(
-    (diceValue: number) => {
-      if (gameState.gameOver) return;
-
-      setGameState((prev) => {
-        const newPlayers = [...prev.players];
-        const currentPlayer = newPlayers[prev.currentPlayerIndex];
-        let newPosition = currentPlayer.position + diceValue;
-
-        // Check if player reached or passed the end
-        if (newPosition >= BOARD_SIZE) {
-          newPosition = BOARD_SIZE;
-        } else {
-          // Check for snake or ladder
-          newPosition = checkTileEffect(newPosition);
-        }
-
-        const oldPosition = currentPlayer.position;
-        currentPlayer.position = newPosition;
-
-        // Check win condition
-        const isWinner = newPosition === BOARD_SIZE;
-        const moveMsg = `${currentPlayer.name} rolled ${diceValue} and moved from ${oldPosition} to ${newPosition}`;
-
-        const newMoveHistory = [...prev.moveHistory, moveMsg];
-
-        if (isWinner) {
-          return {
-            ...prev,
-            players: newPlayers,
-            gameOver: true,
-            winner: currentPlayer,
-            moveHistory: newMoveHistory,
-            diceValue: null,
-          };
-        }
-
-        // Next player
-        const nextPlayerIndex = (prev.currentPlayerIndex + 1) % prev.players.length;
-
-        return {
-          ...prev,
-          players: newPlayers,
-          currentPlayerIndex: nextPlayerIndex,
-          moveHistory: newMoveHistory,
-          diceValue: null,
-        };
-      });
-    },
-    [gameState.gameOver]
-  );
-
-  const resetGame = useCallback(() => {
-    setGameState({
-      players: mockPlayers.map((p) => ({ ...p })),
-      currentPlayerIndex: 0,
-      diceValue: null,
-      gameOver: false,
-      winner: null,
-      moveHistory: [], 
-    });
+  const movePlayer = useCallback((_steps: number) => {
+    if (!socket || !gameId) return;
+    // Emit the new event
+    socket.emit('move_player', { gameId });
+  }, [socket, gameId]);
+  
+  // FIXED: Added missing function to prevent crash
+  const autoPlayCPU = useCallback(() => {
+    // console.log("CPU Auto-play triggered (not implemented)");
   }, []);
 
-  const autoPlayCPU = useCallback(() => {
-    const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-    if (currentPlayer.id !== 'player1' && !gameState.gameOver) {
-      setTimeout(() => {
-        const dice = rollDice();
-        if (dice) {
-          setTimeout(() => {
-            movePlayer(dice);
-          }, 500);
-        }
-      }, 1000);
-    }
-  }, [gameState, rollDice, movePlayer]);
+  const resetGame = useCallback(() => {
+    console.log("Reset game not implemented yet");
+  }, []);
 
   return {
     gameState,
@@ -124,5 +71,8 @@ export const useGameLogic = () => {
     movePlayer,
     resetGame,
     autoPlayCPU,
+    players: gameState?.players || [],
+    currentPlayer: gameState?.players[gameState?.currentPlayerIndex || 0],
+    isMyTurn: false, // You can implement logic here: user.id === currentPlayer.id
   };
 };

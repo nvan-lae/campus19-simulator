@@ -21,7 +21,7 @@ export const PlayersList = ({ players, currentPlayerIndex }: PlayersListProps) =
               style={{ backgroundColor: player.color }}
             />
             <div className="player-info">
-              <div className="player-name">{player.name}</div>
+              <div className="player-name">{player.username}</div>
               <div className="player-position">Tile: {player.position}</div>
             </div>
           </div>

@@ -8,6 +8,7 @@ import { useGameLogic } from '../hooks/useGameLogic';
 import { useSocket } from '../../../hooks/useSocket';
 
 export const GamePage = () => {
+  // 1. CALL ALL HOOKS FIRST (Order must not change)
   useSocket();
   
   const {
@@ -18,17 +19,35 @@ export const GamePage = () => {
     autoPlayCPU,
   } = useGameLogic();
 
-  const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-  const isRolling = gameState.diceValue !== null && !gameState.gameOver;
-
-  // Auto-play CPU turns
+  // 2. Safe useEffect: Check dependencies carefully
   useEffect(() => {
+    if (!gameState || !autoPlayCPU) return;
+
+    // Only run if it's a CPU turn (example logic, adjust as needed)
+    // const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+    // if (currentPlayer.isCpu) { ... }
+
     const timer = setTimeout(() => {
       autoPlayCPU();
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [gameState.currentPlayerIndex, autoPlayCPU]);
+  }, [gameState?.currentPlayerIndex, autoPlayCPU]); // Use optional chaining
+
+  // 3. NOW Handle Loading State (Early Return)
+  if (!gameState) {
+    return (
+      <div className="page-container">
+        <div className="loading-state">
+           <h2>Connecting to Game...</h2>
+        </div>
+      </div>
+    );
+  }
+
+  // 4. Safe Derived State (Guaranteed to have gameState here)
+  const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+  const isRolling = gameState.diceValue !== null && !gameState.gameOver;
 
   const handleRoll = () => {
     rollDice();
@@ -44,25 +63,26 @@ export const GamePage = () => {
         <h1>Game Board</h1>
         {gameState.gameOver && gameState.winner && (
           <p className="winner-text">
-            🎉 {gameState.winner.name} WINS! 🎉
+            🎉 {gameState.winner.username} WINS! 🎉
           </p>
         )}
       </div>
 
       <div className="game-content">
         <div className="board-section">
-          <GameBoard players={gameState.players} />
+          {/* Pass safe players array */}
+          <GameBoard players={gameState.players || []} />
         </div>
 
         <div className="sidebar">
           <PlayersList
-            players={gameState.players}
+            players={gameState.players || []}
             currentPlayerIndex={gameState.currentPlayerIndex}
           />
 
           <GameControls
             diceValue={gameState.diceValue}
-            currentPlayerName={currentPlayer.name}
+            currentPlayerName={currentPlayer?.username || 'Unknown'}
             isRolling={isRolling}
             onRoll={handleRoll}
             onMove={handleMove}
@@ -71,13 +91,16 @@ export const GamePage = () => {
           />
 
           <div className="move-history">
-            <h3>Move History</h3>
+            <h3>Last Move</h3>
             <div className="history-list">
-              {gameState.moveHistory.slice().reverse().map((move, idx) => (
-                <div key={idx} className="history-item">
-                  {move}
-                </div>
-              ))}
+              {/* FIXED: gameState does not have moveHistory. Use lastMoveDescription. */}
+              {gameState.lastMoveDescription ? (
+                 <div className="history-item">
+                   {gameState.lastMoveDescription}
+                 </div>
+              ) : (
+                <div className="history-item text-gray-500">No moves yet</div>
+              )}
             </div>
           </div>
         </div>

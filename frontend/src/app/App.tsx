@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Navigation } from '../components/layout/Navigation';
 import { ProtectedRoute } from '../components/ProtectedRoute';
-import { AuthProvider } from '../contexts/AuthContext';
 import { HomePage } from '../features/home/HomePage';
 import { LobbyPage } from '../features/lobby/LobbyPage';
 import { GamePage } from '../features/game/pages/GamePage';
@@ -12,7 +11,6 @@ import '../styles/App.css';
 
 function App() {
   return (
-    <AuthProvider>
       <Router>
         <Navigation />
         <Routes>
@@ -28,7 +26,7 @@ function App() {
             }
           />
           <Route
-            path="/game/:matchId"
+            path="/game/:gameId"
             element={
               <ProtectedRoute>
                 <GamePage />
@@ -46,7 +44,6 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
-    </AuthProvider>
   );
 }
 
