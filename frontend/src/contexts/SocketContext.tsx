@@ -12,6 +12,7 @@ const SocketContext = createContext<SocketContextType>({
   isConnected: false,
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useSocket = () => useContext(SocketContext);
 
 export const SocketProvider = ({ children }: { children: ReactNode }) => {
