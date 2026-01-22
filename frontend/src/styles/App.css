@@ -1,6 +1,0 @@
-@import "tailwindcss";
-
-/* App.css - All styling handled by Tailwind via class composition */
-#root {
-  @apply w-full min-h-screen flex flex-col bg-white dark:bg-gray-950;
-}
