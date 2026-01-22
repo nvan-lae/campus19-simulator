@@ -40,6 +40,36 @@ export const useGameLogic = () => {
     socket.emit('move_player', { gameId });
   }, [socket, gameId]);
 
+  const purchaseItem = useCallback((itemId: string) => {
+    if (!socket || !gameId) return;
+    socket.emit('purchase_item', { gameId, itemId });
+  }, [socket, gameId]);
+
+  const useItem = useCallback((itemId: string, targetPlayerId?: number) => {
+    if (!socket || !gameId) return;
+    socket.emit('use_item', { gameId, itemId, targetPlayerId });
+  }, [socket, gameId]);
+
+  const payEscape = useCallback(() => {
+    if (!socket || !gameId) return;
+    socket.emit('pay_escape', { gameId });
+  }, [socket, gameId]);
+
+  const submitChallenge = useCallback((answerIndex: number) => {
+    if (!socket || !gameId) return;
+    socket.emit('submit_challenge', { gameId, answerIndex });
+  }, [socket, gameId]);
+
+  const placeBet = useCallback((prediction: 'success' | 'fail') => {
+    if (!socket || !gameId) return;
+    socket.emit('place_bet', { gameId, prediction });
+  }, [socket, gameId]);
+
+  const sendReaction = useCallback((emoji: string) => {
+    if (!socket || !gameId) return;
+    socket.emit('send_reaction', { gameId, emoji });
+  }, [socket, gameId]);
+
   const autoPlayCPU = useCallback(() => {
     // console.log("CPU Auto-play triggered (not implemented)");
   }, []);
@@ -52,6 +82,12 @@ export const useGameLogic = () => {
     gameState,
     rollDice,
     movePlayer,
+    purchaseItem,
+    useItem,
+    payEscape,
+    submitChallenge,
+    placeBet,
+    sendReaction,
     resetGame,
     autoPlayCPU,
     players: gameState?.players || [],
@@ -59,3 +95,5 @@ export const useGameLogic = () => {
     isMyTurn: false, // You can implement logic here: user.id === currentPlayer.id
   };
 };
+
+

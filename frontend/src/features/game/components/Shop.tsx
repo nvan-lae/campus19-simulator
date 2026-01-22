@@ -1,0 +1,134 @@
+import { useState } from 'react';
+import './Shop.css';
+import { SHOP_ITEMS, type GamePlayer } from '../../../types/game';
+
+interface ShopProps {
+    currentPlayer: GamePlayer | undefined;
+    allPlayers: GamePlayer[];
+    onPurchase: (itemId: string) => void;
+    onUseItem: (itemId: string, targetPlayerId?: number) => void;
+    onPayEscape: () => void;
+    disabled: boolean;
+}
+
+export const Shop = ({
+    currentPlayer,
+    allPlayers,
+    onPurchase,
+    onUseItem,
+    onPayEscape,
+    disabled,
+}: ShopProps) => {
+    const [selectedItem, setSelectedItem] = useState<string | null>(null);
+    const [selectingTarget, setSelectingTarget] = useState(false);
+
+    if (!currentPlayer) return null;
+
+    const handleItemClick = (itemId: string) => {
+        const item = SHOP_ITEMS.find((i) => i.id === itemId);
+        if (!item) return;
+
+        if (item.targetOther) {
+            setSelectedItem(itemId);
+            setSelectingTarget(true);
+        } else {
+            onUseItem(itemId);
+            setSelectedItem(null);
+        }
+    };
+
+    const handleTargetSelect = (targetId: number) => {
+        if (selectedItem) {
+            onUseItem(selectedItem, targetId);
+            setSelectedItem(null);
+            setSelectingTarget(false);
+        }
+    };
+
+    const canEscape = currentPlayer.stuckInWell || currentPlayer.turnsToSkip > 0;
+    const escapeCost = currentPlayer.stuckInWell ? 10 : currentPlayer.turnsToSkip > 0 ? 15 : 0;
+
+    return (
+        <div className="shop-container">
+            <div className="coin-display">
+                <span className="coin-icon">🪙</span>
+                <span className="coin-amount">{currentPlayer.coins}</span>
+            </div>
+
+            {canEscape && currentPlayer.coins >= escapeCost && (
+                <button
+                    className="escape-button"
+                    onClick={onPayEscape}
+                    disabled={disabled}
+                >
+                    Pay {escapeCost} 🪙 to Escape!
+                </button>
+            )}
+
+            <div className="shop-section">
+                <h4>Shop</h4>
+                <div className="shop-items">
+                    {SHOP_ITEMS.map((item) => (
+                        <button
+                            key={item.id}
+                            className="shop-item"
+                            onClick={() => onPurchase(item.id)}
+                            disabled={disabled || currentPlayer.coins < item.cost}
+                            title={item.description}
+                        >
+                            <span className="item-name">{item.name}</span>
+                            <span className="item-cost">{item.cost} 🪙</span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {currentPlayer.inventory.length > 0 && (
+                <div className="inventory-section">
+                    <h4>Inventory</h4>
+                    <div className="inventory-items">
+                        {currentPlayer.inventory.map((item, index) => (
+                            <button
+                                key={`${item.itemId}-${index}`}
+                                className={`inventory-item ${selectedItem === item.itemId ? 'selected' : ''}`}
+                                onClick={() => handleItemClick(item.itemId)}
+                                disabled={disabled}
+                            >
+                                {item.name}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {selectingTarget && (
+                <div className="target-selection">
+                    <h4>Select Target</h4>
+                    <div className="target-players">
+                        {allPlayers
+                            .filter((p) => p.id !== currentPlayer.id)
+                            .map((player) => (
+                                <button
+                                    key={player.id}
+                                    className="target-player"
+                                    onClick={() => handleTargetSelect(player.id)}
+                                    style={{ borderColor: player.color }}
+                                >
+                                    {player.username}
+                                </button>
+                            ))}
+                    </div>
+                    <button
+                        className="cancel-button"
+                        onClick={() => {
+                            setSelectingTarget(false);
+                            setSelectedItem(null);
+                        }}
+                    >
+                        Cancel
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+};

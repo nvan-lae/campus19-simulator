@@ -1,0 +1,177 @@
+.shop-container {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.coin-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.coin-icon {
+  font-size: 1.5rem;
+}
+
+.coin-amount {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #1a1a2e;
+}
+
+.escape-button {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.escape-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+}
+
+.escape-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.shop-section h4,
+.inventory-section h4,
+.target-selection h4 {
+  color: #fff;
+  margin: 0 0 0.75rem 0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.shop-items {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.shop-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.shop-item:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.shop-item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.item-name {
+  font-size: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.item-cost {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #ffd700;
+}
+
+.inventory-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.inventory-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.inventory-item {
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.inventory-item:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.inventory-item.selected {
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.inventory-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.target-selection {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.target-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.target-player {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 2px solid;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.target-player:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.cancel-button {
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+}
+
+.cancel-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
