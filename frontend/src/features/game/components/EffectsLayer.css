@@ -1,0 +1,119 @@
+.effects-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    /* Let clicks pass through */
+    z-index: 50;
+    /* Above board, below UI */
+    overflow: hidden;
+}
+
+.global-event-banner {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    border: 2px solid #FFD700;
+    animation: slideDown 0.5s ease-out;
+}
+
+.event-icon {
+    font-size: 1.5rem;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translate(-50%, -100%);
+    }
+
+    to {
+        transform: translate(-50%, 0);
+    }
+}
+
+/* Gravity Flux Visuals */
+.gravity_flux {
+    background: radial-gradient(circle at center, transparent 0%, rgba(75, 0, 130, 0.1) 100%);
+}
+
+.effect-gravity-particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(2px 2px at 20px 30px, #eee, rgba(0, 0, 0, 0)),
+        radial-gradient(2px 2px at 40px 70px, #fff, rgba(0, 0, 0, 0)),
+        radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0, 0, 0, 0)),
+        radial-gradient(2px 2px at 90px 40px, #fff, rgba(0, 0, 0, 0));
+    background-size: 200px 200px;
+    animation: zoomStars 4s linear infinite;
+}
+
+@keyframes zoomStars {
+    from {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+
+    to {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Windy Visuals */
+.windy {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    background-size: 200% 100%;
+    animation: windSweep 2s linear infinite;
+}
+
+.effect-wind-lines {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(90deg,
+            transparent,
+            transparent 50px,
+            rgba(255, 255, 255, 0.1) 50px,
+            rgba(255, 255, 255, 0.1) 52px);
+    opacity: 0.5;
+    animation: windMove 1s linear infinite;
+}
+
+@keyframes windMove {
+    from {
+        transform: translateX(-100px);
+    }
+
+    to {
+        transform: translateX(100px);
+    }
+}
+
+@keyframes windSweep {
+    0% {
+        background-position: 100% 0;
+    }
+
+    100% {
+        background-position: -100% 0;
+    }
+}
+
+/* Inflation Visuals */
+.inflation .global-event-banner {
+    border-color: #ff4757;
+    color: #ff4757;
+}
