@@ -36,7 +36,7 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('access_token'));
-  const [isLoading, setIsLoading] = useState(false); // Not loading by default
+  const [isLoading] = useState(false); // Not loading by default
 
   const apiBase = useMemo(() => {
     return import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'http://localhost:3000';
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // On mount, if we have a token, fetch user data in the background (non-blocking)
   useEffect(() => {
     const storedToken = localStorage.getItem('access_token');
-    
+
     if (!storedToken) {
       console.log('[Auth] No stored token');
       return;
