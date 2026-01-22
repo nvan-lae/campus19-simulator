@@ -21,8 +21,22 @@ export const PlayersList = ({ players, currentPlayerIndex }: PlayersListProps) =
               style={{ backgroundColor: player.color }}
             />
             <div className="player-info">
-              <div className="player-name">{player.username}</div>
-              <div className="player-position">Tile: {player.position}</div>
+              <div className="player-name">
+                {player.username}
+                <div className="status-icons">
+                  {player.hasShield && <span title="Shielded">🛡️</span>}
+                  {player.stuckInWell && <span title="Stuck in Well">🕳️</span>}
+                  {player.turnsToSkip > 0 && !player.stuckInWell && (
+                    <span title={`Skipping ${player.turnsToSkip} turn(s)`}>
+                      {player.turnsToSkip === 1 ? '💤' : '⛓️'}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="player-stats">
+                <span>Tile: {player.position}</span>
+                <span>💰 {player.coins}</span>
+              </div>
             </div>
           </div>
         ))}

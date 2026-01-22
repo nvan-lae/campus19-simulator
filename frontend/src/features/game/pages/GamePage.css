@@ -1,55 +1,220 @@
-@import "tailwindcss";
+/* Game Page Layout - Grid Version */
 
-.game-content {
-  @apply grid grid-cols-1 lg:grid-cols-3 gap-6 auto-rows-auto;
+.game-layout-container {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "board sidebar"
+    "chat sidebar";
+  background-color: #0f172a;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
 }
 
-.board-section {
-  @apply lg:col-span-2 min-w-0 overflow-x-auto;
+/* Board Area */
+.main-viewport {
+  grid-area: board;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  background-color: #1e293b;
+  overflow: hidden;
+  padding: 1rem;
 }
 
-.sidebar {
-  @apply lg:col-span-1 flex flex-col gap-4 md:gap-6 min-w-full;
+.board-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 
-.move-history {
-  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 md:p-6 flex-1 min-h-[200px] flex flex-col shadow-md;
+/* Chat Bar at the Bottom-Left */
+.chat-viewport {
+  grid-area: chat;
+  height: 200px;
+  background-color: #0f172a;
+  border-top: 1px solid #334155;
+  display: flex;
+  flex-direction: column;
 }
 
-.move-history h3 {
-  @apply m-0 mb-4 text-base md:text-lg font-bold text-gray-900 dark:text-gray-50 border-b border-gray-300 dark:border-gray-600 pb-2;
+/* Right Area: Sidebar (Full Height) */
+.game-sidebar {
+  grid-area: sidebar;
+  width: 20rem;
+  display: flex;
+  flex-direction: column;
+  background-color: #0f172a;
+  height: 100%;
+  overflow: hidden;
+  border-left: 1px solid #334155;
 }
 
-.history-list {
-  @apply flex-1 overflow-y-auto flex flex-col gap-2;
-}
-
-.history-item {
-  @apply bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded p-3 text-xs md:text-sm text-gray-900 dark:text-gray-50 leading-relaxed;
-}
-
-.winner-text {
-  @apply text-lg md:text-2xl text-yellow-500 font-bold animate-pulse;
-}
-
-@media (max-width: 1024px) {
-  .game-content {
-    @apply grid-cols-1;
+@media (min-width: 768px) {
+  .game-sidebar {
+    width: 22rem;
   }
-
-  .sidebar {
-    @apply lg:col-span-1 min-w-auto;
-  }
 }
 
-@media (max-width: 768px) {
-  .sidebar {
-    @apply grid grid-cols-1 md:grid-cols-2 gap-3;
-  }
+.sidebar-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-  .move-history {
-    grid-column: 1 / -1;
-    min-height: 150px;
-  }
+.sidebar-header h1 {
+  font-size: 1.125rem;
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+}
 
+.sidebar-section {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #1e293b;
+}
+
+.players-section {
+  flex: 1 1 0%;
+  overflow-y: auto;
+}
+
+/* Global Event Card */
+.global-event-card {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: #ffffff;
+}
+
+.global-event-card.inactive {
+  background: #334155;
+  color: #94a3b8;
+}
+
+.event-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.8;
+  margin-bottom: 0.25rem;
+}
+
+.event-name {
+  font-size: 1rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+}
+
+.event-description {
+  font-size: 0.75rem;
+  opacity: 0.9;
+}
+
+/* Action Card */
+.action-card {
+  background-color: rgba(49, 46, 129, 0.3);
+  border: 1px solid rgba(55, 48, 163, 0.5);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+}
+
+.action-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #818cf8;
+  margin-bottom: 0.25rem;
+}
+
+.action-content {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+/* Controls Section */
+.controls-section {
+  background-color: rgba(15, 23, 42, 0.5);
+  margin-top: auto;
+}
+
+.controls-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.shop-button-full {
+  width: 100%;
+  padding: 0.625rem;
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 0.625rem;
+  color: #e2e8f0;
+  font-weight: 700;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.shop-button-full:hover {
+  background-color: #334155;
+}
+
+.shop-button-full:active {
+  transform: scale(0.98);
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  background-color: #0f172a;
+  color: #ffffff;
+  gap: 1rem;
+}
+
+/* Shop Modal Styling */
+.shop-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  padding: 1rem;
+}
+
+.shop-modal {
+  background-color: #0f172a;
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 56rem;
+  max-height: 90vh;
+  overflow: hidden;
+  border: 1px solid #334155;
+}
