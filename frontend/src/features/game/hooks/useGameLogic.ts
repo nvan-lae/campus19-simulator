@@ -5,8 +5,8 @@ import type { GameState } from '../../../types/game';
 
 export const useGameLogic = () => {
   const { socket } = useSocket();
-  const { gameId } = useParams<{ gameId: string }>(); 
-  
+  const { gameId } = useParams<{ gameId: string }>();
+
   const [gameState, setGameState] = useState<GameState | null>(null);
 
   useEffect(() => {
@@ -34,12 +34,12 @@ export const useGameLogic = () => {
     socket.emit('roll_dice', { gameId });
   }, [socket, gameId]);
 
-  const movePlayer = useCallback((_steps: number) => {
+  const movePlayer = useCallback(() => {
     if (!socket || !gameId) return;
     // Emit the new event
     socket.emit('move_player', { gameId });
   }, [socket, gameId]);
-  
+
   const autoPlayCPU = useCallback(() => {
     // console.log("CPU Auto-play triggered (not implemented)");
   }, []);

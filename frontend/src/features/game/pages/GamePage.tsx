@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import '../../../styles/pages.css';
+
 import './GamePage.css';
 import { GameBoard } from '../components/GameBoard';
 import { GameControls } from '../components/GameControls';
@@ -10,7 +10,7 @@ import { useSocket } from '../../../contexts/SocketContext';
 export const GamePage = () => {
   // 1. CALL ALL HOOKS FIRST (Order must not change)
   useSocket();
-  
+
   const {
     gameState,
     rollDice,
@@ -32,6 +32,7 @@ export const GamePage = () => {
     }, 100);
 
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState?.currentPlayerIndex, autoPlayCPU]); // Use optional chaining
 
   // 3. NOW Handle Loading State (Early Return)
@@ -39,7 +40,7 @@ export const GamePage = () => {
     return (
       <div className="page-container">
         <div className="loading-state">
-           <h2>Connecting to Game...</h2>
+          <h2>Connecting to Game...</h2>
         </div>
       </div>
     );
@@ -53,8 +54,8 @@ export const GamePage = () => {
     rollDice();
   };
 
-  const handleMove = (diceValue: number) => {
-    movePlayer(diceValue);
+  const handleMove = () => {
+    movePlayer();
   };
 
   return (
@@ -95,9 +96,9 @@ export const GamePage = () => {
             <div className="history-list">
               {/* FIXED: gameState does not have moveHistory. Use lastMoveDescription. */}
               {gameState.lastMoveDescription ? (
-                 <div className="history-item">
-                   {gameState.lastMoveDescription}
-                 </div>
+                <div className="history-item">
+                  {gameState.lastMoveDescription}
+                </div>
               ) : (
                 <div className="history-item text-gray-500">No moves yet</div>
               )}

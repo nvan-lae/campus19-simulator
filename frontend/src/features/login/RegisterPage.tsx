@@ -1,7 +1,6 @@
 import { useState, useMemo, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import '../../styles/pages.css';
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
@@ -62,7 +61,7 @@ export const RegisterPage = () => {
           setError('Registration succeeded but automatic login failed');
         }
       }
-    } catch (err) {
+    } catch {
       setError('Network error');
     } finally {
       setIsSubmitting(false);
