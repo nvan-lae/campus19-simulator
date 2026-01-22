@@ -1,6 +1,15 @@
 // backend/src/auth/auth.controller.ts
 
-import { Controller, Get, Post, Body, Req, Res, UseGuards, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Req,
+  Res,
+  UseGuards,
+  BadRequestException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 
@@ -50,7 +59,9 @@ export class AuthController {
   @UseGuards(AuthGuard('42'))
   async callback(@Req() req, @Res() res) {
     const { access_token } = await this.authService.login(req.user);
-    const frontend = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
+    const frontend = (
+      process.env.FRONTEND_URL || 'http://localhost:5173'
+    ).replace(/\/$/, '');
     res.redirect(`${frontend}/login?token=${access_token}`);
   }
 }

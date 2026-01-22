@@ -1,4 +1,4 @@
-import '../../styles/pages.css';
+
 
 export const LobbyPage = () => {
   return (

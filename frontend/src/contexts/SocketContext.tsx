@@ -21,11 +21,11 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!token) {
-        if (socket) {
-            socket.disconnect();
-            setSocket(null);
-        }
-        return;
+      if (socket) {
+        socket.disconnect();
+        setSocket(null);
+      }
+      return;
     }
 
     // Initialize Socket
@@ -48,7 +48,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     });
 
     newSocket.on('connect_error', (err) => {
-        console.error('Socket connection error:', err);
+      console.error('Socket connection error:', err);
     });
 
     setSocket(newSocket);
@@ -56,6 +56,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       newSocket.disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   return (

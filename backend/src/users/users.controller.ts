@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Param, UseGuards, Request, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  UseGuards,
+  Request,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as path from 'path';
@@ -38,6 +48,7 @@ export class UsersController {
   getProfile(@Request() req) {
     console.log('[Users] GET /me - user:', req.user?.username);
     // Strip password before returning
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...safeUser } = req.user || {};
     return safeUser;
   }
@@ -45,25 +56,42 @@ export class UsersController {
   // Upload avatar (Protected)
   @UseGuards(AuthGuard('jwt'))
   @Post('avatar')
-  @UseInterceptors(FileInterceptor('avatar', { storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } }))
-  async uploadAvatar(@Request() req, @UploadedFile() file: Express.Multer.File) {
-    console.log('[Avatar] Upload started', { userId: req.user.id, file: file?.filename });
-    
-    if (!file) {
-      console.log('[Avatar] No file uploaded');
-      throw new BadRequestException('No file uploaded');
-    }
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage,
+      fileFilter,
+      limits: { fileSize: 5 * 1024 * 1024 },
+    }),
+  )
+  async uploadAvatar(
+    @Request() req,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    console.log('[Avatar] Upload started', {
+      userId: req.user.id,
+      file: file?.filename,
+    });
 
     try {
+      if (!file) {
+        console.log('[Avatar] No file uploaded');
+        throw new BadRequestException('No file uploaded');
+      }
+
       const avatarUrl = `/uploads/avatars/${file.filename}`;
       console.log('[Avatar] Updating user with URL:', avatarUrl);
-      
+
       const updatedUser = await this.usersService.update(req.user.id, {
         avatarUrl,
       });
-      
+
+      if (!updatedUser) {
+        throw new Error('User not found after update');
+      }
+
       console.log('[Avatar] Upload successful');
-      const { password, ...safeUser } = updatedUser || {};
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...safeUser } = updatedUser;
       return safeUser;
     } catch (error) {
       console.error('[Avatar] Upload error:', error);
@@ -81,18 +109,24 @@ export class UsersController {
       const updatedUser = await this.usersService.update(req.user.id, {
         avatarUrl: null,
       });
-      
+
+      if (!updatedUser) {
+        throw new Error('User not found after update');
+      }
+
       console.log('[Avatar] Delete successful');
-      const { password, ...safeUser } = updatedUser || {};
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...safeUser } = updatedUser;
       return safeUser;
     } catch (error) {
       console.error('[Avatar] Delete error:', error);
       throw error;
     }
-  }  // Find a specific user by ID (Public or Protected, your choice)
+  } // Find a specific user by ID (Public or Protected, your choice)
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const user = await this.usersService.findOne(+id);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...safeUser } = user || {};
     return safeUser;
   }

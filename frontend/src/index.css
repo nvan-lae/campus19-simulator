@@ -1,103 +1,267 @@
 @import "tailwindcss";
 
+@theme {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
 @layer base {
   :root {
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+  }
+
+  * {
+    @apply border-border;
   }
 
   body {
-    @apply bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-50;
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 
   h1 {
-    @apply text-4xl font-bold;
+    @apply text-4xl font-bold tracking-tight;
   }
 
   h2 {
-    @apply text-3xl font-semibold;
+    @apply text-3xl font-semibold tracking-tight;
   }
 
   h3 {
-    @apply text-2xl font-semibold;
+    @apply text-2xl font-semibold tracking-tight;
   }
 
   a {
-    @apply text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors;
+    @apply font-medium underline-offset-4 hover:underline text-primary transition-colors;
   }
 }
 
 /* Component utilities */
 .btn {
-  @apply inline-flex items-center justify-center rounded-lg px-4 py-2 font-medium transition-all duration-200;
+  @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
   padding: clamp(.5rem, .9vw, .95rem) clamp(.75rem, 1.2vw, 1.25rem);
-  font-size: clamp(14px, .95vw, 16px);
 }
 
 .btn-primary {
-  @apply inline-flex items-center justify-center rounded-lg px-4 py-2 font-medium transition-all duration-200 bg-blue-600 text-white hover:bg-blue-700 active:scale-95 dark:bg-blue-500 dark:hover:bg-blue-600;
+  @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm;
 }
 
 .btn-secondary {
-  @apply inline-flex items-center justify-center rounded-lg px-4 py-2 font-medium transition-all duration-200 bg-gray-200 text-gray-900 hover:bg-gray-300 active:scale-95 dark:bg-gray-700 dark:text-gray-50 dark:hover:bg-gray-600;
+  @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-sm;
 }
 
 .btn-ghost {
-  @apply inline-flex items-center justify-center rounded-lg px-4 py-2 font-medium transition-all duration-200 text-gray-900 hover:bg-gray-100 dark:text-gray-50 dark:hover:bg-gray-800;
+  @apply hover:bg-accent hover:text-accent-foreground;
 }
 
 /* Authentication styles */
 .auth-grid {
-  @apply grid gap-4 max-w-3xl mx-auto w-full;
+  @apply grid gap-6 max-w-4xl mx-auto w-full items-start;
   grid-template-columns: 1fr;
 }
 
 @media (min-width: 768px) {
   .auth-grid {
     grid-template-columns: 1fr 1fr;
-    align-items: start;
   }
 }
 
 .auth-card {
-  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-md flex flex-col;
-  padding: clamp(1rem, 1.2vw, 2.5rem);
-  gap: clamp(.75rem, .8vw, 1.25rem);
-  font-size: clamp(14px, 1.05vw, 18px);
+  @apply bg-card text-card-foreground border rounded-xl p-8 shadow-sm flex flex-col gap-6;
 }
 
 .input {
-  @apply w-full border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500;
-  padding: clamp(.5rem, .9vw, 1rem);
-  font-size: clamp(14px, .95vw, 18px);
-}
-
-.input:disabled {
-  @apply opacity-60 cursor-not-allowed;
+  @apply flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
 }
 
 .divider {
-  @apply flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400;
+  @apply relative flex items-center justify-center text-xs uppercase;
+}
+
+.divider::before {
+  content: "";
+  @apply absolute inset-0 flex items-center;
+}
+
+.divider span {
+  @apply relative z-10 bg-background px-2 text-muted-foreground;
+}
+
+/* Helper to draw the line using a nested element usually, but let's keep it simple for now or preserve the span if possible */
+/* Revisiting divider to match previous simpler structure but using new vars */
+.divider-line {
+  @apply w-full border-t;
+}
+
+.divider-text {
+  @apply bg-background px-2 text-muted-foreground text-xs uppercase;
+}
+
+/* Previous .divider definition was flex Gap-3. Let's keep that structure but update colors */
+.divider {
+  @apply flex items-center gap-3 text-sm text-muted-foreground;
 }
 
 .divider::before,
 .divider::after {
   content: '';
-  @apply flex-1 h-px bg-gray-200 dark:bg-gray-700;
+  @apply flex-1 h-px bg-border;
 }
 
 .auth-footer {
-  @apply text-center text-sm text-gray-500 dark:text-gray-400;
+  @apply text-center text-sm text-muted-foreground;
 }
 
-.error {
-  @apply text-sm text-red-500;
+/* Page Layouts from pages.css */
+.page-container {
+  @apply px-4 py-8 max-w-7xl mx-auto min-h-[calc(100vh-28px)] bg-background text-foreground;
 }
 
-@media (min-width: 1600px) {
-  .auth-grid {
-    gap: 2.5rem;
+.page-header {
+  @apply mb-8 text-center bg-muted/50 p-8 rounded-xl border border-border;
+}
+
+.page-header h1 {
+  @apply text-3xl md:text-4xl font-bold my-2 text-foreground;
+}
+
+.page-header p {
+  @apply text-sm md:text-base text-muted-foreground my-1;
+}
+
+.box {
+  @apply bg-card border border-border rounded-xl p-6 flex items-center justify-center min-h-[120px] text-card-foreground transition-all hover:shadow-sm hover:border-primary/50;
+}
+
+.home-content {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-auto;
+}
+
+/* Lobby Page Layout */
+.lobby-content {
+  @apply grid grid-cols-1 lg:grid-cols-2 gap-6 auto-rows-auto;
+}
+
+/* Login Page Layout */
+.login-content {
+  @apply flex flex-col gap-8 w-full max-w-4xl mx-auto my-8;
+}
+
+@media (max-width: 1024px) {
+
+  .game-content,
+  .profile-content,
+  .lobby-content,
+  .home-content {
+    @apply grid-cols-1;
   }
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    @apply px-4 py-4;
+  }
+
+  .page-header {
+    @apply p-6;
+  }
+
+  .page-header h1 {
+    @apply text-2xl;
+  }
+}
+
+.game-content {
+  @apply grid grid-cols-1 lg:grid-cols-3 gap-6;
+}
+
+.profile-content {
+  @apply grid grid-cols-1 lg:grid-cols-2 gap-6;
 }

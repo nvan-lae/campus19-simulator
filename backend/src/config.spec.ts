@@ -7,7 +7,9 @@ describe('validateEnvOrExit', () => {
   beforeEach(() => {
     jest.resetModules();
     process.env = { ...OLD_ENV };
-    exitSpy = jest.spyOn(process, 'exit').mockImplementation(((code?: number) => {
+    exitSpy = jest.spyOn(process, 'exit').mockImplementation(((
+      code?: number,
+    ) => {
       throw new Error('process.exit:' + code);
     }) as never);
     jest.spyOn(console, 'warn').mockImplementation(() => {});

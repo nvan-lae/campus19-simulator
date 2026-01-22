@@ -26,7 +26,7 @@ export class GameService {
   processRoll(gameId: string, userId: number): GameState {
     const game = this.activeGames.get(gameId);
     if (!game) throw new Error('Game not found');
-    
+
     return game.rollDice(userId);
   }
 

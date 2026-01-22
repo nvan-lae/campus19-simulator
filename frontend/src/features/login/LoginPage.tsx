@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import '../../styles/pages.css';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -55,7 +54,7 @@ export const LoginPage = () => {
       } else {
         setError('No access token returned from server');
       }
-    } catch (err) {
+    } catch {
       setError('Network error');
     } finally {
       setIsSubmitting(false);
@@ -66,14 +65,14 @@ export const LoginPage = () => {
     <div className="page-container">
       <div className="page-header">
         <h1>Login</h1>
-        <p className="text-sm text-gray-200/90">Sign in with 42 or with an email/password account.</p>
+        <p className="text-sm text-muted-foreground">Sign in with 42 or with an email/password account.</p>
       </div>
 
       <div className="login-content">
         <div className="auth-grid">
           <div className="auth-card">
-            <div className="text-sm text-gray-700 dark:text-gray-200 text-center">Continue with 42</div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 text-center">Use your 42 account to quickly sign in.</p>
+            <div className="text-sm text-foreground text-center font-medium">Continue with 42</div>
+            <p className="text-sm text-muted-foreground text-center">Use your 42 account to quickly sign in.</p>
             <a
               className="btn btn-primary w-full text-center mt-2"
               href={`${apiBase}/auth/login`}
@@ -83,7 +82,7 @@ export const LoginPage = () => {
           </div>
 
           <form className="auth-card" onSubmit={handleEmailLogin}>
-            <div className="text-sm text-gray-700 dark:text-gray-200 text-center">Sign in with email</div>
+            <div className="text-sm text-foreground text-center font-medium">Sign in with email</div>
 
             <input
               required
