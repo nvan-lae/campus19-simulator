@@ -8,13 +8,14 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   // 1. Validate Email/Password User
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.usersService.findByEmail(email);
     // Check if user exists AND has a password (OAuth users might not)
     if (user && user.password && (await bcrypt.compare(pass, user.password))) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = user;
       return result;
     }
@@ -31,7 +32,7 @@ export class AuthService {
     // User doesn't exist, create them automatically
     return this.usersService.create({
       intraId: id,
-      username: username, 
+      username: username,
       email: emails[0].value,
       avatarUrl: photos[0].value,
       // No password required for OAuth users
@@ -39,6 +40,7 @@ export class AuthService {
   }
 
   // 3. Login (Generate JWT Token)
+  // eslint-disable-next-line @typescript-eslint/require-await
   async login(user: any) {
     const payload = { username: user.username, sub: user.id };
     return {
@@ -55,6 +57,7 @@ export class AuthService {
     });
 
     // Exclude the password before returning
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...safeUser } = user;
 
     // Generate a JWT for the new user
