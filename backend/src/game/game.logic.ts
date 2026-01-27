@@ -357,9 +357,9 @@ export class GameRoom {
     const item = SHOP_ITEMS.find((i) => i.id === itemId);
     if (!item) throw new Error('Item not found');
     let cost = item.cost;
-    // Inflation Event
+    // Inflation Event (50% increase, rounded up to nearest coin)
     if (this.state.currentGlobalEvent === 'inflation') {
-      cost *= 2;
+      cost = Math.ceil(cost * 1.5);
     }
 
     if (player.coins < cost)
