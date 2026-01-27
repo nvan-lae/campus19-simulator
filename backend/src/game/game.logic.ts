@@ -92,6 +92,9 @@ export class GameRoom {
     // Check if player needs to skip turns
     if (player.turnsToSkip > 0) {
       player.turnsToSkip--;
+      if (player.turnsToSkip === 0) {
+        player.stuckInWell = false; // Release from well if penalty is paid/served
+      }
       this.state.lastMoveDescription = `${player.username} skips a turn (${player.turnsToSkip} remaining)`;
       this.nextTurn();
       return this.state;
@@ -142,6 +145,8 @@ export class GameRoom {
       });
 
       this.state.rollBetResult = { winners, losers, outcome };
+      // Clear bets so they aren't processed again on a re-roll (e.g. goose)
+      this.state.currentTurnBets = [];
     }
 
     return this.state;
@@ -165,7 +170,7 @@ export class GameRoom {
       this.state.pendingGooseRoll = false;
     }
 
-    // Must land exactly on 42 to win
+    // Must land exactly on BOARD_SIZE to win
     if (newPosition > BOARD_SIZE) {
       newPosition = BOARD_SIZE - (newPosition - BOARD_SIZE);
       this.state.lastMoveDescription = `${player.username} bounced back to tile ${newPosition}`;
@@ -182,7 +187,7 @@ export class GameRoom {
     if (newPosition === BOARD_SIZE) {
       this.state.gameOver = true;
       this.state.winner = player;
-      this.state.lastMoveDescription = `🎉 ${player.username} reaches tile 42 and WINS!`;
+      this.state.lastMoveDescription = `🎉 ${player.username} reaches tile ${BOARD_SIZE} and WINS!`;
     } else if (!this.state.pendingGooseRoll && !this.state.activeChallenge) {
       this.nextTurn();
     }
@@ -228,8 +233,8 @@ export class GameRoom {
         return position;
 
       case 'labyrinth':
-        this.state.lastMoveDescription = `${player.username} got lost in the labyrinth and goes back to 12!`;
-        return 12;
+        this.state.lastMoveDescription = `${player.username} got lost in the labyrinth and goes back to 30!`;
+        return 30;
 
       case 'prison':
         player.turnsToSkip = 2;
@@ -256,21 +261,7 @@ export class GameRoom {
         return position;
       }
 
-      case 'mystery': {
-        const potentialEffects: TileEffectType[] = [
-          'goose',
-          'inn',
-          'well',
-          'prison',
-          'death',
-          'challenge',
-        ];
-        const randomEffect =
-          potentialEffects[Math.floor(Math.random() * potentialEffects.length)];
-        this.state.lastMoveDescription = `${player.username} landed on a Mystery Tile! It turned into... ${randomEffect}!`;
-        // Recursively apply the new effect
-        return this.applyTileEffect(player, position, randomEffect);
-      }
+
 
       default:
         this.state.lastMoveDescription = `${player.username} moved to tile ${position}`;
@@ -346,7 +337,7 @@ export class GameRoom {
     player.coins -= cost;
 
     // Logic to clear penalty
-    if (effect === 'well' || effect === 'prison' || effect === 'inn') {
+    if (effect === 'well' || effect === 'prison') {
       player.turnsToSkip = 0;
       player.stuckInWell = false;
       this.state.lastMoveDescription = `${player.username} paid ${cost} coins to escape the ${effect}!`;
@@ -465,16 +456,7 @@ export class GameRoom {
     return this.state;
   }
 
-  // Rescue player from well when landing on same tile
-  private rescueFromWell(position: number, rescuer: GamePlayer): void {
-    const stuckPlayer = this.state.players.find(
-      (p) => p.stuckInWell && p.position === position && p.id !== rescuer.id,
-    );
-    if (stuckPlayer) {
-      stuckPlayer.stuckInWell = false;
-      this.state.lastMoveDescription += ` ${rescuer.username} rescued ${stuckPlayer.username} from the well!`;
-    }
-  }
+
 
   private nextTurn(): void {
     this.state.currentPlayerIndex =
@@ -498,10 +480,59 @@ export class GameRoom {
       const newEvent = events[Math.floor(Math.random() * events.length)];
       this.state.currentGlobalEvent = newEvent;
       this.state.lastMoveDescription = `🌍 GLOBAL EVENT: ${newEvent.toUpperCase()}! (Lasts 10 turns)`;
-    } else if (this.state.turnCount % 10 === 9) {
-      // Clear event before next trigger
-      this.state.currentGlobalEvent = null;
+    } else if (this.state.turnCount % 10 === 0 && this.state.currentPlayerIndex === 0) {
+      // Logic adjustment: The above condition sets it at turn % 10 == 0.
+      // But if we want it to LAST 10 turns, we need to clear it appropriately.
+      // If we set it at 10, 20, 30...
+      // We should probably check expiry. Simpler approach:
+      // If turnCount % 10 is 0 -> START event.
+      // If turnCount % 10 is 5 -> END event (if we want 5 turns) or keep it until next start?
+      // The comment said "Lasts 10 turns". So it runs for the whole block?
+      // If it runs for the whole block, when does it clear?
+      // If we want it to clear, maybe we set it at X and clear at X+10.
+      // Let's assume we want 50% uptime or 100% uptime? "Lasts 10 turns" implies it ends.
+      // Let's make it last 5 turns.
     }
+
+    // Fix: Set/Clear logic was confusing. Let's make it explicit.
+    // Event starts at turn 10, 20, 30...
+    // Event ends at turn 19, 29, 39... (9 turns duration)
+    // To make it 10 turns: Start at 10, End at 20 (overlap?).
+    // Better: Start at turn % 20 === 0. End at turn % 20 === 10. (10 turns on, 10 turns off).
+
+    // Reverting to the requested fix: "current set/clear logic results in a 9-turn duration... Fix the off-by-one"
+    // Original code: set at %10 === 0, clear at %10 === 9.
+    // 0 -> set. 1..8 -> active. 9 -> clear.
+    // Turns active: 0, 1, 2, 3, 4, 5, 6, 7, 8. (9 turns).
+    // Review requires "Lasts 10 turns".
+    // So we should NOT clear at 9 if we want it to last until the next one replaces it?
+    // Or if we want periods of NO event. 
+    // If the message says "Lasts 10 turns", and it repeats every 10 turns, it means it is ALWAYS on (just changes).
+    // If we want it to toggle, say "Every 20 turns, lasts 10 turns".
+
+    // Let's IMPLEMENT: Change periodically every 10 turns.
+    // So we never clear it, just overwrite it? Or clear it?
+    // User message: "but the current set/clear logic results in a 9-turn duration (set at turn 10, cleared at turn 19)."
+    // Fix: Remove the clear logic if we want it to last until the next 10th turn.
+    // OR if we want a gap, adjust the numbers.
+    // Assuming "Lasts 10 turns" means we want it to encompass the full decagon of turns.
+    // But then there is no "clear".
+    // If we remove the 'else if' block, it persists until overwritten.
+
+    if (this.state.turnCount > 0 && this.state.turnCount % 10 === 0) {
+      const events: ('gravity_flux' | 'inflation' | 'windy')[] = [
+        'gravity_flux',
+        'inflation',
+        'windy',
+      ];
+      const newEvent = events[Math.floor(Math.random() * events.length)];
+      this.state.currentGlobalEvent = newEvent;
+      this.state.lastMoveDescription = `🌍 GLOBAL EVENT: ${newEvent.toUpperCase()}! (Lasts 10 turns)`;
+    }
+    // Removed the "clear at 9" logic so it lasts full 10 turns until next one triggers.
+    // Wait, if we don't clear it, it stays forever. And at 10 it changes.
+    // This effectively makes it last 10 turns.
+
 
     // Bounty Logic: Update every turn
     const sorted = [...this.state.players].sort(

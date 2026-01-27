@@ -31,7 +31,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
     private readonly gameService: GameService, // Inject our new service
-  ) {}
+  ) { }
 
   async handleConnection(client: Socket) {
     try {
@@ -241,6 +241,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     const user = client.data.user;
+    if (!client.rooms.has(data.gameId)) return;
     // Just broadcast the reaction, no state change really needed for now
     // But we might want to validate gameId
     this.server.to(data.gameId).emit('game_reaction', {

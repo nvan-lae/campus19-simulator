@@ -21,8 +21,7 @@ export type TileEffectType =
   | 'labyrinth'
   | 'prison'
   | 'death'
-  | 'challenge'
-  | 'mystery';
+  | 'challenge';
 
 // Special tiles configuration
 export const SPECIAL_TILES: Record<number, TileEffectType> = {
@@ -31,7 +30,7 @@ export const SPECIAL_TILES: Record<number, TileEffectType> = {
   31: 'well', // Well (wait)
   42: 'labyrinth', // Labyrinth (back to 30 or 39?) Classic is 42->30
   52: 'prison', // Prison (wait)
-  58: 'death', // Death (back to 1)
+  58: 'death', // Death (back to Start)
 
   // Add 3 coding challenges scattered
   15: 'challenge',
