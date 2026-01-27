@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import './GameBoard.css';
 import { getEffectType, BOARD_SIZE, TILE_INFO } from '../utils/gameData';
 import type { GamePlayer } from '../../../types/game';
@@ -14,11 +14,53 @@ interface GameBoardProps {
   onTileClick?: (tileNumber: number) => void;
 }
 
+// Board aspect ratio
+const BOARD_ASPECT_RATIO = 9 / 7;
+
 export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDescription, onTileClick }: GameBoardProps) => {
   const [hoveredTile, setHoveredTile] = useState<number | null>(null);
   const { playWin, playMove } = useGameSound(); // removed playSwap if unused or keep if needed
 
   const hasWonRef = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [boardSize, setBoardSize] = useState<{ width: number; height: number } | null>(null);
+
+  // Calculate board size to fit container while maintaining aspect ratio
+  const calculateBoardSize = useCallback(() => {
+    if (!containerRef.current) return;
+    
+    const container = containerRef.current;
+    // Use slightly smaller area to prevent any edge clipping
+    const containerWidth = container.clientWidth - 4;
+    const containerHeight = container.clientHeight - 4;
+    
+    // Calculate size that fits within container maintaining 9:7 aspect ratio
+    let width = containerWidth;
+    let height = width / BOARD_ASPECT_RATIO;
+    
+    // If height exceeds container, constrain by height instead
+    if (height > containerHeight) {
+      height = containerHeight;
+      width = height * BOARD_ASPECT_RATIO;
+    }
+    
+    setBoardSize({ width, height });
+  }, []);
+
+  // Set up resize observer
+  useEffect(() => {
+    calculateBoardSize();
+    
+    const resizeObserver = new ResizeObserver(() => {
+      calculateBoardSize();
+    });
+    
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+    
+    return () => resizeObserver.disconnect();
+  }, [calculateBoardSize]);
 
   // Animation State
   // Map of playerId -> currently displayed position (can be float for smooth interpolation if using canvas, 
@@ -208,52 +250,7 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
   };
 
 
-  const renderTile = (tileNumber: number) => {
-    const coords = getGridCoords(tileNumber);
-    const effectType = getEffectType(tileNumber);
-    const tileInfo = TILE_INFO[effectType];
-    const isSpecial = effectType !== 'none';
-    const isHovered = hoveredTile === tileNumber;
-    const isWin = tileNumber === BOARD_SIZE;
-    const isStart = tileNumber === 1;
 
-    return (
-      <div
-        key={tileNumber}
-        className={`game-tile ${effectType} ${isSpecial ? 'special-tile' : ''} ${isWin ? 'end graduation-zone' : ''} ${isStart ? 'start' : ''}`}
-        style={{
-          gridColumn: coords.col,
-          gridRow: coords.row,
-        }}
-        onClick={() => onTileClick?.(tileNumber)}
-        onMouseEnter={() => setHoveredTile(tileNumber)}
-        onMouseLeave={() => setHoveredTile(null)}
-      >
-        <div className="tile-content">
-          <div className="tile-number">{isStart ? 'START' : isWin ? 'WIN' : tileNumber}</div>
-          {tileInfo.emoji && <div className="tile-emoji">{tileInfo.emoji}</div>}
-        </div>
-        {/* Custom Popover */}
-        {isHovered && isSpecial && (
-          <div className="tile-popover">
-            <div className="popover-header">
-              {tileInfo.emoji} {tileInfo.label}
-            </div>
-            <div className="popover-body">
-              {effectType === 'goose' && "Double roll + 5 coins!"}
-              {effectType === 'bridge' && "Jump ahead to tile 12"}
-              {effectType === 'inn' && "Skip 1 turn to rest"}
-              {effectType === 'well' && "Stuck until rescue or pay 10 coins"}
-              {effectType === 'labyrinth' && "Go back to tile 30"}
-              {effectType === 'prison' && "Skip 2 turns or pay 15 coins"}
-              {effectType === 'death' && "Restart at Start or pay 20 coins"}
-              {effectType === 'challenge' && "Coding Challenge! Win coins!"}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
 
   // Zoom Logic
   // We track the active player's VISUAL position for zoom focus.
@@ -291,29 +288,14 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
   });
 
   // Zoom Level - User requested heavily zoomed on player (approx 3 squares)
-  const zoomScale = isMoving ? 3.0 : 1.05; // 3.0x zoom when moving
+  const zoomScale = isMoving ? 3.0 : 1.0; // 3.0x zoom when moving, 1.0 when idle
+  const inverseScale = 1 / zoomScale;
 
   const tiles = Array.from({ length: BOARD_SIZE }, (_, i) => i + 1);
 
   return (
-    <div className="game-board-container" style={{
-      width: '100%',
-      height: '100%',
-      // We want the board to be centered in the available space
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      overflow: 'hidden', // prevent spill
-      padding: '2vmin'
-    }}>
-      <div style={{
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
+    <div className="game-board-container" ref={containerRef}>
+      <div className="game-board-wrapper">
         {/* Stationary Effects Layer - Now sibling to scaled board */}
         <div style={{ position: 'absolute', inset: 0, zIndex: 60, pointerEvents: 'none', overflow: 'hidden' }}>
           <EffectsLayer globalEvent={globalEvent} lastMoveDescription={lastMoveDescription} />
@@ -322,34 +304,91 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
         <div
           className="game-board spiral-layout-63"
           style={{
-            position: 'relative', // Context for absolute children (effects, players)
-            display: 'grid',
-            gridTemplateColumns: 'repeat(9, 1fr)',
-            gridTemplateRows: 'repeat(7, 1fr)',
-            gap: 'clamp(2px, 0.4vmin, 5px)',
-            padding: 'clamp(4px, 0.5vmin, 8px)',
-            background: 'rgba(30, 41, 59, 0.9)',
-            borderRadius: '10px',
-            border: '2px solid rgba(255, 255, 255, 0.1)',
+            ...(boardSize && {
+              width: boardSize.width,
+              height: boardSize.height,
+            }),
             transformOrigin: `${zoomOriginX}% ${zoomOriginY}%`,
             transform: `scale(${zoomScale})`,
             transition: 'transform-origin 0.5s ease, transform 0.5s ease',
-
-            // SIZING MAGIC:
-            // We want it to be as big as possible maintaining 9/7 aspect ratio
-            // "contain" logic:
-            aspectRatio: '9 / 7',
-            width: '100%',
-            height: 'auto',
-            maxWidth: '100%',
-            maxHeight: '100%',
-            // If height is the constraint, it shrinks width. If width is constraint, it shrinks height.
-            // Flex container centers it.
           }}
         >
           {/* Effects moved out to parent to avoid scaling issues */}
 
-          {tiles.map((tileNumber) => renderTile(tileNumber))}
+          {tiles.map((tileNumber) => {
+            const coords = getGridCoords(tileNumber);
+            const effectType = getEffectType(tileNumber);
+            const tileInfo = TILE_INFO[effectType];
+            const isSpecial = effectType !== 'none';
+            const isHovered = hoveredTile === tileNumber;
+            const isWin = tileNumber === BOARD_SIZE;
+            const isStart = tileNumber === 1;
+
+            return (
+              <div
+                key={tileNumber}
+                className={`game-tile ${effectType} ${isSpecial ? 'special-tile' : ''} ${isWin ? 'end graduation-zone' : ''} ${isStart ? 'start' : ''}`}
+                style={{
+                  gridColumn: coords.col,
+                  gridRow: coords.row,
+                }}
+                onClick={() => onTileClick?.(tileNumber)}
+                onMouseEnter={() => setHoveredTile(tileNumber)}
+                onMouseLeave={() => setHoveredTile(null)}
+              >
+                {/* Number scales from top-left to stay in corner but maintain size */}
+                <div
+                  className="tile-number"
+                  style={{
+                    transform: `scale(${inverseScale})`,
+                    transformOrigin: 'top left',
+                    transition: 'transform 0.5s ease'
+                  }}
+                >
+                  {isStart ? 'START' : isWin ? 'WIN' : tileNumber}
+                </div>
+
+                <div className="tile-content">
+                  {tileInfo.emoji && (
+                    <div
+                      className="tile-emoji"
+                      style={{
+                        transform: `scale(${inverseScale})`,
+                        transformOrigin: 'center center',
+                        transition: 'transform 0.5s ease'
+                      }}
+                    >
+                      {tileInfo.emoji}
+                    </div>
+                  )}
+                </div>
+                {/* Custom Popover */}
+                {isHovered && isSpecial && (
+                  <div
+                    className="tile-popover"
+                    style={{
+                      transform: `translateX(-50%) scale(${inverseScale})`,
+                      transformOrigin: 'bottom center'
+                    }}
+                  >
+                    <div className="popover-header">
+                      {tileInfo.emoji} {tileInfo.label}
+                    </div>
+                    <div className="popover-body">
+                      {effectType === 'goose' && "Double roll + 5 coins!"}
+                      {effectType === 'bridge' && "Jump ahead to tile 12"}
+                      {effectType === 'inn' && "Skip 1 turn to rest"}
+                      {effectType === 'well' && "Stuck until rescue or pay 10 coins"}
+                      {effectType === 'labyrinth' && "Go back to tile 30"}
+                      {effectType === 'prison' && "Skip 2 turns or pay 15 coins"}
+                      {effectType === 'death' && "Restart at Start or pay 20 coins"}
+                      {effectType === 'challenge' && "Coding Challenge! Win coins!"}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
 
           {players.map((player) => {
             // Use interpolated visual position
@@ -382,7 +421,8 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
                   gridColumn: coords.col,
                   gridRow: coords.row,
                   backgroundColor: player.color,
-                  transform: `translate(${offsetX}px, ${offsetY}px)`,
+                  // Apply scale to counteract board zoom
+                  transform: `translate(${offsetX}px, ${offsetY}px) scale(${inverseScale})`,
                   zIndex: 10 + pIndex,
                   transition: 'all 0.3s ease-out' // smooth micro-adjustment
                 }}

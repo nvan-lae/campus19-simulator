@@ -5,6 +5,31 @@
   justify-content: center;
   align-items: center;
   overflow: visible;
+  width: 100%;
+  height: 100%;
+}
+
+.game-board-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.game-board.spiral-layout-63 {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(7, 1fr);
+  gap: 3px;
+  padding: 6px;
+  background: rgba(30, 41, 59, 0.9);
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
+  /* Size is set via JS for proper contain behavior */
 }
 
 .game-board.spiral-layout {
@@ -61,12 +86,17 @@
   top: 4px;
   left: 6px;
   opacity: 0.6;
+  /* Fixed size - doesn't scale with container */
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .tile-emoji {
   font-size: 24px;
   margin-top: 10px;
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2));
+  /* Fixed size - doesn't scale with container */
+  line-height: 1;
 }
 
 .tile-label {
@@ -224,6 +254,8 @@
   transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   pointer-events: auto;
   z-index: 5;
+  /* Fixed size - doesn't scale with container */
+  flex-shrink: 0;
 }
 
 .player-token:first-child {

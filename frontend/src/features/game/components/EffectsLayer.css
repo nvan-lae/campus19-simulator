@@ -8,7 +8,7 @@
     /* Let clicks pass through */
     z-index: 50;
     /* Above board, below UI */
-    overflow: hidden;
+    overflow: visible;
 }
 
 .global-event-banner {
