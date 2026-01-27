@@ -14,7 +14,7 @@ export const PredictionPanel = ({ gameId, isMyTurn, hasBet }: PredictionPanelPro
     // Reset local bet state when turn changes (hasBet becomes false)
     useEffect(() => {
         if (!hasBet) {
-            setBetPlaced(null);
+            setTimeout(() => setBetPlaced(null), 0);
         }
     }, [hasBet]);
 

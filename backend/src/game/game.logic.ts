@@ -97,8 +97,6 @@ export class GameRoom {
       return this.state;
     }
 
-
-
     // Reset previous bet results before new roll
     this.state.rollBetResult = null;
 
@@ -129,8 +127,8 @@ export class GameRoom {
       const winners: number[] = [];
       const losers: number[] = [];
 
-      this.state.currentTurnBets.forEach(bet => {
-        const bettor = this.state.players.find(p => p.id === bet.playerId);
+      this.state.currentTurnBets.forEach((bet) => {
+        const bettor = this.state.players.find((p) => p.id === bet.playerId);
         if (bettor) {
           if (bet.bet === outcome) {
             bettor.coins += 5;
@@ -259,8 +257,16 @@ export class GameRoom {
       }
 
       case 'mystery': {
-        const potentialEffects: TileEffectType[] = ['goose', 'inn', 'well', 'prison', 'death', 'challenge'];
-        const randomEffect = potentialEffects[Math.floor(Math.random() * potentialEffects.length)];
+        const potentialEffects: TileEffectType[] = [
+          'goose',
+          'inn',
+          'well',
+          'prison',
+          'death',
+          'challenge',
+        ];
+        const randomEffect =
+          potentialEffects[Math.floor(Math.random() * potentialEffects.length)];
         this.state.lastMoveDescription = `${player.username} landed on a Mystery Tile! It turned into... ${randomEffect}!`;
         // Recursively apply the new effect
         return this.applyTileEffect(player, position, randomEffect);
@@ -291,24 +297,24 @@ export class GameRoom {
       this.state.lastMoveDescription = `✅ Correct! ${player.username} earned ${question.rewardCoins} coins!`;
 
       // Payout bets (SUCCESS)
-      challenge.bets.forEach(bet => {
+      challenge.bets.forEach((bet) => {
         if (bet.prediction === 'success') {
-          const bettor = this.state.players.find(p => p.id === bet.playerId);
+          const bettor = this.state.players.find((p) => p.id === bet.playerId);
           if (bettor) bettor.coins += 5; // Fixed reward for simplicity
         } else {
-          const bettor = this.state.players.find(p => p.id === bet.playerId);
+          const bettor = this.state.players.find((p) => p.id === bet.playerId);
           if (bettor) bettor.coins = Math.max(0, bettor.coins - 5);
         }
       });
     } else {
       this.state.lastMoveDescription = `❌ Wrong! The correct answer was: ${question.options[question.correctIndex]}`;
       // Payout bets (FAIL)
-      challenge.bets.forEach(bet => {
+      challenge.bets.forEach((bet) => {
         if (bet.prediction === 'fail') {
-          const bettor = this.state.players.find(p => p.id === bet.playerId);
+          const bettor = this.state.players.find((p) => p.id === bet.playerId);
           if (bettor) bettor.coins += 5;
         } else {
-          const bettor = this.state.players.find(p => p.id === bet.playerId);
+          const bettor = this.state.players.find((p) => p.id === bet.playerId);
           if (bettor) bettor.coins = Math.max(0, bettor.coins - 5);
         }
       });
@@ -440,7 +446,7 @@ export class GameRoom {
 
       case 'chaos_orb': {
         // Shuffle all positions
-        const positions = this.state.players.map(p => p.position);
+        const positions = this.state.players.map((p) => p.position);
         for (let i = positions.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [positions[i], positions[j]] = [positions[j], positions[i]];
@@ -484,7 +490,11 @@ export class GameRoom {
     // Global Event Logic (every 5 turns? or every 5 rounds?)
     // Let's say every 10 turns (approx 2-3 rounds with 4 players)
     if (this.state.turnCount > 0 && this.state.turnCount % 10 === 0) {
-      const events: ('gravity_flux' | 'inflation' | 'windy')[] = ['gravity_flux', 'inflation', 'windy'];
+      const events: ('gravity_flux' | 'inflation' | 'windy')[] = [
+        'gravity_flux',
+        'inflation',
+        'windy',
+      ];
       const newEvent = events[Math.floor(Math.random() * events.length)];
       this.state.currentGlobalEvent = newEvent;
       this.state.lastMoveDescription = `🌍 GLOBAL EVENT: ${newEvent.toUpperCase()}! (Lasts 10 turns)`;
@@ -494,7 +504,9 @@ export class GameRoom {
     }
 
     // Bounty Logic: Update every turn
-    const sorted = [...this.state.players].sort((a, b) => a.position - b.position);
+    const sorted = [...this.state.players].sort(
+      (a, b) => a.position - b.position,
+    );
     // Only assign bounty if positions distinct and count > 1 (lowest position is index 0)
     if (sorted.length > 1) {
       this.state.bountyTargetId = sorted[0].id; // Last place is actually earliest position (lowest number)
@@ -532,10 +544,12 @@ export class GameRoom {
   placeBet(userId: number, prediction: 'success' | 'fail'): GameState {
     const challenge = this.state.activeChallenge;
     if (!challenge) throw new Error('No active challenge');
-    if (challenge.playerId === userId) throw new Error('Cannot bet on yourself');
+    if (challenge.playerId === userId)
+      throw new Error('Cannot bet on yourself');
 
     // Check if already bet
-    if (challenge.bets.find(b => b.playerId === userId)) throw new Error('Already placed a bet');
+    if (challenge.bets.find((b) => b.playerId === userId))
+      throw new Error('Already placed a bet');
 
     challenge.bets.push({ playerId: userId, prediction });
     // DEDUCT COST? Maybe free to bet for now to encourage it?
@@ -554,7 +568,7 @@ export class GameRoom {
     }
 
     // 3. Check if already bet
-    if (this.state.currentTurnBets.find(b => b.playerId === userId)) {
+    if (this.state.currentTurnBets.find((b) => b.playerId === userId)) {
       throw new Error('Already placed a bet for this turn');
     }
 

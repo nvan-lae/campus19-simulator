@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 
 export const useGameSound = () => {
     const playTone = useCallback((frequency: number, type: OscillatorType, duration: number) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
         if (!AudioContext) return;
 

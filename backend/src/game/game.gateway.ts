@@ -31,7 +31,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
     private readonly gameService: GameService, // Inject our new service
-  ) { }
+  ) {}
 
   async handleConnection(client: Socket) {
     try {

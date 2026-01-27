@@ -25,7 +25,7 @@ export const GamePage = () => {
     rollDice,
     movePlayer,
     purchaseItem,
-    useItem,
+    useItem: activateItem,
     payEscape,
     submitChallenge,
     resetGame,
@@ -99,7 +99,8 @@ export const GamePage = () => {
             <PredictionPanel
               gameId={gameId || ''}
               isMyTurn={currentPlayer?.id === user?.id}
-              hasBet={!!gameState.currentTurnBets?.some((b: any) => b.playerId === user?.id)}
+              hasBet={!!gameState.currentTurnBets?.some((b: { playerId: number }) => b.playerId === user?.id)}
+
             />
           </div>
         )}
@@ -248,7 +249,7 @@ export const GamePage = () => {
                   purchaseItem(itemId);
                 }}
                 onUseItem={(itemId, targetId) => {
-                  useItem(itemId, targetId);
+                  activateItem(itemId, targetId);
                   setIsShopOpen(false);
                 }}
                 onPayEscape={payEscape}

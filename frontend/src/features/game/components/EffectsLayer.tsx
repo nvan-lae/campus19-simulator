@@ -13,13 +13,13 @@ export const EffectsLayer = ({ globalEvent, lastMoveDescription }: EffectsLayerP
     // Show banner ephemeral
     useEffect(() => {
         if (globalEvent) {
-            setShowBanner(true);
+            setTimeout(() => setShowBanner(true), 0);
             const timer = setTimeout(() => {
                 setShowBanner(false);
             }, 4000);
             return () => clearTimeout(timer);
         } else {
-            setShowBanner(false);
+            setTimeout(() => setShowBanner(false), 0);
         }
     }, [globalEvent]);
 
