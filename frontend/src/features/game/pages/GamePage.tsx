@@ -64,6 +64,7 @@ export const GamePage = () => {
 
   // 5. Derived State (Guaranteed to have gameState here)
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+  const myPlayer = gameState.players.find(p => p.id === user?.id);
   const isRolling = gameState.diceValue !== null && !gameState.gameOver;
 
   const handleRoll = () => {
@@ -75,9 +76,9 @@ export const GamePage = () => {
     movePlayer();
   };
 
-  // Check if current user has an active challenge
+  // Check if current user has an active challenge (it's my challenge to answer)
   const hasActiveChallenge = gameState.activeChallenge &&
-    gameState.activeChallenge.playerId === currentPlayer.id;
+    gameState.activeChallenge.playerId === myPlayer?.id;
 
   return (
     <div className="game-layout-container">
@@ -237,11 +238,11 @@ export const GamePage = () => {
               <h2 className="text-2xl font-black mb-6 flex items-center gap-3 text-slate-800 dark:text-white">
                 🛒 Campus Shop
                 <span className="text-sm font-medium px-3 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 rounded-full ml-auto">
-                  My Coins: {currentPlayer?.coins || 0}
+                  My Coins: {myPlayer?.coins || 0}
                 </span>
               </h2>
               <Shop
-                currentPlayer={currentPlayer}
+                currentPlayer={myPlayer}
                 allPlayers={gameState.players || []}
                 onPurchase={(itemId) => {
                   purchaseItem(itemId);
@@ -259,12 +260,12 @@ export const GamePage = () => {
       )}
 
       {/* Challenge Modals */}
-      {hasActiveChallenge && gameState.activeChallenge && (
+      {hasActiveChallenge && gameState.activeChallenge && myPlayer && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border border-indigo-500/50">
             <ChallengeModal
               challenge={gameState.activeChallenge}
-              currentPlayerName={currentPlayer.username}
+              currentPlayerName={myPlayer.username}
               onSubmit={submitChallenge}
             />
           </div>

@@ -249,6 +249,29 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
     return { col: 4, row: 3 }; // Fallback
   };
 
+  // Calculate direction arrow for each tile pointing to the next tile
+  const getDirectionArrow = (tileNumber: number): string | null => {
+    if (tileNumber >= BOARD_SIZE) return null; // No arrow on last tile
+    
+    const current = getGridCoords(tileNumber);
+    const next = getGridCoords(tileNumber + 1);
+    
+    const dx = next.col - current.col;
+    const dy = next.row - current.row;
+    
+    // Determine direction based on delta
+    if (dx > 0 && dy === 0) return '→'; // Right
+    if (dx < 0 && dy === 0) return '←'; // Left
+    if (dx === 0 && dy > 0) return '↓'; // Down
+    if (dx === 0 && dy < 0) return '↑'; // Up
+    if (dx > 0 && dy < 0) return '↗'; // Up-Right
+    if (dx > 0 && dy > 0) return '↘'; // Down-Right
+    if (dx < 0 && dy < 0) return '↖'; // Up-Left
+    if (dx < 0 && dy > 0) return '↙'; // Down-Left
+    
+    return null;
+  };
+
 
 
 
@@ -314,6 +337,46 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
           }}
         >
           {/* Effects moved out to parent to avoid scaling issues */}
+
+          {/* Path Connectors - Arrows at tile edges pointing to next tile */}
+          {tiles.slice(0, -1).map((tileNumber) => {
+            const current = getGridCoords(tileNumber);
+            const next = getGridCoords(tileNumber + 1);
+            const arrow = getDirectionArrow(tileNumber);
+            
+            if (!arrow) return null;
+            
+            // Determine direction for positioning
+            const dx = next.col - current.col;
+            const dy = next.row - current.row;
+            
+            // Position class based on direction
+            let positionClass = '';
+            if (dx > 0) positionClass = 'edge-right';
+            else if (dx < 0) positionClass = 'edge-left';
+            else if (dy > 0) positionClass = 'edge-bottom';
+            else if (dy < 0) positionClass = 'edge-top';
+            
+            return (
+              <div
+                key={`connector-${tileNumber}`}
+                className={`path-connector ${positionClass}`}
+                style={{
+                  gridColumn: current.col,
+                  gridRow: current.row,
+                }}
+              >
+                <span 
+                  className="connector-arrow"
+                  style={{
+                    transform: `scale(${inverseScale})`,
+                  }}
+                >
+                  {arrow}
+                </span>
+              </div>
+            );
+          })}
 
           {tiles.map((tileNumber) => {
             const coords = getGridCoords(tileNumber);

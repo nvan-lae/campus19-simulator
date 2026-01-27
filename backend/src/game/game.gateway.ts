@@ -217,6 +217,24 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+  @SubscribeMessage('place_roll_bet')
+  handlePlaceRollBet(
+    @MessageBody() data: { gameId: string; prediction: 'low' | 'high' },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const user = client.data.user;
+    try {
+      const newState = this.gameService.placeRollBet(
+        data.gameId,
+        user.id,
+        data.prediction,
+      );
+      this.server.to(data.gameId).emit('game_state_update', newState);
+    } catch (e) {
+      client.emit('game_error', { message: e.message });
+    }
+  }
+
   @SubscribeMessage('send_reaction')
   handleSendReaction(
     @MessageBody() data: { gameId: string; emoji: string },
