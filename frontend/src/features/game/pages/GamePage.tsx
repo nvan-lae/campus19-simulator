@@ -162,9 +162,9 @@ export const GamePage = () => {
                 {gameState.currentGlobalEvent === 'windy' && '🌬️ Windy'}
               </div>
               <div className="event-description">
-                {gameState.currentGlobalEvent === 'gravity_flux' && 'All rolls are doubled!'}
-                {gameState.currentGlobalEvent === 'inflation' && 'Shop prices increased by 50%!'}
-                {gameState.currentGlobalEvent === 'windy' && 'Movement is reversed!'}
+                {gameState.currentGlobalEvent === 'gravity_flux' && 'Movement +2 tiles!'}
+                {gameState.currentGlobalEvent === 'inflation' && 'Shop +50%!'}
+                {gameState.currentGlobalEvent === 'windy' && 'Movement -1 tile!'}
               </div>
             </div>
           ) : (
