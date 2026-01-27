@@ -39,4 +39,57 @@ export class GameService {
     if (!game) throw new Error('Game not found');
     return game.makeMove(userId);
   }
+
+  payToEscape(gameId: string, userId: number): GameState {
+    const game = this.activeGames.get(gameId);
+    if (!game) throw new Error('Game not found');
+    return game.payToEscape(userId);
+  }
+
+  purchaseItem(gameId: string, userId: number, itemId: string): GameState {
+    const game = this.activeGames.get(gameId);
+    if (!game) throw new Error('Game not found');
+    return game.purchaseItem(userId, itemId);
+  }
+
+  useItem(
+    gameId: string,
+    userId: number,
+    itemId: string,
+    targetPlayerId?: number,
+  ): GameState {
+    const game = this.activeGames.get(gameId);
+    if (!game) throw new Error('Game not found');
+    return game.useItem(userId, itemId, targetPlayerId);
+  }
+
+  submitChallenge(
+    gameId: string,
+    userId: number,
+    answerIndex: number,
+  ): GameState {
+    const game = this.activeGames.get(gameId);
+    if (!game) throw new Error('Game not found');
+    return game.submitChallenge(userId, answerIndex);
+  }
+
+  placeBet(
+    gameId: string,
+    userId: number,
+    prediction: 'success' | 'fail',
+  ): GameState {
+    const game = this.activeGames.get(gameId);
+    if (!game) throw new Error('Game not found');
+    return game.placeBet(userId, prediction);
+  }
+
+  placeRollBet(
+    gameId: string,
+    userId: number,
+    prediction: 'low' | 'high',
+  ): GameState {
+    const game = this.activeGames.get(gameId);
+    if (!game) throw new Error('Game not found');
+    return game.placeRollBet(userId, prediction);
+  }
 }

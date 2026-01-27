@@ -31,7 +31,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
     private readonly gameService: GameService, // Inject our new service
-  ) {}
+  ) { }
 
   async handleConnection(client: Socket) {
     try {
@@ -127,5 +127,142 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     } catch (e) {
       client.emit('game_error', { message: e.message });
     }
+  }
+
+  @SubscribeMessage('pay_escape')
+  handlePayEscape(
+    @MessageBody() data: { gameId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const user = client.data.user;
+    try {
+      const newState = this.gameService.payToEscape(data.gameId, user.id);
+      this.server.to(data.gameId).emit('game_state_update', newState);
+    } catch (e) {
+      client.emit('game_error', { message: e.message });
+    }
+  }
+
+  @SubscribeMessage('purchase_item')
+  handlePurchaseItem(
+    @MessageBody() data: { gameId: string; itemId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const user = client.data.user;
+    try {
+      const newState = this.gameService.purchaseItem(
+        data.gameId,
+        user.id,
+        data.itemId,
+      );
+      this.server.to(data.gameId).emit('game_state_update', newState);
+    } catch (e) {
+      client.emit('game_error', { message: e.message });
+    }
+  }
+
+  @SubscribeMessage('use_item')
+  handleUseItem(
+    @MessageBody()
+    data: { gameId: string; itemId: string; targetPlayerId?: number },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const user = client.data.user;
+    try {
+      const newState = this.gameService.useItem(
+        data.gameId,
+        user.id,
+        data.itemId,
+        data.targetPlayerId,
+      );
+      this.server.to(data.gameId).emit('game_state_update', newState);
+    } catch (e) {
+      client.emit('game_error', { message: e.message });
+    }
+  }
+
+  @SubscribeMessage('submit_challenge')
+  handleSubmitChallenge(
+    @MessageBody() data: { gameId: string; answerIndex: number },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const user = client.data.user;
+    try {
+      const newState = this.gameService.submitChallenge(
+        data.gameId,
+        user.id,
+        data.answerIndex,
+      );
+      this.server.to(data.gameId).emit('game_state_update', newState);
+    } catch (e) {
+      client.emit('game_error', { message: e.message });
+    }
+  }
+
+  @SubscribeMessage('place_bet')
+  handlePlaceBet(
+    @MessageBody() data: { gameId: string; prediction: 'success' | 'fail' },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const user = client.data.user;
+    try {
+      const newState = this.gameService.placeBet(
+        data.gameId,
+        user.id,
+        data.prediction,
+      );
+      this.server.to(data.gameId).emit('game_state_update', newState);
+    } catch (e) {
+      client.emit('game_error', { message: e.message });
+    }
+  }
+
+  @SubscribeMessage('place_roll_bet')
+  handlePlaceRollBet(
+    @MessageBody() data: { gameId: string; prediction: 'low' | 'high' },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const user = client.data.user;
+    try {
+      const newState = this.gameService.placeRollBet(
+        data.gameId,
+        user.id,
+        data.prediction,
+      );
+      this.server.to(data.gameId).emit('game_state_update', newState);
+    } catch (e) {
+      client.emit('game_error', { message: e.message });
+    }
+  }
+
+  @SubscribeMessage('send_reaction')
+  handleSendReaction(
+    @MessageBody() data: { gameId: string; emoji: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const user = client.data.user;
+    if (!client.rooms.has(data.gameId)) return;
+    // Just broadcast the reaction, no state change really needed for now
+    // But we might want to validate gameId
+    this.server.to(data.gameId).emit('game_reaction', {
+      playerId: user.id,
+      emoji: data.emoji,
+    });
+  }
+
+  @SubscribeMessage('send_message')
+  handleSendMessage(
+    @MessageBody() data: { gameId: string; message: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const user = client.data.user;
+    if (!data.message || data.message.trim().length === 0) return;
+
+    this.server.to(data.gameId).emit('chat_message', {
+      playerId: user.id,
+      username: user.username,
+      message: data.message.trim(),
+      timestamp: new Date().toISOString(),
+    });
   }
 }

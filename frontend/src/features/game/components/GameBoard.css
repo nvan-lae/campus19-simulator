@@ -1,94 +1,388 @@
 @import "tailwindcss";
 
 .game-board-container {
-  @apply flex justify-center items-center w-full p-4 md:p-6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: visible;
+  width: 100%;
+  height: 100%;
 }
 
-.game-board {
-  @apply flex flex-col gap-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 md:p-6 shadow-md;
+.game-board-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 
-.board-row {
-  @apply grid grid-cols-7 gap-2 md:gap-3;
+.game-board.spiral-layout-63 {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(7, 1fr);
+  gap: 3px;
+  padding: 6px;
+  background: rgba(30, 41, 59, 0.9);
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
+  /* Size is set via JS for proper contain behavior */
+}
+
+.game-board.spiral-layout {
+  display: grid;
+  grid-template-columns: repeat(7, 80px);
+  /* 7 cols fixed size */
+  grid-template-rows: repeat(6, 80px);
+  /* 6 rows fixed size */
+  gap: 12px;
+  width: auto;
+  height: auto;
+  position: relative;
+  /* Subtle grid pattern background */
+  background: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='smallGrid' width='10' height='10' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 10 0 L 0 0 0 10' fill='none' stroke='white' stroke-width='0.5'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23smallGrid)' opacity='0.05'/%3E%3C/svg%3E");
 }
 
 .game-tile {
-  @apply aspect-square bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded flex flex-col items-center justify-center cursor-pointer transition-all hover:shadow-md hover:border-blue-400 dark:hover:border-blue-500 p-2 min-w-[40px] md:min-w-[60px];
+  width: 100%;
+  /* Fill grid cell */
+  height: 100%;
+  background: linear-gradient(135deg, #e0e0e0 0%, #bebebe 100%);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 4px;
+  position: relative;
+  /* Grid items relative by default */
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 3px solid #95a5a6;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  cursor: help;
+  z-index: 10;
 }
 
-.game-tile:active {
-  @apply scale-95;
+.game-tile:hover {
+  z-index: 50;
+  transform: scale(1.15) !important;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
 }
 
-.game-tile.snake {
-  @apply bg-red-100 dark:bg-red-900 border-red-400 dark:border-red-600;
-}
-
-.game-tile.ladder {
-  @apply bg-green-100 dark:bg-green-900 border-green-400 dark:border-green-600;
-}
-
-.game-tile.start {
-  @apply bg-gradient-to-br from-green-400 to-green-600 border-green-700 font-bold text-white shadow-lg;
-}
-
-.game-tile.end {
-  @apply bg-gradient-to-br from-yellow-400 to-yellow-600 border-yellow-700 font-bold text-gray-900 shadow-lg;
+.tile-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
 }
 
 .tile-number {
-  @apply text-xs md:text-sm font-bold text-gray-900 dark:text-gray-100 text-center min-h-4 flex items-center justify-center flex-1;
+  font-size: 11px;
+  font-weight: 900;
+  color: #7f8c8d;
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  opacity: 0.6;
+  /* Fixed size - doesn't scale with container */
+  line-height: 1;
+  white-space: nowrap;
 }
 
-.game-tile.start .tile-number,
-.game-tile.end .tile-number {
-  color: inherit;
-}
-
-.tile-players {
+/* Path Connector Arrows Between Tiles */
+.path-connector {
+  position: relative;
   display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 15;
+  width: 100%;
+  height: 100%;
+}
+
+/* Position arrow at tile edges */
+.path-connector.edge-right {
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.path-connector.edge-left {
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.path-connector.edge-bottom {
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.path-connector.edge-top {
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.connector-arrow {
+  position: absolute;
+  font-size: 14px;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.7);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.path-connector.edge-right .connector-arrow {
+  right: -10px;
+}
+
+.path-connector.edge-left .connector-arrow {
+  left: -10px;
+}
+
+.path-connector.edge-bottom .connector-arrow {
+  bottom: -10px;
+}
+
+.path-connector.edge-top .connector-arrow {
+  top: -10px;
+}
+
+.tile-emoji {
+  font-size: 24px;
+  margin-top: 10px;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2));
+  /* Fixed size - doesn't scale with container */
+  line-height: 1;
+}
+
+.tile-label {
+  font-size: 8px;
+  font-weight: bold;
+  text-transform: uppercase;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 2px 4px;
+  border-radius: 8px;
+  margin-top: auto;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Special Function Tiles */
+
+.game-tile.start {
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  border-color: #2ecc71;
+  color: white;
+}
+
+.game-tile.start .tile-number {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.game-tile.end {
+  background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
+  border-color: #e67e22;
+}
+
+.game-tile.goose {
+  background: linear-gradient(135deg, #ff9ff3 0%, #feca57 100%);
+  border-color: #ff6b6b;
+  animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 5px #ff6b6b;
+  }
+
+  to {
+    box-shadow: 0 0 20px #ff6b6b, 0 0 10px #feca57;
+  }
+}
+
+/* Graduation Zone (Tile 63) */
+.graduation-zone {
+  border: 4px solid #fbbf24;
+  /* border-amber-400 */
+  box-shadow: 0 0 20px rgba(254, 243, 199, 0.4);
+  /* bg-amber-50 shadow */
+  background-color: #fffbeb;
+  animation: pulse-glow 2s infinite;
+}
+
+.graduation-zone .tile-number {
+  color: #d97706;
+  /* text-amber-600 */
+  font-weight: 800;
+}
+
+@keyframes pulse-glow {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+  }
+
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(251, 191, 36, 0.6);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+  }
+}
+
+.game-tile.bridge {
+  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+  border-color: #0984e3;
+}
+
+.game-tile.inn {
+  background: linear-gradient(135deg, #fab1a0 0%, #e17055 100%);
+  border-color: #d63031;
+}
+
+.game-tile.well {
+  background: linear-gradient(135deg, #636e72 0%, #2d3436 100%);
+  border-color: #000;
+}
+
+.game-tile.labyrinth {
+  background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+  border-color: #5f27cd;
+}
+
+.game-tile.prison {
+  background: repeating-linear-gradient(45deg,
+      #bdc3c7,
+      #bdc3c7 10px,
+      #7f8c8d 10px,
+      #7f8c8d 20px);
+  border-color: #2c3e50;
+}
+
+.game-tile.death {
+  background: #000;
+  border-color: #c0392b;
+  color: #c0392b;
+}
+
+.game-tile.death .tile-number {
+  color: #c0392b;
+}
+
+.game-tile.challenge {
+  background: linear-gradient(135deg, #00cec9 0%, #0984e3 100%);
+  border-color: #00cec9;
+  box-shadow: 0 0 10px #00cec9;
+}
+
+/* Player Tokens */
+.tile-players {
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  display: flex;
+  flex-wrap: wrap-reverse;
+  justify-content: flex-end;
+  pointer-events: none;
   width: 100%;
 }
 
 .player-token {
-  @apply w-5 h-5 md:w-6 md:h-6 rounded-full border-2 border-blue-900 flex items-center justify-center text-xs md:text-sm font-bold text-white drop-shadow-md transition-transform hover:scale-125;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 800;
+  color: white;
+  border: 2px solid white;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+  margin-left: -8px;
+  margin-bottom: 5px;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: auto;
+  z-index: 5;
+  /* Fixed size - doesn't scale with container */
+  flex-shrink: 0;
+}
+
+.player-token:first-child {
+  margin-left: 0;
 }
 
 .player-token:hover {
-  @apply scale-125;
+  transform: scale(1.2) translateY(-5px);
+  z-index: 30;
 }
 
 .player-token.winner {
-  @apply border-yellow-400 shadow-lg shadow-yellow-400 animate-pulse;
+  width: 50px;
+  height: 50px;
+  font-size: 24px;
+  border: 4px solid #f1c40f;
+  background: #2ecc71 !important;
 }
 
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.15);
-  }
+/* Popover Syling */
+.tile-popover {
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(22, 33, 62, 0.95);
+  border: 1px solid #ffd700;
+  border-radius: 8px;
+  padding: 8px 12px;
+  width: 160px;
+  z-index: 100;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  animation: fadeIn 0.15s ease-out;
 }
 
-@media (max-width: 768px) {
-  .board-row {
-    @apply grid-cols-7 gap-1;
+.tile-popover::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -6px;
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(22, 33, 62, 0.95) transparent transparent transparent;
+}
+
+.popover-header {
+  color: #ffd700;
+  font-weight: bold;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.popover-body {
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(5px);
   }
 
-  .game-tile {
-    @apply min-w-8 md:min-w-12;
-  }
-
-  .tile-number {
-    @apply text-xs;
-  }
-
-  .player-token {
-    @apply w-4 h-4 text-xs;
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
 }
