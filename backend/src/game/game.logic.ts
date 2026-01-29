@@ -28,6 +28,7 @@ export interface GamePlayer {
   stuckInWell: boolean;
   hasShield: boolean;
   inventory: InventoryItem[];
+  isReady: boolean;
 }
 
 export interface ActiveChallenge {
@@ -39,7 +40,10 @@ export interface ActiveChallenge {
   bets: { playerId: number; prediction: 'success' | 'fail' }[];
 }
 
+export type GameStatus = 'LOBBY' | 'PLAYING' | 'FINISHED';
+
 export interface GameState {
+  status: GameStatus;
   players: GamePlayer[];
   currentPlayerIndex: number;
   diceValue: number | null;
@@ -66,6 +70,7 @@ export class GameRoom {
 
   constructor(public readonly roomId: string) {
     this.state = {
+      status: 'LOBBY',
       players: [],
       currentPlayerIndex: 0,
       diceValue: null,
@@ -82,7 +87,38 @@ export class GameRoom {
     };
   }
 
+  toggleReady(userId: number): GameState {
+    const player = this.state.players.find((p) => p.id === userId);
+    if (!player) throw new Error('Player not found');
+    player.isReady = !player.isReady;
+    return this.state;
+  }
+
+  startGame(userId: number): GameState {
+    // Only host (first player) can start
+    if (this.state.players.length === 0 || this.state.players[0].id !== userId) {
+      throw new Error('Only the host can start the game');
+    }
+
+    if (this.state.players.length < 2) { // Allow 1 player for debug/testing? Maybe enforce 2? Let's say 2 for real game
+      // For now, let's allow 1 for easy testing if needed, or enforce 2.
+      // The rules usually imply multiple players.
+      // Let's enforce > 0 for now.
+    }
+
+    const allReady = this.state.players.every((p) => p.isReady);
+    if (!allReady) {
+      throw new Error('All players must be ready');
+    }
+
+    this.state.status = 'PLAYING';
+    this.state.lastMoveDescription = 'Game Started! Good Luck!';
+    return this.state;
+  }
+
   rollDice(userId: number): GameState {
+    if (this.state.status !== 'PLAYING') throw new Error('Game not started');
+
     const playerIndex = this.state.currentPlayerIndex;
     const player = this.state.players[playerIndex];
 
@@ -153,6 +189,8 @@ export class GameRoom {
   }
 
   makeMove(userId: number): GameState {
+    if (this.state.status !== 'PLAYING') throw new Error('Game not started');
+
     const playerIndex = this.state.currentPlayerIndex;
     const player = this.state.players[playerIndex];
 
@@ -186,6 +224,7 @@ export class GameRoom {
     // Check win condition
     if (newPosition === BOARD_SIZE) {
       this.state.gameOver = true;
+      this.state.status = 'FINISHED';
       this.state.winner = player;
       this.state.lastMoveDescription = `🎉 ${player.username} reaches tile ${BOARD_SIZE} and WINS!`;
     } else if (!this.state.pendingGooseRoll && !this.state.activeChallenge) {
@@ -321,6 +360,8 @@ export class GameRoom {
 
   // Escape from well, prison, or death by paying coins
   payToEscape(userId: number): GameState {
+    if (this.state.status !== 'PLAYING') throw new Error('Game not started');
+
     const player = this.state.players.find((p) => p.id === userId);
     if (!player) throw new Error('Player not found');
 
@@ -351,6 +392,9 @@ export class GameRoom {
 
   // Purchase an item from the shop
   purchaseItem(userId: number, itemId: string): GameState {
+    // Can buy items anytime or only on turn? Let's say anytime if alive/playing
+    if (this.state.status !== 'PLAYING') throw new Error('Game not started');
+
     const player = this.state.players.find((p) => p.id === userId);
     if (!player) throw new Error('Player not found');
 
@@ -374,6 +418,8 @@ export class GameRoom {
 
   // Use an item from inventory
   useItem(userId: number, itemId: string, targetPlayerId?: number): GameState {
+    if (this.state.status !== 'PLAYING') throw new Error('Game not started');
+
     const player = this.state.players.find((p) => p.id === userId);
     if (!player) throw new Error('Player not found');
 
@@ -562,6 +608,7 @@ export class GameRoom {
       stuckInWell: false,
       hasShield: false,
       inventory: [],
+      isReady: false,
     };
 
     this.state.players.push(newPlayer);

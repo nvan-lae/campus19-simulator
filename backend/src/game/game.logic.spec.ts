@@ -34,6 +34,10 @@ describe('GameRoom Logic', () => {
         gameRoom = new GameRoom('test-room');
         gameRoom.addPlayer(mockUser1);
         gameRoom.addPlayer(mockUser2);
+        // Start game flow
+        gameRoom.toggleReady(mockUser1.id);
+        gameRoom.toggleReady(mockUser2.id);
+        gameRoom.startGame(mockUser1.id);
     });
 
     it('should allow buying and using swap_position', () => {
