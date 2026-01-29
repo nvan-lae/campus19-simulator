@@ -9,13 +9,18 @@ validateEnvOrExit();
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const frontend = (
-    process.env.FRONTEND_URL || 'http://localhost:5173'
-  ).replace(/\/$/, '');
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
   app.enableCors({
-    origin: [frontend, `http://localhost:${process.env.NEST_PORT || 3000}`],
+    origin: [
+      frontendUrl,
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      `http://localhost:${process.env.NEST_PORT || 3000}`,
+    ],
     credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Accept, Authorization',
   });
 
   // Serve static files from uploads directory
@@ -23,6 +28,7 @@ async function bootstrap() {
 
   await app.listen(
     process.env.NEST_PORT ? Number(process.env.NEST_PORT) : 3000,
+    '0.0.0.0',
   );
 }
 void bootstrap();

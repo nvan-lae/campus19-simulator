@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Navigation } from '../components/layout/Navigation';
 import { ProtectedRoute } from '../components/ProtectedRoute';
+import { MainMenu } from '../features/menu/MainMenu';
 import { HomePage } from '../features/home/HomePage';
 import { LobbyPage } from '../features/lobby/LobbyPage';
 import { GamePage } from '../features/game/pages/GamePage';
@@ -13,11 +14,19 @@ function App() {
     <Router>
       <Navigation />
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <MainMenu />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/home" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route
-          path="/lobby"
+          path="/lobby/:gameId"
           element={
             <ProtectedRoute>
               <LobbyPage />

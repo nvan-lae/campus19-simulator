@@ -16,24 +16,27 @@ These items should be checked regularly to ensure project health.
 
 ---
 
-## Priority: P0 — Must fix (blocking / user-facing)
 
-### 1) Implement stats & recent matches (Promoted from P1)
-- **ETA**: 3–6 hours
-- **Why**: `ProfilePage` currently uses hardcoded/mocked stats and empty match history.
-- **Files**: `frontend/src/features/profile/ProfilePage.tsx`, `backend/src/users/users.controller.ts`
-- **Tasks**:
-  - [ ] Add `GET /users/me/stats` endpoint (calculate wins, losses, win rate).
-  - [ ] Add `GET /users/me/matches` endpoint with pagination.
-  - [ ] Connect frontend `ProfilePage` to real data.
-- **Acceptance criteria**:
-  - User sees their actual win/loss counts and recent game history.
-
----
 
 ## Priority: P1 — Important (feature-complete / correctness)
 
-### 2) Backend tests for new Game Logic (Game of the Goose)
+### 1) Main Menu & Lobby System
+- **ETA**: 4-8 hours
+- **Why**: Currently users are dropped directly into games or have basic navigation. Needs a proper flow: Login -> Main Menu -> Lobby -> Game.
+- **Tasks**:
+  - [ ] Create `MainMenu` page with "Quick Play", "Create Game", "Join Game" options.
+  - [ ] Implement `LobbyPage` where players wait for host to start.
+  - [ ] Add "Ready" status for players in lobby.
+
+### 2) Matchmaking & Game Creation
+- **ETA**: 4-8 hours
+- **Why**: Users need to be able to find games or play with friends easily.
+- **Tasks**:
+  - [ ] Backend: Store active lobbies in `activeGames`.
+  - [ ] API: `GET /games` to list open lobbies.
+  - [ ] API: `POST /games/join` to matchmake or join specific room.
+
+### 3) Backend tests for new Game Logic (Game of the Goose)
 - **ETA**: 3–6 hours
 - **Reasoning**: The game logic has been significantly transformed (42 tiles, Goose mechanics, Global Events, Betting). Old tests may be stale or insufficient.
 - **Files**: `backend/src/game/game.logic.spec.ts`
@@ -49,14 +52,14 @@ These items should be checked regularly to ensure project health.
 
 ## Priority: P2 — Quality / polish
 
-### 3) Docs & onboarding
+### 1) Docs & onboarding
 - **ETA**: 1–2 hours
 - **Tasks**:
   - [ ] Add example `.env` files.
   - [ ] Update `README.md` with new features (Game of the Goose rules).
   - [ ] Document `VITE_API_URL` usage.
 
-### 4) Accessibility & UX Polish
+### 2) Accessibility & UX Polish
 - **ETA**: 4–8 hours
 - **Tasks**:
   - [ ] Add alt text to images (especially Avatar).
@@ -67,7 +70,7 @@ These items should be checked regularly to ensure project health.
 
 ## Priority: P3 — Housekeeping / Cleanup
 
-### 5) Verify Styling Consistency
+### 1) Verify Styling Consistency
 - **ETA**: 0.5 hours
 - **Tasks**:
   - [ ] Ensure all new game components use the `gl-` global classes from `index.css` or Tailwind utilities, not ad-hoc styles.
@@ -76,5 +79,7 @@ These items should be checked regularly to ensure project health.
 
 ## Completed Items ✅
 
+- [x] **Fix ProfilePage Crash**: Added error handling for `matches` fetching.
 - [x] **Add CI workflow**: GitHub Actions configured for frontend/backend.
 - [x] **Codebase Cleanup**: CSS files consolidated, `frontend/src/styles` removed.
+- [x] **Implement Stats & Matches**: Backend endpoints created, DB schema updated, and ProfilePage connected.
