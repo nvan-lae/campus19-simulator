@@ -40,7 +40,7 @@ const fileFilter = (req, file, cb) => {
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   // Get my own profile (Protected)
   @UseGuards(AuthGuard('jwt'))
@@ -51,6 +51,21 @@ export class UsersController {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...safeUser } = req.user || {};
     return safeUser;
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('me/stats')
+  async getMyStats(@Request() req) {
+    console.log(`[Users] GET /me/stats - User ID: ${req.user.id}`);
+    return this.usersService.getStats(req.user.id);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('me/matches')
+  async getMyMatches(@Request() req) {
+    console.log(`[Users] GET /me/matches - User ID: ${req.user.id}`);
+    // Basic pagination could be added via query params later
+    return this.usersService.getMatches(req.user.id);
   }
 
   // Upload avatar (Protected)
