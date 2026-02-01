@@ -16,24 +16,24 @@ export const MainMenu = () => {
 
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+    useEffect(() => {
     const fetchLobbies = async () => {
-        try {
-            const response = await fetch(`${API_URL}/games`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            if (response.ok) {
-                setLobbies(await response.json());
-            }
-        } catch (error) {
-            console.error('Failed to fetch lobbies', error);
+      try {
+        const response = await fetch(`${API_URL}/games`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.ok) {
+          setLobbies(await response.json());
         }
+      } catch (error) {
+        console.error('Failed to fetch lobbies', error);
+      }
     };
 
-    useEffect(() => {
-        fetchLobbies();
-        const interval = setInterval(fetchLobbies, 5000); // Poll every 5s
-        return () => clearInterval(interval);
-    }, [fetchLobbies]);
+    fetchLobbies();
+    const interval = setInterval(fetchLobbies, 5000); // Poll every 5 seconds
+    return () => clearInterval(interval);
+  }, [token]);
 
     const createGame = async () => {
         try {
