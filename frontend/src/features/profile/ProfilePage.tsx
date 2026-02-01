@@ -1,10 +1,35 @@
-import { useRef, useState, useMemo } from 'react';
+import { useRef, useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, Camera, Trophy, Medal, Star } from 'lucide-react';
 // CSS imported via index.css
+
+interface MatchPlayer {
+  userId: number;
+  username: string;
+  avatarUrl: string | null;
+  rank: number;
+  isWinner: boolean;
+  coins: number;
+}
+
+interface Match {
+  id: string;
+  endedAt: string;
+  rank: number;
+  isWinner: boolean;
+  coins: number;
+  players: MatchPlayer[];
+}
+
+interface UserStats {
+  totalMatches: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+}
 
 export const ProfilePage = () => {
   const { user, token, updateUser } = useAuth();
@@ -16,16 +41,47 @@ export const ProfilePage = () => {
     return import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'http://localhost:3000';
   }, []);
 
-  const [stats] = useState({
+  const [stats, setStats] = useState<UserStats>({
     totalMatches: 0,
     wins: 0,
     losses: 0,
     winRate: 0,
-    avgPosition: 0,
-    bestScore: 0,
   });
 
-  const recentMatches: { id: number; opponent: string; result: 'Won' | 'Lost'; date: string }[] = [];
+  const [matches, setMatches] = useState<Match[]>([]);
+
+  useEffect(() => {
+    if (!token) return;
+
+    // Fetch Stats
+    fetch(`${apiBase}/users/me/stats`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`Status: ${res.status}`);
+        return res.json();
+      })
+      .then((data) => setStats(data))
+      .catch((err) => console.error('Failed to fetch stats:', err));
+
+    // Fetch Matches
+    fetch(`${apiBase}/users/me/matches`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`Status: ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setMatches(data);
+        } else {
+          console.error('Matches response is not an array:', data);
+          setMatches([]);
+        }
+      })
+      .catch((err) => console.error('Failed to fetch matches:', err));
+  }, [apiBase, token]);
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
@@ -243,8 +299,8 @@ export const ProfilePage = () => {
             <Card>
               <CardContent className="pt-6 flex flex-col items-center justify-center text-center">
                 <Star className="w-8 h-8 text-orange-500 mb-2" />
-                <div className="text-2xl font-bold">{stats.bestScore}</div>
-                <p className="text-xs text-muted-foreground uppercase font-semibold">Best Score</p>
+                <div className="text-2xl font-bold">{stats.winRate > 50 ? 'Great!' : 'Keep Going'}</div>
+                <p className="text-xs text-muted-foreground uppercase font-semibold">Status</p>
               </CardContent>
             </Card>
           </div>
@@ -257,16 +313,20 @@ export const ProfilePage = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-muted-foreground">Avg Finish Position</span>
-                  <span className="font-mono font-medium">{stats.avgPosition}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-border">
                   <span className="text-muted-foreground">Total Games</span>
                   <span className="font-mono font-medium">{stats.totalMatches}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-muted-foreground">Current Streak</span>
-                  <span className="font-mono font-medium">—</span>
+                  <span className="text-muted-foreground">Wins</span>
+                  <span className="font-mono font-medium text-green-500">{stats.wins}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-border">
+                  <span className="text-muted-foreground">Losses</span>
+                  <span className="font-mono font-medium text-red-500">{stats.losses}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-border">
+                  <span className="text-muted-foreground">Highest Coins</span>
+                  <span className="font-mono font-medium">Coming Soon</span>
                 </div>
               </CardContent>
             </Card>
@@ -276,20 +336,36 @@ export const ProfilePage = () => {
                 <CardTitle>Recent Matches</CardTitle>
               </CardHeader>
               <CardContent>
-                {recentMatches.length === 0 ? (
+                {matches.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
                     <p>No matches played yet.</p>
-                    <Button variant="link" className="mt-2 text-primary">Play a game</Button>
                   </div>
                 ) : (
-                  <div className="space-y-2">
-                    {recentMatches.map((match) => (
+                  <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+                    {matches.map((match) => (
                       <div key={match.id} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                         <div className="flex items-center gap-3">
-                          <div className={`w-2 h-2 rounded-full ${match.result === 'Won' ? 'bg-green-500' : 'bg-red-500'}`} />
-                          <span className="font-medium">{match.opponent}</span>
+                          <div
+                            className={`w-2 h-2 rounded-full ${match.isWinner ? 'bg-green-500' : 'bg-red-500'
+                              }`}
+                          />
+                          <div>
+                            <span className="font-medium block">
+                              {match.isWinner ? 'Victory' : `Rank #${match.rank}`}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {match.coins} coins
+                            </span>
+                          </div>
                         </div>
-                        <span className="text-xs text-muted-foreground">{match.date}</span>
+                        <div className="text-right">
+                          <span className="text-xs text-muted-foreground block">
+                            {new Date(match.endedAt).toLocaleDateString()}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">
+                            {new Date(match.endedAt).toLocaleTimeString()}
+                          </span>
+                        </div>
                       </div>
                     ))}
                   </div>

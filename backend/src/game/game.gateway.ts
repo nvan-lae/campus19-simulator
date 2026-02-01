@@ -21,7 +21,14 @@ interface AuthenticatedSocket extends Socket {
 }
 
 @WebSocketGateway({
-  cors: { origin: 'http://localhost:5173', credentials: true },
+  cors: {
+    origin: [
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+      process.env.FRONTEND_URL || 'http://localhost:5173',
+    ],
+    credentials: true,
+  },
 })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
@@ -83,18 +90,60 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     const user = client.data.user;
-    if (!user) return;
+    if (!user) {
+      this.logger.error(`User not found on socket ${client.id} during join_game`);
+      client.emit('game_error', { message: 'Authentication pending. Please retry.' });
+      return;
+    }
 
     // 1. Join the Socket.IO room for this game
-    await client.join(data.gameId);
+    try {
+      this.logger.log(`[GameGateway] Client ${client.id} (User ${user.username}) joining room ${data.gameId}`);
+      await client.join(data.gameId);
 
-    // 2. Add player to the game logic
-    const gameState = this.gameService.createOrJoinGame(data.gameId, user);
+      // 2. Add player to the game logic
+      this.logger.log(`[GameGateway] Calling gameService.joinGame for ${data.gameId}`);
+      const gameState = this.gameService.joinGame(data.gameId, user);
 
-    // 3. Notify EVERYONE in the room that state updated
-    this.server.to(data.gameId).emit('game_state_update', gameState);
+      // 3. Notify EVERYONE in the room that state updated
+      this.logger.log(`[GameGateway] Emitting game_state_update to room ${data.gameId}. Players: ${gameState.players.length}`);
+      this.server.to(data.gameId).emit('game_state_update', gameState);
 
-    this.logger.log(`User ${user.username} joined game ${data.gameId}`);
+    } catch (e) {
+      this.logger.error(`[GameGateway] Error in join_game: ${e.message}`);
+      client.emit('game_error', { message: e.message });
+      await client.leave(data.gameId);
+    }
+  }
+
+  @SubscribeMessage('player_ready')
+  handlePlayerReady(
+    @MessageBody() data: { gameId: string },
+    @ConnectedSocket() client: AuthenticatedSocket,
+  ) {
+    const user = client.data.user;
+    if (!user) return;
+    try {
+      const newState = this.gameService.toggleReady(data.gameId, user.id);
+      this.server.to(data.gameId).emit('game_state_update', newState);
+    } catch (e) {
+      client.emit('game_error', { message: e.message });
+    }
+  }
+
+  @SubscribeMessage('start_game')
+  handleStartGame(
+    @MessageBody() data: { gameId: string },
+    @ConnectedSocket() client: AuthenticatedSocket,
+  ) {
+    const user = client.data.user;
+    if (!user) return;
+    try {
+      const newState = this.gameService.startGame(data.gameId, user.id);
+      this.server.to(data.gameId).emit('game_state_update', newState);
+    } catch (e) {
+      client.emit('game_error', { message: e.message });
+    }
   }
 
   @SubscribeMessage('roll_dice')
