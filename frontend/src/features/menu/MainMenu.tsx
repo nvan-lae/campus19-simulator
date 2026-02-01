@@ -16,12 +16,6 @@ export const MainMenu = () => {
 
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-    useEffect(() => {
-        fetchLobbies();
-        const interval = setInterval(fetchLobbies, 5000); // Poll every 5s
-        return () => clearInterval(interval);
-    }, []);
-
     const fetchLobbies = async () => {
         try {
             const response = await fetch(`${API_URL}/games`, {
@@ -34,6 +28,12 @@ export const MainMenu = () => {
             console.error('Failed to fetch lobbies', error);
         }
     };
+
+    useEffect(() => {
+        fetchLobbies();
+        const interval = setInterval(fetchLobbies, 5000); // Poll every 5s
+        return () => clearInterval(interval);
+    }, [fetchLobbies]);
 
     const createGame = async () => {
         try {
@@ -53,23 +53,8 @@ export const MainMenu = () => {
         }
     };
 
-    const joinGame = async (gameId: string) => {
-        try {
-            const response = await fetch(`${API_URL}/games/${gameId}/join`, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
-            if (response.ok) {
-                navigate(`/lobby/${gameId}`);
-            } else {
-                console.error('Failed to join game', await response.text());
-            }
-        } catch (error) {
-            console.error('Failed to join game', error);
-        }
+    const joinGame = (gameId: string) => {
+        navigate(`/lobby/${gameId}`);
     };
 
     return (
@@ -84,7 +69,7 @@ export const MainMenu = () => {
                     <h2 className="text-2xl font-bold text-white">Open Lobbies</h2>
                     <button
                         onClick={createGame}
-                        className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-lg font-bold transition-all shadow-lg hover:shadow-xl"
+                        className="px-6 py-2 bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-lg font-bold transition-all shadow-lg hover:shadow-xl"
                     >
                         Create Match
                     </button>

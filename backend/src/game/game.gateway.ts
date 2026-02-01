@@ -117,7 +117,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('player_ready')
-  async handlePlayerReady(
+  handlePlayerReady(
     @MessageBody() data: { gameId: string },
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
@@ -132,7 +132,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('start_game')
-  async handleStartGame(
+  handleStartGame(
     @MessageBody() data: { gameId: string },
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
