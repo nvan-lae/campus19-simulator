@@ -53,8 +53,23 @@ export const MainMenu = () => {
         }
     };
 
-    const joinGame = (gameId: string) => {
-        navigate(`/lobby/${gameId}`);
+    const joinGame = async (gameId: string) => {
+        try {
+            const response = await fetch(`${API_URL}/games/${gameId}/join`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (response.ok) {
+                navigate(`/lobby/${gameId}`);
+            } else {
+                console.error('Failed to join game', await response.text());
+            }
+        } catch (error) {
+            console.error('Failed to join game', error);
+        }
     };
 
     return (
