@@ -77,9 +77,6 @@ export class GameService {
     return game.startGame(userId);
   }
 
-  // Legacy support for direct join? Deprecated/removed in favor of explicit create/join
-  // createOrJoinGame REMOVED
-
   getGame(gameId: string): GameRoom | undefined {
     return this.activeGames.get(gameId);
   }
