@@ -12,12 +12,13 @@ interface GameBoardProps {
   globalEvent: 'gravity_flux' | 'inflation' | 'windy' | null;
   lastMoveDescription: string | null;
   onTileClick?: (tileNumber: number) => void;
+  playerEmojis: Record<number, string>;
 }
 
 // Board aspect ratio
 const BOARD_ASPECT_RATIO = 9 / 7;
 
-export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDescription, onTileClick }: GameBoardProps) => {
+export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDescription, onTileClick, playerEmojis }: GameBoardProps) => {
   const [hoveredTile, setHoveredTile] = useState<number | null>(null);
   const { playWin, playMove } = useGameSound(); // removed playSwap if unused or keep if needed
 
@@ -483,6 +484,21 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
             const offsetX = baseX + pIndex * tokenSize;
             const offsetY = cellHeight * 0.5 - tokenSize / 2;
 
+            // Use emoji if set, otherwise fallback to initial
+            const emoji = playerEmojis?.[player.id];
+            // Helper: detect emoji (simple unicode range check)
+            const isEmoji = emoji && emoji.match(/^[\p{Emoji}\p{Extended_Pictographic}]/u);
+            
+            // If emoji is selected, remove background circle. If text, show circle with player color
+            const bgColor = isEmoji 
+              ? 'transparent' 
+              : (player.color.startsWith('#')
+                ? player.color
+                : player.color);
+            
+            const borderColor = isEmoji ? 'transparent' : 'white';
+            const boxShadow = isEmoji ? 'none' : '0 3px 8px rgba(0, 0, 0, 0.4)';
+            
             return (
               <div
                 key={player.id}
@@ -490,15 +506,24 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
                 style={{
                   gridColumn: coords.col,
                   gridRow: coords.row,
-                  backgroundColor: player.color,
+                  backgroundColor: bgColor,
+                  borderColor: borderColor,
+                  boxShadow: boxShadow,
                   // Apply scale to counteract board zoom
                   transform: `translate(${offsetX}px, ${offsetY}px) scale(${inverseScale})`,
                   zIndex: 10 + pIndex,
-                  transition: 'all 0.3s ease-out' // smooth micro-adjustment
+                  transition: 'all 0.3s ease-out', // smooth micro-adjustment
+                  fontSize: isEmoji ? '1.6em' : '1em',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontFamily: isEmoji ? 'inherit' : 'inherit', // fallback to default for text
+                  fontWeight: isEmoji ? 'normal' : 'bold',
+                  letterSpacing: isEmoji ? undefined : '0.02em',
                 }}
                 title={`${player.username} (Coins: ${player.coins})`}
               >
-                {player.username.charAt(0)}
+                {emoji || player.username.charAt(0)}
               </div>
             );
           })}

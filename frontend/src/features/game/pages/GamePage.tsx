@@ -15,7 +15,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 
 export const GamePage = () => {
   // 1. CALL ALL HOOKS FIRST (Order must not change)
-  useSocket();
+  const { socket } = useSocket();
   const { user } = useAuth();
   const { gameId } = useParams<{ gameId: string }>(); // Get ID from URL
   const { playRoll } = useGameSound();
@@ -31,6 +31,33 @@ export const GamePage = () => {
     resetGame,
     autoPlayCPU,
   } = useGameLogic();
+
+  // Emoji state for all players
+  const [playerEmojis, setPlayerEmojis] = useState<Record<number, string>>({});
+  
+  const handleEmojiChange = (playerId: number, emoji: string) => {
+    setPlayerEmojis(prev => ({ ...prev, [playerId]: emoji }));
+    
+    // Emit emoji change to other players via WebSocket
+    if (socket && gameId) {
+      socket.emit('player_emoji_change', { gameId, playerId, emoji });
+    }
+  };
+
+  // Listen for emoji changes from other players
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleEmojiUpdate = (data: { playerId: number; emoji: string }) => {
+      setPlayerEmojis(prev => ({ ...prev, [data.playerId]: data.emoji }));
+    };
+
+    socket.on('emoji_updated', handleEmojiUpdate);
+
+    return () => {
+      socket.off('emoji_updated', handleEmojiUpdate);
+    };
+  }, [socket]);
 
   // 2. Safe useEffect: Check dependencies carefully
   useEffect(() => {
@@ -90,6 +117,7 @@ export const GamePage = () => {
             currentPlayerIndex={gameState.currentPlayerIndex}
             globalEvent={gameState.currentGlobalEvent}
             lastMoveDescription={gameState.lastMoveDescription}
+            playerEmojis={playerEmojis}
           />
         </div>
 
@@ -180,6 +208,8 @@ export const GamePage = () => {
           <PlayersList
             players={gameState.players || []}
             currentPlayerIndex={gameState.currentPlayerIndex}
+            playerEmojis={playerEmojis}
+            onEmojiChange={handleEmojiChange}
           />
         </div>
 

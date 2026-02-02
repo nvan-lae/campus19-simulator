@@ -314,4 +314,16 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       timestamp: new Date().toISOString(),
     });
   }
+
+  @SubscribeMessage('player_emoji_change')
+  handleEmojiChange(
+    @MessageBody() data: { gameId: string; playerId: number; emoji: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    // Broadcast emoji change to all players in the game (including sender)
+    this.server.to(data.gameId).emit('emoji_updated', {
+      playerId: data.playerId,
+      emoji: data.emoji,
+    });
+  }
 }
