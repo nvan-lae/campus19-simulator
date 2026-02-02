@@ -476,9 +476,12 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
             const cellWidth = boardSize ? boardSize.width / 9 : 0;
             const cellHeight = boardSize ? boardSize.height / 4 : 0;
 
-            // Dynamic offset, scaled to cell size
-            const offsetX = cellWidth * (0.2 + (pIndex * 0.08) - (playersOnSameTile.length * 0.04));
-            const offsetY = cellHeight * (0.43 + (pIndex * 0.05));
+            // Arrange tokens in a row, centered horizontally in the tile
+            const tokenSize = Math.min(cellWidth, cellHeight) * 0.21; // estimate token diameter
+            const totalWidth = playersOnSameTile.length * tokenSize;
+            const baseX = (cellWidth - totalWidth) / 1;
+            const offsetX = baseX + pIndex * tokenSize;
+            const offsetY = cellHeight * 0.5 - tokenSize / 2;
 
             return (
               <div

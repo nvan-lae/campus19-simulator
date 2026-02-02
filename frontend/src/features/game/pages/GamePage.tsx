@@ -183,6 +183,13 @@ export const GamePage = () => {
           />
         </div>
 
+        <div className="sidebar-section chat-section max-h-150">
+          <ChatWindow
+            gameId={gameId || ''}
+            players={gameState.players || []}
+          />
+        </div>
+
         <div className="sidebar-section action-section">
           <div className="action-card">
             <div className="action-label">Last Action</div>
@@ -214,14 +221,6 @@ export const GamePage = () => {
           </div>
         </div>
       </aside>
-
-      {/* Bottom Chat Bar */}
-      <div className="chat-viewport">
-        <ChatWindow
-          gameId={gameId || ''}
-          players={gameState.players || []}
-        />
-      </div>
 
       {/* Modals */}
       {isShopOpen && (
