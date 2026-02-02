@@ -14,9 +14,10 @@ const ALL_EMOJIS = Object.values(EMOJI_CATEGORIES).flat();
 
 interface CustomEmojiPickerProps {
   onSelect: (emoji: string) => void;
+  usedEmojis?: string[]; // List of emojis already used by other players
 }
 
-export const CustomEmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
+export const CustomEmojiPicker = ({ onSelect, usedEmojis = [] }: CustomEmojiPickerProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
   // Filter emojis by category
@@ -55,16 +56,24 @@ export const CustomEmojiPicker = ({ onSelect }: CustomEmojiPickerProps) => {
       {/* Emoji grid */}
       <div className="flex-1 overflow-y-auto p-1">
         <div className="grid grid-cols-7 gap-0.5">
-          {displayEmojis.map((emoji, idx) => (
-            <button
-              key={`${emoji}-${idx}`}
-              className="text-lg p-1 hover:bg-slate-200 dark:hover:bg-slate-600 rounded transition-colors"
-              onClick={() => onSelect(emoji)}
-              title={emoji}
-            >
-              {emoji}
-            </button>
-          ))}
+          {displayEmojis.map((emoji, idx) => {
+            const isUsed = usedEmojis.includes(emoji);
+            return (
+              <button
+                key={`${emoji}-${idx}`}
+                className={`text-lg p-1 rounded transition-colors ${
+                  isUsed 
+                    ? 'opacity-30 cursor-not-allowed' 
+                    : 'hover:bg-slate-200 dark:hover:bg-slate-600'
+                }`}
+                onClick={() => !isUsed && onSelect(emoji)}
+                disabled={isUsed}
+                title={isUsed ? 'Already in use' : emoji}
+              >
+                {emoji}
+              </button>
+            );
+          })}
         </div>
         {displayEmojis.length === 0 && (
           <div className="text-center text-slate-400 py-8">
