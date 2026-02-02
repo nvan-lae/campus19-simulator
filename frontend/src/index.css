@@ -36,7 +36,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 14 0% 100%;
     --foreground: 240 10% 3.9%;
 
     --card: 0 0% 100%;
@@ -102,7 +102,7 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-slate-900 text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
@@ -130,11 +130,11 @@
 }
 
 .btn-primary {
-  @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm;
+  @apply bg-slate-900 border border-slate-700 text-white hover:bg-primary/90 shadow-sm;
 }
 
 .btn-secondary {
-  @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-sm;
+  @apply bg-slate-900 text-white hover:bg-secondary/80 shadow-sm border border-slate-700;
 }
 
 .btn-ghost {
@@ -154,11 +154,11 @@
 }
 
 .auth-card {
-  @apply bg-card text-card-foreground border rounded-xl p-8 shadow-sm flex flex-col gap-6;
+  @apply bg-slate-800 text-card-foreground border rounded-xl p-8 shadow-sm flex flex-col gap-6 border-slate-700;
 }
 
 .input {
-  @apply flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  @apply flex w-full rounded-md border border-slate-700 bg-slate-900 text-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
 }
 
 .divider {
@@ -201,23 +201,23 @@
 
 /* Page Layouts from pages.css */
 .page-container {
-  @apply px-4 py-8 max-w-7xl mx-auto min-h-[calc(100vh-28px)] bg-background text-foreground;
+  @apply px-4 py-8 max-w-7xl mx-auto min-h-[calc(100vh-28px)] bg-slate-900 text-foreground;
 }
 
 .page-header {
-  @apply mb-8 text-center bg-muted/50 p-8 rounded-xl border border-border;
+  @apply mb-8 text-center bg-muted/10 p-8 rounded-xl border border-border border-slate-700;
 }
 
 .page-header h1 {
-  @apply text-3xl md:text-4xl font-bold my-2 text-foreground;
+  @apply text-3xl md:text-4xl font-bold my-2 text-white;
 }
 
 .page-header p {
-  @apply text-sm md:text-base text-muted-foreground my-1;
+  @apply text-sm md:text-base text-gray-400 my-1;
 }
 
 .box {
-  @apply bg-card border border-border rounded-xl p-6 flex items-center justify-center min-h-[120px] text-card-foreground transition-all hover:shadow-sm hover:border-primary/50;
+  @apply bg-slate-800 border border-slate-700 rounded-xl p-6 flex items-center justify-center min-h-[120px] text-card-foreground transition-all hover:shadow-sm hover:border-primary/50;
 }
 
 .home-content {
@@ -231,7 +231,7 @@
 
 /* Login Page Layout */
 .login-content {
-  @apply flex flex-col gap-8 w-full max-w-4xl mx-auto my-8;
+  @apply flex bg-slate-900 flex-col gap-8 w-full max-w-4xl mx-auto my-8;
 }
 
 @media (max-width: 1024px) {

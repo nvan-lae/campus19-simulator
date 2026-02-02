@@ -62,17 +62,17 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="page-container">
+    <div className="page-container bg-slate-900 min-h-screen">
       <div className="page-header">
-        <h1>Login</h1>
-        <p className="text-sm text-muted-foreground">Sign in with 42 or with an email/password account.</p>
+        <h1 className='text-white'>Login</h1>
+        <p className="text-sm text-gray-400">Sign in with 42 or with an email/password account.</p>
       </div>
 
       <div className="login-content">
         <div className="auth-grid">
           <div className="auth-card">
-            <div className="text-sm text-foreground text-center font-medium">Continue with 42</div>
-            <p className="text-sm text-muted-foreground text-center">Use your 42 account to quickly sign in.</p>
+            <div className="text-sm text-white text-center font-medium">Continue with 42</div>
+            <p className="text-sm text-gray-400 text-center">Use your 42 account to quickly sign in.</p>
             <a
               className="btn btn-primary w-full text-center mt-2"
               href={`${apiBase}/auth/login`}
@@ -82,7 +82,7 @@ export const LoginPage = () => {
           </div>
 
           <form className="auth-card" onSubmit={handleEmailLogin}>
-            <div className="text-sm text-foreground text-center font-medium">Sign in with email</div>
+            <div className="text-sm text-white text-center font-medium">Sign in with email</div>
 
             <input
               required
@@ -112,7 +112,7 @@ export const LoginPage = () => {
         </div>
 
         <div className="box auth-footer flex items-center justify-center gap-3">
-          <span>Don’t have an account?</span>
+          <span className='text-gray-400'>Don’t have an account?</span>
           <Link to="/register" className="btn btn-secondary">Register</Link>
         </div>
       </div>
