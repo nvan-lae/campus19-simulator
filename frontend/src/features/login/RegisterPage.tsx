@@ -14,7 +14,7 @@ export const RegisterPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const apiBase = useMemo(() => {
-    return import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'http://localhost:3000';
+    return import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'https://localhost:3000';
   }, []);
 
   const handleSubmit = async (e: FormEvent) => {

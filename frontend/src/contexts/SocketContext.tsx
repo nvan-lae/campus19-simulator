@@ -30,7 +30,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     }
 
     // Initialize Socket
-    const newSocket = io('http://localhost:3000', {
+    const newSocket = io('https://localhost:3000', {
       auth: {
         token: `Bearer ${token}`, // Pass the token for backend validation
       },

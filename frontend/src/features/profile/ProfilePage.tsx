@@ -38,7 +38,7 @@ export const ProfilePage = () => {
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   const apiBase = useMemo(() => {
-    return import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'http://localhost:3000';
+    return import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'https://localhost:3000';
   }, []);
 
   const [stats, setStats] = useState<UserStats>({

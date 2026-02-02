@@ -63,7 +63,7 @@ describe('ProfilePage', () => {
         render(<ProfilePage />);
         const img = screen.getByAltText('testuser') as HTMLImageElement;
         // Assuming VITE_API_URL or default localhost:3000
-        expect(img.src).toContain('http://localhost:3000/uploads/avatars/me.jpg');
+        expect(img.src).toContain('https://localhost:3000/uploads/avatars/me.jpg');
     });
 
     it('displays correct URL for absolute avatar path', () => {

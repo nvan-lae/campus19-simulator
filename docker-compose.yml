@@ -46,6 +46,7 @@ services:
       # Mount source code for "Hot Reloading"
       - ./frontend:/app
       - /app/node_modules
+      - ./backend/secrets:/app/secrets
     networks:
       - transcendence_network
 

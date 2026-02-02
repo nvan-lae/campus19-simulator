@@ -45,7 +45,7 @@ describe('validateEnvOrExit', () => {
     process.env.NODE_ENV = 'production';
     process.env.JWT_SECRET = 'supersecret';
     process.env.DATABASE_URL = 'postgres://foo';
-    process.env.FRONTEND_URL = 'http://localhost:5173';
+    process.env.FRONTEND_URL = 'https://localhost:5173';
     process.env.FORTYTWO_CLIENT_ID = 'id';
     process.env.FORTYTWO_CLIENT_SECRET = 'secret';
 
@@ -57,7 +57,7 @@ describe('validateEnvOrExit', () => {
     process.env.NODE_ENV = 'production';
     process.env.JWT_SECRET = 'supersecret';
     process.env.DATABASE_URL = 'postgres://foo';
-    process.env.FRONTEND_URL = 'http://localhost:5173';
+    process.env.FRONTEND_URL = 'https://localhost:5173';
     process.env.FORTYTWO_CLIENT_ID = 'id';
     delete process.env.FORTYTWO_CLIENT_SECRET;
 
