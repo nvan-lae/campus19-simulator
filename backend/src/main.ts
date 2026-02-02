@@ -20,7 +20,11 @@ async function bootstrap() {
       cert: fs.readFileSync(certPath),
     };
   } else {
-    console.error('SSL certificates not found. Please run "make certs" or "make up".');
+    console.error(
+      'SSL certificates not found.\n' +
+        'Please ensure the TLS certificates in "secrets/key.pem" and "secrets/cert.pem" are generated before starting this service.\n' +
+        'If you are running via Docker, generate the certificates on the host (for example, using "make certs" or "make up") before starting the container.',
+    );
     process.exit(1);
   }
 
