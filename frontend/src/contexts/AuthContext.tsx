@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isLoading] = useState(false); // Not loading by default
 
   const apiBase = useMemo(() => {
-    return import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'http://localhost:3000';
+    return import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'https://localhost:3000';
   }, []);
 
   // On mount, if we have a token, fetch user data in the background (non-blocking)

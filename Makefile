@@ -5,8 +5,19 @@ RESET = \033[0m
 
 all: up
 
+# Generate SSL certificates for backend
+certs:
+	@echo "$(GREEN)Generating SSL certificates...$(RESET)"
+	@mkdir -p backend/secrets
+	@if [ ! -f backend/secrets/key.pem ]; then \
+		openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+		-keyout backend/secrets/key.pem \
+		-out backend/secrets/cert.pem \
+		-subj "/C=BE/ST=Antwerp/L=Antwerp/O=42/OU=Student/CN=localhost"; \
+	fi
+
 # Build and start the containers in the background
-up:
+up: certs
 	@echo "$(GREEN)Building and starting containers...$(RESET)"
 	docker-compose -f $(COMPOSE_FILE) up -d --build
 

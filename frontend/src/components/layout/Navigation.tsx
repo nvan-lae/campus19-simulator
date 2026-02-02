@@ -10,7 +10,7 @@ export const Navigation = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const apiBase = useMemo(() => {
-    return import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'http://localhost:3000';
+    return import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'https://localhost:3000';
   }, []);
 
   const handleLogout = () => {
