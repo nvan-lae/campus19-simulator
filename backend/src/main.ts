@@ -38,7 +38,7 @@ async function bootstrap() {
       'https://localhost:5173',
       'https://127.0.0.1:5173',
       // Allow the HTTPS origin as well
-      `https://localhost:${process.env.NEST_PORT || 3000}`, 
+      `https://localhost:${process.env.NEST_PORT || 3000}`,
     ],
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
