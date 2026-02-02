@@ -30,7 +30,8 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     }
 
     // Initialize Socket
-    const newSocket = io('https://localhost:3000', {
+    const socketUrl = import.meta.env.VITE_API_URL || 'https://localhost:3000';
+    const newSocket = io(socketUrl, {
       auth: {
         token: `Bearer ${token}`, // Pass the token for backend validation
       },
