@@ -472,9 +472,13 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
             });
             const pIndex = playersOnSameTile.findIndex(p => p.id === player.id);
 
-            // dynamic offset
-            const offsetX = (pIndex * 8) - (playersOnSameTile.length * 4);
-            const offsetY = (pIndex * 5);
+             // Calculate cell size based on board size
+            const cellWidth = boardSize ? boardSize.width / 9 : 0;
+            const cellHeight = boardSize ? boardSize.height / 4 : 0;
+
+            // Dynamic offset, scaled to cell size
+            const offsetX = cellWidth * (0.2 + (pIndex * 0.08) - (playersOnSameTile.length * 0.04));
+            const offsetY = cellHeight * (0.43 + (pIndex * 0.05));
 
             return (
               <div

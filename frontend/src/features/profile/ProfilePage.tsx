@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Camera, Trophy, Medal, Star } from 'lucide-react';
+import { Trash2, Camera, Trophy, Medal, Star, Gamepad2} from 'lucide-react';
 // CSS imported via index.css
 
 interface MatchPlayer {
@@ -193,185 +193,188 @@ export const ProfilePage = () => {
   };
 
   return (
-    <div className="container max-w-6xl mx-auto py-10 px-4 space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Player Profile</h1>
-          <p className="text-muted-foreground mt-1">Manage your account settings and view your stats.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="text-sm px-3 py-1">Online</Badge>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-        {/* User Info Card */}
-        <Card className="md:col-span-4 border-border">
-          <CardHeader>
-            <CardTitle>Identity</CardTitle>
-            <CardDescription>Your personal game profile.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center text-center space-y-4">
-            <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
-              <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-muted shadow-sm transition-transform group-hover:scale-105">
-                <img
-                  src={getAvatarUrl(user.avatarUrl)}
-                  alt={user.username}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = defaultAvatarSvg;
-                  }}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-primary/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  {isUploadingAvatar ? (
-                    <span className="animate-spin text-primary-foreground">⏳</span>
-                  ) : (
-                    <Camera className="w-8 h-8 text-primary-foreground" />
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <input
-              data-testid="avatar-upload"
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarChange}
-              disabled={isUploadingAvatar}
-              className="hidden"
-            />
-
-            <div className="space-y-1">
-              <h2 className="text-2xl font-bold">{user.username}</h2>
-              <p className="text-sm text-muted-foreground">{user.email}</p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Badge>Level 1</Badge>
-              <span className="text-xs text-muted-foreground">Joined {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}</span>
-            </div>
-
-            {uploadError && (
-              <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md w-full">
-                {uploadError}
-              </div>
-            )}
-
-            {user.avatarUrl && (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleDeleteAvatar}
-                disabled={isUploadingAvatar}
-                className="w-full mt-4"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Remove Picture
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-
-        <div className="md:col-span-8 space-y-6">
-          {/* Stats Summary */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="pt-6 flex flex-col items-center justify-center text-center">
-                <Trophy className="w-8 h-8 text-yellow-500 mb-2" />
-                <div className="text-2xl font-bold">{stats.wins}</div>
-                <p className="text-xs text-muted-foreground uppercase font-semibold">Wins</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6 flex flex-col items-center justify-center text-center">
-                <div className="text-2xl font-bold text-foreground">{stats.totalMatches}</div>
-                <p className="text-xs text-muted-foreground uppercase font-semibold">Matches</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6 flex flex-col items-center justify-center text-center">
-                <Medal className="w-8 h-8 text-primary mb-2" />
-                <div className="text-2xl font-bold">{stats.winRate}%</div>
-                <p className="text-xs text-muted-foreground uppercase font-semibold">Win Rate</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6 flex flex-col items-center justify-center text-center">
-                <Star className="w-8 h-8 text-orange-500 mb-2" />
-                <div className="text-2xl font-bold">{stats.winRate > 50 ? 'Great!' : 'Keep Going'}</div>
-                <p className="text-xs text-muted-foreground uppercase font-semibold">Status</p>
-              </CardContent>
-            </Card>
+    <div className="min-h-screen w-full bg-slate-900">
+      <div className="container max-w-6xl mx-auto py-10 px-4 space-y-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-white">Player Profile</h1>
+            <p className="text-muted-foreground mt-1 text-gray-400">Manage your account settings and view your stats.</p>
           </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="text-sm px-3 py-1 bg-green-500">Online</Badge>
+          </div>
+        </div>
 
-          {/* Detailed Stats & Matches */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="h-full">
-              <CardHeader>
-                <CardTitle>Performance</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-muted-foreground">Total Games</span>
-                  <span className="font-mono font-medium">{stats.totalMatches}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-muted-foreground">Wins</span>
-                  <span className="font-mono font-medium text-green-500">{stats.wins}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-muted-foreground">Losses</span>
-                  <span className="font-mono font-medium text-red-500">{stats.losses}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-muted-foreground">Highest Coins</span>
-                  <span className="font-mono font-medium">Coming Soon</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="h-full">
-              <CardHeader>
-                <CardTitle>Recent Matches</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {matches.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-                    <p>No matches played yet.</p>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          {/* User Info Card */}
+          <Card className="md:col-span-4 border-border bg-slate-800/80 backdrop-blur rounded-xl border border-slate-700">
+            <CardHeader>
+              <CardTitle className='text-white'>Identity</CardTitle>
+              <CardDescription className='text-gray-400'>Your personal game profile.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center text-center space-y-4 text-white">
+              <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
+                <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-muted shadow-sm transition-transform group-hover:scale-105">
+                  <img
+                    src={getAvatarUrl(user.avatarUrl)}
+                    alt={user.username}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = defaultAvatarSvg;
+                    }}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-primary/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    {isUploadingAvatar ? (
+                      <span className="animate-spin text-primary-foreground">⏳</span>
+                    ) : (
+                      <Camera className="w-8 h-8 text-primary-foreground" />
+                    )}
                   </div>
-                ) : (
-                  <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
-                    {matches.map((match) => (
-                      <div key={match.id} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`w-2 h-2 rounded-full ${match.isWinner ? 'bg-green-500' : 'bg-red-500'
-                              }`}
-                          />
-                          <div>
-                            <span className="font-medium block">
-                              {match.isWinner ? 'Victory' : `Rank #${match.rank}`}
+                </div>
+              </div>
+
+              <input
+                data-testid="avatar-upload"
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                disabled={isUploadingAvatar}
+                className="hidden"
+              />
+
+              <div className="space-y-1">
+                <h2 className="text-2xl font-bold">{user.username}</h2>
+                <p className="text-sm text-gray-400">{user.email}</p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Badge className='bg-gray-500'>Level 1</Badge>
+                <span className="text-xs text-gray-400">Joined {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}</span>
+              </div>
+
+              {uploadError && (
+                <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md w-full">
+                  {uploadError}
+                </div>
+              )}
+
+              {user.avatarUrl && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleDeleteAvatar}
+                  disabled={isUploadingAvatar}
+                  className="w-full mt-4"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Remove Picture
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+
+          <div className="md:col-span-8 space-y-6">
+            {/* Stats Summary */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card className="bg-slate-800/80 backdrop-blur rounded-xl border border-slate-700">
+                <CardContent className="pt-6 flex flex-col items-center justify-center text-center">
+                  <Trophy className="w-8 h-8 text-yellow-500 mb-2" />
+                  <div className="text-2xl font-bold text-white">{stats.wins}</div>
+                  <p className="text-xs uppercase font-semibold text-gray-400">Wins</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-slate-800/80 backdrop-blur rounded-xl border border-slate-700">
+                <CardContent className="pt-6 flex flex-col items-center justify-center text-center">
+                  <Gamepad2 className="w-8 h-8 text-green-500 mb-2" />
+                  <div className="text-2xl font-bold text-foreground text-white">{stats.totalMatches}</div>
+                  <p className="text-xs uppercase font-semibold text-gray-400">Matches</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-slate-800/80 backdrop-blur rounded-xl border border-slate-700">
+                <CardContent className="pt-6 flex flex-col items-center justify-center text-center">
+                  <Medal className="w-8 h-8 text-gray-400 mb-2" />
+                  <div className="text-2xl font-bold text-white">{stats.winRate}%</div>
+                  <p className="text-xs uppercase font-semibold text-gray-400">Win Rate</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-slate-800/80 backdrop-blur rounded-xl border border-slate-700">
+                <CardContent className="pt-6 flex flex-col items-center justify-center text-center">
+                  <Star className="w-8 h-8 text-orange-500 mb-2" />
+                  <div className="text-2xl font-bold text-white">{stats.winRate > 50 ? 'Great!' : 'Persist'}</div>
+                  <p className="text-xs uppercase font-semibold text-gray-400">Status</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Detailed Stats & Matches */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="bg-slate-800/80 backdrop-blur rounded-xl border border-slate-700 h-full">
+                <CardHeader>
+                  <CardTitle className='text-white'>Performance</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center py-2 border-b border-border">
+                    <span className="text-gray-400">Total Games</span>
+                    <span className="font-mono font-medium text-white">{stats.totalMatches}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-border">
+                    <span className="text-gray-400">Wins</span>
+                    <span className="font-mono font-medium text-green-500">{stats.wins}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-border">
+                    <span className="text-gray-400">Losses</span>
+                    <span className="font-mono font-medium text-red-500">{stats.losses}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-border">
+                    <span className="text-gray-400">Highest Coins</span>
+                    <span className="font-mono font-medium text-white">Coming Soon</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-800/80 backdrop-blur rounded-xl border border-slate-700 h-full text-white">
+                <CardHeader>
+                  <CardTitle>Recent Matches</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {matches.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                      <p>No matches played yet.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+                      {matches.map((match) => (
+                        <div key={match.id} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`w-2 h-2 rounded-full ${match.isWinner ? 'bg-green-500' : 'bg-red-500'
+                                }`}
+                            />
+                            <div>
+                              <span className="font-medium block">
+                                {match.isWinner ? 'Victory' : `Rank #${match.rank}`}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {match.coins} coins
+                              </span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-xs text-muted-foreground block">
+                              {new Date(match.endedAt).toLocaleDateString()}
                             </span>
-                            <span className="text-xs text-muted-foreground">
-                              {match.coins} coins
+                            <span className="text-[10px] text-muted-foreground">
+                              {new Date(match.endedAt).toLocaleTimeString()}
                             </span>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <span className="text-xs text-muted-foreground block">
-                            {new Date(match.endedAt).toLocaleDateString()}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground">
-                            {new Date(match.endedAt).toLocaleTimeString()}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </div>

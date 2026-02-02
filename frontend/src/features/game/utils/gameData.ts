@@ -40,7 +40,7 @@ export const TILE_INFO: Record<TileEffectType, TileInfo> = {
   bridge: { emoji: '🌉', label: 'Bridge' },
   inn: { emoji: '🏨', label: 'Inn' },
   well: { emoji: '🕳️', label: 'Well' },
-  labyrinth: { emoji: '🌀', label: 'Maze' },
+  labyrinth: { emoji: '🧩', label: 'Maze' },
   prison: { emoji: '⛓️', label: 'Prison' },
   death: { emoji: '💀', label: 'Death' },
   challenge: { emoji: '👾', label: 'Code' },

@@ -126,10 +126,10 @@
 
 .connector-arrow {
   position: absolute;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: bold;
   color: rgba(255, 255, 255, 0.7);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .path-connector.edge-right .connector-arrow {
@@ -249,12 +249,12 @@
 
 .game-tile.well {
   background: linear-gradient(135deg, #636e72 0%, #2d3436 100%);
-  border-color: #000;
+  border-color: #d63031;
 }
 
 .game-tile.labyrinth {
-  background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
-  border-color: #5f27cd;
+  background: linear-gradient(135deg, #d2c800 0%, #454b00 100%);
+  border-color: #d63031;
 }
 
 .game-tile.prison {
@@ -263,7 +263,7 @@
       #bdc3c7 10px,
       #7f8c8d 10px,
       #7f8c8d 20px);
-  border-color: #2c3e50;
+  border-color: #d63031;
 }
 
 .game-tile.death {
@@ -286,10 +286,10 @@
 .tile-players {
   position: absolute;
   bottom: -10px;
-  right: -10px;
+  left: -10px;
   display: flex;
   flex-wrap: wrap-reverse;
-  justify-content: flex-end;
+  justify-content: flex-start;
   pointer-events: none;
   width: 100%;
 }

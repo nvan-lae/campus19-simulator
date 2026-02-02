@@ -35,6 +35,7 @@ export const PlayersList = ({ players, currentPlayerIndex }: PlayersListProps) =
               </div>
               <div className="player-stats">
                 <span>Tile: {player.position}</span>
+                <br />
                 <span>💰 {player.coins}</span>
               </div>
             </div>
