@@ -7,6 +7,7 @@
   overflow: visible;
   width: 100%;
   height: 100%;
+  background: transparent;
 }
 
 .game-board-wrapper {
@@ -21,14 +22,17 @@
 .game-board.spiral-layout-63 {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  grid-template-rows: repeat(7, 1fr);
-  gap: 3px;
-  padding: 6px;
-  background: rgba(30, 41, 59, 0.9);
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  row-gap: 3px;
+  column-gap: 3px;
+  padding: 20px;
+  background: transparent;
   border-radius: 10px;
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0);
   box-sizing: border-box;
+  width: 100%;
+  height: 100%;
   /* Size is set via JS for proper contain behavior */
 }
 
@@ -38,7 +42,7 @@
   /* 7 cols fixed size */
   grid-template-rows: repeat(6, 80px);
   /* 6 rows fixed size */
-  gap: 12px;
+  gap: 3px;
   width: auto;
   height: auto;
   position: relative;

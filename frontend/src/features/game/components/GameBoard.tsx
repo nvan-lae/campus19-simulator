@@ -16,7 +16,7 @@ interface GameBoardProps {
 }
 
 // Board aspect ratio
-const BOARD_ASPECT_RATIO = 9 / 7;
+const BOARD_ASPECT_RATIO = 10 / 10;
 
 export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDescription, onTileClick, playerEmojis }: GameBoardProps) => {
   const [hoveredTile, setHoveredTile] = useState<number | null>(null);
@@ -87,7 +87,7 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
 
   // Win Condition Check
   useEffect(() => {
-    const winner = players.find(p => p.position === BOARD_SIZE);
+    const winner = players.find(p => p.position === BOARD_SIZE - 1);
     if (winner && !hasWonRef.current) {
       hasWonRef.current = true;
       playWin();
@@ -160,94 +160,69 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
   }, [players, visualPositions, playMove]);
 
 
-  // GRID COORDINATES FOR 63 TILES (9x7 Grid)
+  // GRID COORDINATES FOR 48 TILES (9x10 Grid)
+  // Based on the image: rectangular path with START bottom-left, WIN in center
   const getGridCoords = (index: number) => {
-    // 9 Columns (1..9), 7 Rows (1..7)
-    // Spiral inward.
+    // Left column going UP (tiles 1-9)
+    if (index === 0) return { col: 1, row: 10 }; // START - bottom-left
+    if (index === 1) return { col: 1, row: 9 };
+    if (index === 2) return { col: 1, row: 8 };
+    if (index === 3) return { col: 1, row: 7 };
+    if (index === 4) return { col: 1, row: 6 };
+    if (index === 5) return { col: 1, row: 5 };
+    if (index === 6) return { col: 1, row: 4 };
+    if (index === 7) return { col: 1, row: 3 };
+    if (index === 8) return { col: 1, row: 2 };
+    if (index === 9) return { col: 1, row: 1 };
+    
+    // Bottom row going RIGHT (tiles 10-18)
+    if (index === 10) return { col: 4, row: 10 };
+    if (index === 11) return { col: 5, row: 10 };
+    if (index === 12) return { col: 6, row: 10 };
+    if (index === 13) return { col: 7, row: 10 };
+    if (index === 14) return { col: 8, row: 10 };
+    if (index === 15) return { col: 9, row: 10 };
+    if (index === 16) return { col: 10, row: 10 };
 
-    // SAFETY: Clamp index
-    if (index <= 0) return { col: 1, row: 7 }; // Start at bottom left
+    // Right column going UP (tiles 19-24)
+    if (index === 17) return { col: 10, row: 9 };
+    if (index === 18) return { col: 10, row: 8 };
+    if (index === 19) return { col: 10, row: 7 };
+    if (index === 20) return { col: 10, row: 6 };
+    if (index === 21) return { col: 10, row: 5 };
+    if (index === 22) return { col: 10, row: 4 };
+    if (index === 23) return { col: 10, row: 3 };
+    if (index === 24) return { col: 10, row: 2 };
+    if (index === 25) return { col: 10, row: 1 };
 
-    // Layer 0 (Outer Ring)
-    // Bottom: 1..9 -> (1,7) to (9,7)
-    if (index <= 9) return { col: index, row: 7 };
+    // Top row going LEFT (tiles 25-30)
+    if (index === 26) return { col: 9, row: 1 };
+    if (index === 27) return { col: 8, row: 1 };
+    if (index === 28) return { col: 7, row: 1 };
+    if (index === 29) return { col: 6, row: 1 };
+    if (index === 30) return { col: 5, row: 1 };
+    if (index === 31) return { col: 4, row: 1 };
+    if (index === 32) return { col: 4, row: 2 };
 
-    // Right: 10..14 -> (9,6) to (9,2)
-    // 10->(9,6), 11->(9,5), 12->(9,4), 13->(9,3), 14->(9,2)
-    // row = 7 - (index - 9) = 16 - index.
-    if (index <= 14) return { col: 9, row: 16 - index };
+    // Inner path (tiles 31-40)
+    if (index === 33) return { col: 4, row: 3 };
+    if (index === 34) return { col: 4, row: 4 };
+    if (index === 35) return { col: 4, row: 5 };
+    if (index === 36) return { col: 4, row: 6 };
 
-    // Top: 15..23 -> (9,1) to (1,1)
-    // 15->(9,1)...23->(1,1)
-    // col = 9 - (index - 15) = 24 - index.
-    if (index <= 23) return { col: 24 - index, row: 1 };
 
-    // Left: 24..28 -> (1,2) to (1,6)
-    // 24->(1,2)...28->(1,6)
-    // row = 1 + (index - 23) = index - 22.
-    if (index <= 28) return { col: 1, row: index - 22 };
-
-    // Layer 1 (Inner Ring 1)
-    // Bottom: 29..35 -> (2,6) to (8,6)
-    // 29->(2,6)...35->(8,6)
-    // col = 2 + (index - 29) = index - 27.
-    if (index <= 35) return { col: index - 27, row: 6 };
-
-    // Right: 36..38 -> (8,5) to (8,3)
-    // 36->(8,5), 37->(8,4), 38->(8,3)
-    // row = 6 - (index - 35) = 41 - index.
-    if (index <= 38) return { col: 8, row: 41 - index };
-
-    // Top: 39..45 -> (8,2) to (2,2)
-    // 39->(8,2)...45->(2,2)
-    // col = 8 - (index - 39) = 47 - index.
-    if (index <= 45) return { col: 47 - index, row: 2 };
-
-    // Left: 46..48 -> (2,3) to (2,5)
-    // 46->(2,3)...48->(2,5)
-    // row = 2 + (index - 45) = index - 43.
-    if (index <= 48) return { col: 2, row: index - 43 };
-
-    // Layer 2 (Inner Ring 2)
-    // Bottom: 49..53 -> (3,5) to (7,5)
-    // 49->(3,5)...53->(7,5)
-    // col = 3 + (index - 49) = index - 46.
-    if (index <= 53) return { col: index - 46, row: 5 };
-
-    // Right: 54..54 -> (7,4)
-    if (index === 54) return { col: 7, row: 4 };
-
-    // OR wait, my manual calc earlier:
-    // Ring 2 Side Right was (7,4)? 
-    // Let's recheck gap.
-    // 36..38 was col 8, rows 5,4,3. (Wait, calc said 8,5 to 8,3. 36->8,5; 37->8,4; 38->8,3).
-    // So row 4 is occupied by tile 37 (Right outer).
-    // NO. Grid logic:
-    // Outer Right: 10..14 (Rows 6,5,4,3,2 at col 9). tile 12 is at (9,4).
-    // Inner Right: 36..38 (Rows 5,4,3 at col 8). tile 37 is at (8,4).
-    // Inner Inner Right (Col 7): Should be just row 4?
-    // Wait. 36->(8,5). 37->(8,4). 38->(8,3).
-    // So 37 is at row 4.
-    // So 54 being at (7,4) is fine. It's inside of 37. Perfect.
-
-    // Top: 55..59 -> (7,3) to (3,3)
-    // 55->(7,3)...59->(3,3)
-    // col = 7 - (index - 55) = 62 - index.
-    if (index <= 59) return { col: 62 - index, row: 3 };
-
-    // Left: 60 -> (3,4)
-    if (index === 60) return { col: 3, row: 4 };
-
-    // Center / Win Path
-    // 61 -> (4,4)
-    // 62 -> (5,4)
-    // 63 -> (6,4) WIN? Or Center is 63?
-    // Let's layout 61..63 in center row 4.
-    if (index === 61) return { col: 4, row: 4 };
-    if (index === 62) return { col: 5, row: 4 };
-    if (index >= 63) return { col: 6, row: 4 };
-
-    return { col: 4, row: 3 }; // Fallback
+    // Continue inner path (tiles 41-48)
+    if (index === 37) return { col: 5, row: 6 };
+    if (index === 38) return { col: 6, row: 6 };
+    if (index === 39) return { col: 7, row: 6 };
+    if (index === 40) return { col: 8, row: 6 };
+    if (index === 41) return { col: 8, row: 5 };
+    if (index === 42) return { col: 8, row: 4 };
+    if (index === 43) return { col: 8, row: 3 };
+    if (index === 44) return { col: 7, row: 3 };
+    if (index === 45) return { col: 6, row: 3 };
+    if (index === 46) return { col: 6, row: 4 };
+    return { col: 6, row: 4 }; // WIN tile
   };
 
   // Calculate direction arrow for each tile pointing to the next tile
@@ -296,9 +271,9 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
 
   // Calculate zoom origin based on focus tile
   // 9 Columns -> (col-1)/8 * 100%
-  // 7 Rows -> (row-1)/6 * 100%
+  // 10 Rows -> (row-1)/9 * 100%
   const zoomOriginX = ((focusCoords.col - 1) / 8) * 100;
-  const zoomOriginY = ((focusCoords.row - 1) / 6) * 100;
+  const zoomOriginY = ((focusCoords.row - 1) / 9) * 100;
 
   // Determine Zoom Level
   // We want to zoom IN when a player is moving (i.e. visual != target).
@@ -315,7 +290,7 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
   const zoomScale = isMoving ? 3.0 : 1.0; // 3.0x zoom when moving, 1.0 when idle
   const inverseScale = 1 / zoomScale;
 
-  const tiles = Array.from({ length: BOARD_SIZE }, (_, i) => i + 1);
+  const tiles = Array.from({ length: BOARD_SIZE }, (_, i) => i);
 
   return (
     <div className="game-board-container" ref={containerRef}>
@@ -385,8 +360,8 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
             const tileInfo = TILE_INFO[effectType];
             const isSpecial = effectType !== 'none';
             const isHovered = hoveredTile === tileNumber;
-            const isWin = tileNumber === BOARD_SIZE;
-            const isStart = tileNumber === 1;
+            const isWin = tileNumber === BOARD_SIZE - 1;
+            const isStart = tileNumber === 0;
 
             return (
               <div
@@ -474,8 +449,8 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
             const pIndex = playersOnSameTile.findIndex(p => p.id === player.id);
 
              // Calculate cell size based on board size
-            const cellWidth = boardSize ? boardSize.width / 9 : 0;
-            const cellHeight = boardSize ? boardSize.height / 4 : 0;
+            const cellWidth = boardSize ? boardSize.width / 10 : 0;
+            const cellHeight = boardSize ? boardSize.height / 6 : 0;
 
             // Arrange tokens in a row, centered horizontally in the tile
             const tokenSize = Math.min(cellWidth, cellHeight) * 0.21; // estimate token diameter
