@@ -131,6 +131,7 @@ export interface GameState {
     losers: number[];
     outcome: 'low' | 'high';
   } | null;
+  rollAvailableAt: string | null;
 }
 
 // --- Match History (optional, for Lobby/Profile) ---

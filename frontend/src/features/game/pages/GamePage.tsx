@@ -32,6 +32,13 @@ export const GamePage = () => {
     autoPlayCPU,
   } = useGameLogic();
 
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000); // Update every second
+    return () => clearInterval(interval);
+  }, []);
+
   // Emoji state for all players
   const [playerEmojis, setPlayerEmojis] = useState<Record<number, string>>({});
   
@@ -93,6 +100,11 @@ export const GamePage = () => {
   const currentPlayer = gameState.players[gameState.currentPlayerIndex];
   const myPlayer = gameState.players.find(p => p.id === user?.id);
   const isRolling = gameState.diceValue !== null && !gameState.gameOver;
+
+  // check if roll is possible by timer
+  const isTimeLocked = gameState.rollAvailableAt && now < Number(gameState.rollAvailableAt);
+  const secondsLeft = isTimeLocked ? Math.ceil((Number(gameState.rollAvailableAt) - now) / 1000) : 0;
+  const isRollDisabled = !!(currentPlayer?.id !== user?.id || !!gameState.diceValue || gameState.gameOver || isTimeLocked);
 
   const handleRoll = () => {
     playRoll();
@@ -239,6 +251,8 @@ export const GamePage = () => {
               onMove={handleMove}
               gameOver={gameState.gameOver}
               onReset={resetGame}
+              disabled={isRollDisabled}
+              rollLabel={isTimeLocked ? `Wait ${secondsLeft}s` : 'Roll Dice'}
             />
 
             <button

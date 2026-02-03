@@ -61,6 +61,7 @@ export interface GameState {
     losers: number[];
     outcome: 'low' | 'high';
   } | null;
+  rollAvailableAt: number | null; // Timestamp when next roll is available
 }
 
 export class GameRoom {
@@ -84,6 +85,7 @@ export class GameRoom {
       bountyTargetId: null,
       currentTurnBets: [],
       rollBetResult: null,
+      rollAvailableAt: null,
     };
   }
 
@@ -118,6 +120,10 @@ export class GameRoom {
 
   rollDice(userId: number): GameState {
     if (this.state.status !== 'PLAYING') throw new Error('Game not started');
+
+    if (this.state.rollAvailableAt && Date.now() < this.state.rollAvailableAt) {
+      throw new Error('Roll not available yet');
+    }
 
     const playerIndex = this.state.currentPlayerIndex;
     const player = this.state.players[playerIndex];
@@ -227,6 +233,9 @@ export class GameRoom {
       this.state.status = 'FINISHED';
       this.state.winner = player;
       this.state.lastMoveDescription = `🎉 ${player.username} reaches tile ${BOARD_SIZE - 1} and WINS!`;
+    }
+    else if (!this.state.pendingGooseRoll && !this.state.activeChallenge) {
+      this.nextTurn();
     }
 
     return this.state;
@@ -505,7 +514,8 @@ export class GameRoom {
   private nextTurn(): void {
     this.state.currentPlayerIndex =
       (this.state.currentPlayerIndex + 1) % this.state.players.length;
-
+    
+    this.state.rollAvailableAt = Date.now() + 3000;
     // Clear bets for new turn
     this.state.currentTurnBets = [];
 
