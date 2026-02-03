@@ -75,7 +75,7 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
     players.forEach(p => {
       // If we already have a visual position, keep it, otherwise sync to real
       if (visualPositions[p.id] === undefined) {
-        initial[p.id] = p.position === 0 ? 1 : p.position;
+        initial[p.id] = p.position;
       }
     });
     if (Object.keys(initial).length > 0) {
@@ -106,7 +106,7 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
       const newPositions = { ...visualPositions };
 
       players.forEach(p => {
-        const target = p.position === 0 ? 1 : p.position;
+        const target = p.position;
         const current = newPositions[p.id] !== undefined ? newPositions[p.id] : target;
 
         if (current !== target) {
@@ -134,7 +134,7 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
     // Trigger animation if any drift
     // Check if any player is desynced
     const isDesynced = players.some(p => {
-      const target = p.position === 0 ? 1 : p.position;
+      const target = p.position;
       const current = visualPositions[p.id] !== undefined ? visualPositions[p.id] : target;
       return current !== target;
     });
@@ -147,7 +147,7 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
       let changed = false;
       players.forEach(p => {
         if (visualPositions[p.id] === undefined) {
-          init[p.id] = p.position === 0 ? 1 : p.position;
+          init[p.id] = p.position;
           changed = true;
         }
       });
@@ -160,7 +160,7 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
   }, [players, visualPositions, playMove]);
 
 
-  // GRID COORDINATES FOR 48 TILES (9x10 Grid)
+  // GRID COORDINATES FOR 47 TILES (10x10 Grid)
   // Based on the image: rectangular path with START bottom-left, WIN in center
   const getGridCoords = (index: number) => {
     // Left column going UP (tiles 1-9)
@@ -259,14 +259,14 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
 
   const movingPlayer = players.find(p => {
     const v = visualPositions[p.id];
-    const t = p.position === 0 ? 1 : p.position;
+    const t = p.position;
     return v !== undefined && v !== t;
   });
 
   const focusPlayer = movingPlayer || players[currentPlayerIndex];
 
   // Use visual position for focus to follow animation smoothly
-  const focusPos = focusPlayer ? (visualPositions[focusPlayer.id] || (focusPlayer.position === 0 ? 1 : focusPlayer.position)) : 1;
+  const focusPos = focusPlayer ? (visualPositions[focusPlayer.id] ?? focusPlayer.position) : 0;
   const focusCoords = getGridCoords(Math.round(focusPos)); // Snap to nearest tile for calc
 
   // Calculate zoom origin based on focus tile
@@ -282,7 +282,7 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
 
   const isMoving = players.some(p => {
     const v = visualPositions[p.id];
-    const t = p.position === 0 ? 1 : p.position;
+    const t = p.position;
     return v !== undefined && v !== t;
   });
 
@@ -436,14 +436,14 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
             // Or just render at the integer tile for now (step-by-step jump).
             // User said "move one square at a time". Jumping tile to tile is acceptable and cleaner than sliding diagonally across gaps.
 
-            const currentVisPos = visualPositions[player.id] || (player.position === 0 ? 1 : player.position);
+            const currentVisPos = visualPositions[player.id] ?? player.position;
             const integerPos = Math.round(currentVisPos);
             const coords = getGridCoords(integerPos);
 
             // Calculate offset if multiple players on same tile
             // Filter by integer pos
             const playersOnSameTile = players.filter(p => {
-              const v = visualPositions[p.id] || (p.position === 0 ? 1 : p.position);
+              const v = visualPositions[p.id] ?? p.position;
               return Math.round(v) === integerPos;
             });
             const pIndex = playersOnSameTile.findIndex(p => p.id === player.id);
