@@ -258,7 +258,7 @@ export const GamePage = () => {
             <button
               className="shop-button-full"
               onClick={() => setIsShopOpen(true)}
-              disabled={gameState.gameOver}
+              disabled={gameState.gameOver || currentPlayer?.id !== user?.id}
             >
               🛒 Open Campus Shop
             </button>
