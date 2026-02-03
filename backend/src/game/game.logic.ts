@@ -222,13 +222,11 @@ export class GameRoom {
     this.state.diceValue = null;
 
     // Check win condition
-    if (newPosition === BOARD_SIZE) {
+    if (newPosition === BOARD_SIZE - 1) {
       this.state.gameOver = true;
       this.state.status = 'FINISHED';
       this.state.winner = player;
-      this.state.lastMoveDescription = `🎉 ${player.username} reaches tile ${BOARD_SIZE} and WINS!`;
-    } else if (!this.state.pendingGooseRoll && !this.state.activeChallenge) {
-      this.nextTurn();
+      this.state.lastMoveDescription = `🎉 ${player.username} reaches tile ${BOARD_SIZE - 1} and WINS!`;
     }
 
     return this.state;

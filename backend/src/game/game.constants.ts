@@ -1,6 +1,6 @@
 // Game of the Goose - Constants and Configuration
 
-export const BOARD_SIZE = 63;
+export const BOARD_SIZE = 47;
 export const MAX_PLAYERS = 4;
 export const STARTING_COINS = 10;
 
