@@ -6,6 +6,7 @@ export const BOARD_SIZE = 47;
 
 // Goose tiles - landing here doubles your roll and earns coins
 export const GOOSE_TILES = [5, 14, 23, 27, 32, 36, 41];
+export const PISCINE_TILES = [1, 2, 3, 4, 6 ,7 ,8];
 
 // Special tiles configuration
 export const SPECIAL_TILES: Record<number, TileEffectType> = {
@@ -17,7 +18,7 @@ export const SPECIAL_TILES: Record<number, TileEffectType> = {
   58: 'death', // Start over or pay coins
 
   // Scatered challenges
-  9: 'challenge',
+  9: 'piscineExam',
   15: 'challenge',
   35: 'challenge',
   55: 'challenge',
@@ -26,6 +27,7 @@ export const SPECIAL_TILES: Record<number, TileEffectType> = {
 // Get the effect type for a given tile
 export const getEffectType = (position: number): TileEffectType => {
   if (GOOSE_TILES.includes(position)) return 'goose';
+  if (PISCINE_TILES.includes(position)) return 'piscine';
   return SPECIAL_TILES[position] || 'none';
 };
 
@@ -46,4 +48,6 @@ export const TILE_INFO: Record<TileEffectType, TileInfo> = {
   death: { emoji: '💀', label: 'Death' },
   challenge: { emoji: '👾', label: 'Code' },
   mystery: { emoji: '❓', label: 'Mystery' },
+  piscine: { emoji: '🏊‍♂️', label: 'Piscine' },
+  piscineExam : { emoji: '📚', label: 'Piscine Exam' },
 };

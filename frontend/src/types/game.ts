@@ -87,7 +87,9 @@ export type TileEffectType =
   | 'prison'
   | 'death'
   | 'challenge'
-  | 'mystery';
+  | 'mystery'
+  | 'piscine'
+  | 'piscineExam';
 
 // --- Live Game State (Socket shapes) ---
 
@@ -100,6 +102,7 @@ export interface GamePlayer {
   coins: number;
   turnsToSkip: number;
   stuckInWell: boolean;
+  stuckOnPiscineExam: boolean;
   hasShield: boolean;
   inventory: InventoryItem[];
 }

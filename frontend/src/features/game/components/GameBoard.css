@@ -286,6 +286,12 @@
   box-shadow: 0 0 10px #00cec9;
 }
 
+.game-tile.piscine {
+  background: linear-gradient(135deg, #c2c2c2 0%, #444444 100%);
+  border: 3px solid #313131;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
 /* Player Tokens */
 .tile-players {
   position: absolute;
@@ -362,6 +368,18 @@
   border-width: 6px;
   border-style: solid;
   border-color: rgba(22, 33, 62, 0.95) transparent transparent transparent;
+}
+
+/* Popover that appears below the tile (for piscine) */
+.tile-popover-below {
+  bottom: auto;
+  top: 110%;
+}
+
+.tile-popover-below::after {
+  top: auto;
+  bottom: 100%;
+  border-color: transparent transparent rgba(22, 33, 62, 0.95) transparent;
 }
 
 .popover-header {

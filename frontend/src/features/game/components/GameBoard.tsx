@@ -358,8 +358,9 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
             const coords = getGridCoords(tileNumber);
             const effectType = getEffectType(tileNumber);
             const tileInfo = TILE_INFO[effectType];
-            const isSpecial = effectType !== 'none';
+            const isSpecial = effectType !== 'none' && effectType !== 'piscine';
             const isHovered = hoveredTile === tileNumber;
+            const isTopRow = coords.row === 1; // Check if tile is on row 1
             const isWin = tileNumber === BOARD_SIZE - 1;
             const isStart = tileNumber === 0;
 
@@ -404,7 +405,7 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
                 {/* Custom Popover */}
                 {isHovered && isSpecial && (
                   <div
-                    className="tile-popover"
+                    className={`tile-popover ${isTopRow ? 'tile-popover-below' : ''}`}
                     style={{
                       transform: `translateX(-50%) scale(${inverseScale})`,
                       transformOrigin: 'bottom center'
@@ -422,6 +423,7 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
                       {effectType === 'prison' && "Skip 2 turns or pay 15 coins"}
                       {effectType === 'death' && "Restart at Start or pay 20 coins"}
                       {effectType === 'challenge' && "Coding Challenge! Win coins!"}
+                      {effectType === 'piscineExam' && "Piscine Exam! Pass to be able to go to the next tile."}
                     </div>
                   </div>
                 )}
