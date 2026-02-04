@@ -75,7 +75,8 @@ export const useGameLogic = () => {
   }, []);
 
   const resetGame = useCallback(() => {
-    // console.log("Reset game not implemented yet");
+    //go back to home screen
+    window.location.href = '/';
   }, []);
 
   return {
