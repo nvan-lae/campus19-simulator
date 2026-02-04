@@ -222,14 +222,16 @@ export class GameRoom {
 
     // Check for piscineExam tiles in the path and stop at the first one
     // Do this BEFORE bounce calculation to ensure we check the actual path
-    let hitPiscineExam = false;
+    // Skip piscineExam check if player is currently on a piscineExam tile (already cleared it)
+    const currentTileEffect = getTileEffect(oldPosition);
+    const skipPiscineExamCheck = currentTileEffect === 'piscineExam';
+    
     const maxCheckPosition = Math.min(newPosition, BOARD_SIZE - 1);
     for (let pos = oldPosition + 1; pos <= maxCheckPosition; pos++) {
       const effect = getTileEffect(pos);
-      if (effect === 'piscineExam') {
+      if (effect === 'piscineExam' && !skipPiscineExamCheck) {
         console.log(`Player ${player.username} hit a Piscine Exam at tile ${pos}`);
         newPosition = pos;
-        hitPiscineExam = true;
         this.state.lastMoveDescription = `${player.username} encountered Piscine Exam at tile ${pos}!`;
         break;
       }
@@ -394,32 +396,17 @@ export class GameRoom {
     } else {
       // For piscineExam, player remains stuck if they get it wrong
       if (wasPiscineExam) {
-        // Payout bets (FAIL)
-        challenge.bets.forEach((bet) => {
-          if (bet.prediction === 'fail') {
-            const bettor = this.state.players.find((p) => p.id === bet.playerId);
-            if (bettor) bettor.coins += 5;
-          } else {
-            const bettor = this.state.players.find((p) => p.id === bet.playerId);
-            if (bettor) bettor.coins = Math.max(0, bettor.coins - 5);
-          }
-        });
-
-        // Move player back 1 tile and release them
-        player.position = Math.max(0, player.position - 1);
-        player.stuckOnPiscineExam = false;
-        
-        this.state.lastMoveDescription = `❌ Wrong! ${player.username} moves back 1 tile to ${player.position}. The correct answer was: ${question.options[question.correctIndex]}`;
-        
-        // Clear challenge and advance turn
+        this.state.lastMoveDescription = `❌ Wrong! ${player.username} returns 1 tile. The correct answer was: ${question.options[question.correctIndex]}`;
+        // Don't clear challenge, keep player stuck - they must try again
         this.state.activeChallenge = null;
-        this.nextTurn();
+        player.position = Math.max(0, player.position - 1);
+        // Don't move to next turn, current player stays
         return this.state;
       } else {
         this.state.lastMoveDescription = `❌ Wrong! The correct answer was: ${question.options[question.correctIndex]}`;
       }
       
-      // Payout bets (FAIL) for regular challenges
+      // Payout bets (FAIL)
       challenge.bets.forEach((bet) => {
         if (bet.prediction === 'fail') {
           const bettor = this.state.players.find((p) => p.id === bet.playerId);
