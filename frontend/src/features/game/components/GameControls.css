@@ -54,6 +54,23 @@
   gap: 0.5rem;
 }
 
+.roll-button:disabled {
+  background-color: #4a5568 !important; /* Slate gray */
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none !important; /* Prevent hover/click bounce effects */
+  box-shadow: none;
+}
+
+.roll-button:disabled:not(.rolling-animation) {
+  animation: pulse-slow 2s infinite ease-in-out;
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 0.5; }
+}
+
 .roll-button:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
@@ -165,3 +182,4 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
 }
+

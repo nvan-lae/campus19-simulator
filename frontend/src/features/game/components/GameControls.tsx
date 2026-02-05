@@ -8,6 +8,8 @@ interface GameControlsProps {
   onMove: (diceValue: number) => void;
   gameOver: boolean;
   onReset: () => void;
+  disabled?: boolean;
+  rollLabel?: string;
 }
 
 const DICE_FACES = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
@@ -20,6 +22,8 @@ export const GameControls = ({
   onMove,
   gameOver,
   onReset,
+  disabled,
+  rollLabel,
 }: GameControlsProps) => {
   const getDiceFace = (value: number) => DICE_FACES[value - 1] || '🎲';
 
@@ -37,12 +41,12 @@ export const GameControls = ({
           <button
             className="roll-button"
             onClick={onRoll}
-            disabled={isRolling || gameOver}
+            disabled={disabled || isRolling || gameOver}
           >
             {isRolling ? (
               <span className="rolling-animation">🎲</span>
             ) : (
-              <>🎲 Roll Dice</>
+              <>{rollLabel || '🎲 Roll Dice'}</>
             )}
           </button>
         ) : (

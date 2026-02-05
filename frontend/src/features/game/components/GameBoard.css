@@ -7,6 +7,7 @@
   overflow: visible;
   width: 100%;
   height: 100%;
+  background: transparent;
 }
 
 .game-board-wrapper {
@@ -21,14 +22,17 @@
 .game-board.spiral-layout-63 {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  grid-template-rows: repeat(7, 1fr);
-  gap: 3px;
-  padding: 6px;
-  background: rgba(30, 41, 59, 0.9);
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  row-gap: 3px;
+  column-gap: 3px;
+  padding: 20px;
+  background: transparent;
   border-radius: 10px;
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0);
   box-sizing: border-box;
+  width: 100%;
+  height: 100%;
   /* Size is set via JS for proper contain behavior */
 }
 
@@ -38,7 +42,7 @@
   /* 7 cols fixed size */
   grid-template-rows: repeat(6, 80px);
   /* 6 rows fixed size */
-  gap: 12px;
+  gap: 3px;
   width: auto;
   height: auto;
   position: relative;
@@ -126,10 +130,10 @@
 
 .connector-arrow {
   position: absolute;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: bold;
   color: rgba(255, 255, 255, 0.7);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .path-connector.edge-right .connector-arrow {
@@ -249,12 +253,12 @@
 
 .game-tile.well {
   background: linear-gradient(135deg, #636e72 0%, #2d3436 100%);
-  border-color: #000;
+  border-color: #d63031;
 }
 
 .game-tile.labyrinth {
-  background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
-  border-color: #5f27cd;
+  background: linear-gradient(135deg, #d2c800 0%, #454b00 100%);
+  border-color: #d63031;
 }
 
 .game-tile.prison {
@@ -263,7 +267,7 @@
       #bdc3c7 10px,
       #7f8c8d 10px,
       #7f8c8d 20px);
-  border-color: #2c3e50;
+  border-color: #d63031;
 }
 
 .game-tile.death {
@@ -282,14 +286,20 @@
   box-shadow: 0 0 10px #00cec9;
 }
 
+.game-tile.piscine {
+  background: linear-gradient(135deg, #c2c2c2 0%, #444444 100%);
+  border: 3px solid #313131;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
 /* Player Tokens */
 .tile-players {
   position: absolute;
   bottom: -10px;
-  right: -10px;
+  left: -10px;
   display: flex;
   flex-wrap: wrap-reverse;
-  justify-content: flex-end;
+  justify-content: flex-start;
   pointer-events: none;
   width: 100%;
 }
@@ -358,6 +368,18 @@
   border-width: 6px;
   border-style: solid;
   border-color: rgba(22, 33, 62, 0.95) transparent transparent transparent;
+}
+
+/* Popover that appears below the tile (for piscine) */
+.tile-popover-below {
+  bottom: auto;
+  top: 110%;
+}
+
+.tile-popover-below::after {
+  top: auto;
+  bottom: 100%;
+  border-color: transparent transparent rgba(22, 33, 62, 0.95) transparent;
 }
 
 .popover-header {

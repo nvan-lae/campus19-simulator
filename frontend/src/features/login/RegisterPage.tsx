@@ -135,7 +135,7 @@ export const RegisterPage = () => {
         </div>
 
         <div className="box auth-footer flex items-center justify-center gap-3">
-          <span>Already have an account?</span>
+          <span className='text-gray-400'>Already have an account?</span>
           <Link to="/login" className="btn btn-secondary">Login</Link>
         </div>
       </div>

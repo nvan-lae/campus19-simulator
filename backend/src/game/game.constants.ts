@@ -1,14 +1,14 @@
 // Game of the Goose - Constants and Configuration
 
-export const BOARD_SIZE = 63;
+export const BOARD_SIZE = 47;
 export const MAX_PLAYERS = 4;
 export const STARTING_COINS = 10;
 
 export const COLORS = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3'];
 
 // Goose tiles - landing here doubles your roll and earns coins
-// Classic Goose tiles: 5, 9, 14, 18, 23, 27, 32, 36, 41, 45, 50, 54, 59
-export const GOOSE_TILES = [5, 9, 14, 18, 23, 27, 32, 36, 41, 45, 50, 54, 59];
+// Classic Goose tiles: 5, 14, 18, 23, 27, 32, 36, 41, 45, 50, 54, 59
+export const GOOSE_TILES = [5, 14, 18, 23, 27, 32, 36, 41, 45, 50, 54, 59];
 export const GOOSE_COIN_REWARD = 5;
 
 // Special tile types
@@ -21,11 +21,12 @@ export type TileEffectType =
   | 'labyrinth'
   | 'prison'
   | 'death'
-  | 'challenge';
+  | 'challenge'
+  | 'piscineExam';
 
 // Special tiles configuration
 export const SPECIAL_TILES: Record<number, TileEffectType> = {
-  6: 'bridge', // Bridge to 12
+  10: 'bridge', // Bridge to 12
   19: 'inn', // Inn (wait)
   31: 'well', // Well (wait)
   42: 'labyrinth', // Labyrinth (back to 30 or 39?) Classic is 42->30
@@ -36,6 +37,9 @@ export const SPECIAL_TILES: Record<number, TileEffectType> = {
   15: 'challenge',
   35: 'challenge',
   55: 'challenge',
+
+  // PiscineExam - player gets stuck until they answer correctly
+  9: 'piscineExam',
 };
 
 // Coding Challenges
@@ -50,25 +54,67 @@ export interface CodingQuestion {
 export const CODING_QUESTIONS: CodingQuestion[] = [
   {
     id: 'q1',
-    question: 'What is the specific type for an integer in TypeScript?',
-    options: ['int', 'number', 'float', 'Integer'],
-    correctIndex: 1,
-    rewardCoins: 15,
+    question: 'What is the output of the following code on a system where int is 4 bytes?\n\nint arr[] = {10, 20, 30, 40, 50};\nint *ptr = arr;\nprintf("%d", *(ptr + 3));',
+    options: ['20', '30', '40', '50'],
+    correctIndex: 2,
+    rewardCoins: 5,
   },
   {
     id: 'q2',
-    question: 'Which method adds an element to the end of an array?',
-    options: ['push()', 'pop()', 'unshift()', 'concat()'],
-    correctIndex: 0,
-    rewardCoins: 10,
+    question: 'Which data structure uses LIFO (Last In First Out) principle?',
+    options: ['Queue', 'Stack', 'Array', 'Linked List'],
+    correctIndex: 1,
+    rewardCoins: 5,
   },
   {
     id: 'q3',
-    question: 'What does "NaN" stand for?',
-    options: ['Not a Null', 'No a Number', 'Not a Number', 'New and Null'],
-    correctIndex: 2,
-    rewardCoins: 12,
+    question: 'What is the time complexity of binary search on a sorted array?',
+    options: ['O(n)', 'O(log n)', 'O(n log n)', 'O(1)'],
+    correctIndex: 1,
+    rewardCoins: 5,
   },
+  {
+    id: 'q4',
+    question: 'In C, which keyword is used to declare a variable that cannot be reassigned?',
+    options: ['const', 'static', 'volatile', 'register'],
+    correctIndex: 0,
+    rewardCoins: 5,
+  },
+  {
+    id: 'q5',
+    question: 'What is the size of a "char" data type in C?',
+    options: ['1 byte', '2 bytes', '4 bytes', 'Depends on the CPU'],
+    correctIndex: 0,
+    rewardCoins: 5,
+  },
+  {
+    id: 'q6',
+    question: 'What will the following code output?\n\nint a = 10, b = 20;\nprintf("%d", a > b ? a : b);',
+    options: ['10', '20', '1', '0'],
+    correctIndex: 1,
+    rewardCoins: 5,
+  },
+  {
+    id: 'q7',
+    question: 'What is the correct format specifier for printing a long value in printf()?',
+    options: ['%d', '%ld', '%l', '%lf'],
+    correctIndex: 1,
+    rewardCoins: 5,
+  },
+  {
+    id: 'q8',
+    question: 'Which of the following is NOT a valid loop construct in C?',
+    options: ['for', 'while', 'do while', 'foreach'],
+    correctIndex: 3,
+    rewardCoins: 5,
+  },
+  {
+    id: 'q9',
+    question: 'What does the "break" statement do in a loop?',
+    options: ['Skips the current iteration', 'Exits the loop', 'Pauses the loop', 'Restarts the loop'],
+    correctIndex: 1,
+    rewardCoins: 5,
+  }
 ];
 
 // Escape costs for special tiles

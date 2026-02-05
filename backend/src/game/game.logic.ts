@@ -26,6 +26,7 @@ export interface GamePlayer {
   coins: number;
   turnsToSkip: number;
   stuckInWell: boolean;
+  stuckOnPiscineExam: boolean;
   hasShield: boolean;
   inventory: InventoryItem[];
   isReady: boolean;
@@ -61,6 +62,7 @@ export interface GameState {
     losers: number[];
     outcome: 'low' | 'high';
   } | null;
+  rollAvailableAt: number | null; // Timestamp when next roll is available
 }
 
 export class GameRoom {
@@ -84,6 +86,7 @@ export class GameRoom {
       bountyTargetId: null,
       currentTurnBets: [],
       rollBetResult: null,
+      rollAvailableAt: null,
     };
   }
 
@@ -119,11 +122,20 @@ export class GameRoom {
   rollDice(userId: number): GameState {
     if (this.state.status !== 'PLAYING') throw new Error('Game not started');
 
+    if (this.state.rollAvailableAt && Date.now() < this.state.rollAvailableAt) {
+      throw new Error('Roll not available yet');
+    }
+
     const playerIndex = this.state.currentPlayerIndex;
     const player = this.state.players[playerIndex];
 
     if (player.id !== userId) throw new Error('Not your turn');
     if (this.state.diceValue !== null) throw new Error('You already rolled');
+
+    // Check if player is stuck on piscineExam
+    if (player.stuckOnPiscineExam) {
+      throw new Error('You must complete the Piscine Exam before rolling');
+    }
 
     // Check if player needs to skip turns
     if (player.turnsToSkip > 0) {
@@ -208,9 +220,26 @@ export class GameRoom {
       this.state.pendingGooseRoll = false;
     }
 
-    // Must land exactly on BOARD_SIZE to win
-    if (newPosition > BOARD_SIZE) {
-      newPosition = BOARD_SIZE - (newPosition - BOARD_SIZE);
+    // Check for piscineExam tiles in the path and stop at the first one
+    // Do this BEFORE bounce calculation to ensure we check the actual path
+    // Skip piscineExam check if player is currently on a piscineExam tile (already cleared it)
+    const currentTileEffect = getTileEffect(oldPosition);
+    const skipPiscineExamCheck = currentTileEffect === 'piscineExam';
+    
+    const maxCheckPosition = Math.min(newPosition, BOARD_SIZE - 1);
+    for (let pos = oldPosition + 1; pos <= maxCheckPosition; pos++) {
+      const effect = getTileEffect(pos);
+      if (effect === 'piscineExam' && !skipPiscineExamCheck) {
+        console.log(`Player ${player.username} hit a Piscine Exam at tile ${pos}`);
+        newPosition = pos;
+        this.state.lastMoveDescription = `${player.username} encountered Piscine Exam at tile ${pos}!`;
+        break;
+      }
+    }
+
+    // Must land exactly on BOARD_SIZE to win (only if didn't hit piscineExam)
+    if (newPosition > BOARD_SIZE - 1) {
+      newPosition = (BOARD_SIZE - 1) - (newPosition - (BOARD_SIZE - 1));
       this.state.lastMoveDescription = `${player.username} bounced back to tile ${newPosition}`;
     }
 
@@ -222,12 +251,13 @@ export class GameRoom {
     this.state.diceValue = null;
 
     // Check win condition
-    if (newPosition === BOARD_SIZE) {
+    if (newPosition === BOARD_SIZE - 1) {
       this.state.gameOver = true;
       this.state.status = 'FINISHED';
       this.state.winner = player;
-      this.state.lastMoveDescription = `🎉 ${player.username} reaches tile ${BOARD_SIZE} and WINS!`;
-    } else if (!this.state.pendingGooseRoll && !this.state.activeChallenge) {
+      this.state.lastMoveDescription = `🎉 ${player.username} reaches tile ${BOARD_SIZE - 1} and WINS!`;
+    }
+    else if (!this.state.pendingGooseRoll && !this.state.activeChallenge) {
       this.nextTurn();
     }
 
@@ -300,6 +330,24 @@ export class GameRoom {
         return position;
       }
 
+      case 'piscineExam': {
+        // Player is stuck on this tile until they answer correctly
+        player.stuckOnPiscineExam = true;
+        // Pick a random question
+        const qIndex = Math.floor(Math.random() * CODING_QUESTIONS.length);
+        const question = CODING_QUESTIONS[qIndex];
+        this.state.activeChallenge = {
+          playerId: player.id,
+          questionId: question.id,
+          questionText: question.question,
+          options: question.options,
+          reward: question.rewardCoins,
+          bets: [],
+        };
+        this.state.lastMoveDescription = `${player.username} must pass the Piscine Exam!`;
+        return position;
+      }
+
 
 
       default:
@@ -322,9 +370,18 @@ export class GameRoom {
     const player = this.state.players.find((p) => p.id === userId);
     if (!player) throw new Error('Player not found');
 
+    const wasPiscineExam = player.stuckOnPiscineExam;
+
     if (answerIndex === question.correctIndex) {
       player.coins += question.rewardCoins;
-      this.state.lastMoveDescription = `✅ Correct! ${player.username} earned ${question.rewardCoins} coins!`;
+      
+      // Release from piscineExam if they were stuck
+      if (wasPiscineExam) {
+        player.stuckOnPiscineExam = false;
+        this.state.lastMoveDescription = `✅ Correct! ${player.username} passed the Piscine Exam and earned ${question.rewardCoins} coins!`;
+      } else {
+        this.state.lastMoveDescription = `✅ Correct! ${player.username} earned ${question.rewardCoins} coins!`;
+      }
 
       // Payout bets (SUCCESS)
       challenge.bets.forEach((bet) => {
@@ -337,7 +394,18 @@ export class GameRoom {
         }
       });
     } else {
-      this.state.lastMoveDescription = `❌ Wrong! The correct answer was: ${question.options[question.correctIndex]}`;
+      // For piscineExam, player remains stuck if they get it wrong
+      if (wasPiscineExam) {
+        this.state.lastMoveDescription = `❌ Wrong! ${player.username} returns 1 tile. The correct answer was: ${question.options[question.correctIndex]}`;
+        // Don't clear challenge, keep player stuck - they must try again
+        this.state.activeChallenge = null;
+        player.position = Math.max(0, player.position - 1);
+        // Don't move to next turn, current player stays
+        return this.state;
+      } else {
+        this.state.lastMoveDescription = `❌ Wrong! The correct answer was: ${question.options[question.correctIndex]}`;
+      }
+      
       // Payout bets (FAIL)
       challenge.bets.forEach((bet) => {
         if (bet.prediction === 'fail') {
@@ -507,7 +575,8 @@ export class GameRoom {
   private nextTurn(): void {
     this.state.currentPlayerIndex =
       (this.state.currentPlayerIndex + 1) % this.state.players.length;
-
+    
+    this.state.rollAvailableAt = Date.now() + 3000;
     // Clear bets for new turn
     this.state.currentTurnBets = [];
 
@@ -606,6 +675,7 @@ export class GameRoom {
       coins: STARTING_COINS,
       turnsToSkip: 0,
       stuckInWell: false,
+      stuckOnPiscineExam: false,
       hasShield: false,
       inventory: [],
       isReady: false,

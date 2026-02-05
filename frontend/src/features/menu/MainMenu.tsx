@@ -17,23 +17,23 @@ export const MainMenu = () => {
     const API_URL = import.meta.env.VITE_API_URL || 'https://localhost:3000';
 
     useEffect(() => {
-    const fetchLobbies = async () => {
-      try {
-        const response = await fetch(`${API_URL}/games`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (response.ok) {
-          setLobbies(await response.json());
-        }
-      } catch (error) {
-        console.error('Failed to fetch lobbies', error);
-      }
-    };
+        const fetchLobbies = async () => {
+            try {
+                const response = await fetch(`${API_URL}/games`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                if (response.ok) {
+                    setLobbies(await response.json());
+                }
+            } catch (error) {
+                console.error('Failed to fetch lobbies', error);
+            }
+        };
 
-    fetchLobbies();
-    const interval = setInterval(fetchLobbies, 5000); // Poll every 5 seconds
-    return () => clearInterval(interval);
-  }, [token]);
+        fetchLobbies();
+        const interval = setInterval(fetchLobbies, 5000); // Poll every 5 seconds
+        return () => clearInterval(interval);
+    }, [token]);
 
     const createGame = async () => {
         try {
@@ -57,11 +57,23 @@ export const MainMenu = () => {
         navigate(`/lobby/${gameId}`);
     };
 
+    useEffect(() => {
+        // Prevent scrolling globally
+        const originalHtmlOverflow = document.documentElement.style.overflow;
+        const originalBodyOverflow = document.body.style.overflow;
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.documentElement.style.overflow = originalHtmlOverflow;
+            document.body.style.overflow = originalBodyOverflow;
+        };
+    }, []);
+
     return (
-        <div className="flex flex-col items-center justify-center min-h-[80vh] gap-8 p-4">
+        <div className="flex flex-col items-center justify-center min-h-screen gap-8 p-4 bg-slate-900 overflow-hidden">
             <div className="text-center space-y-2">
                 <h1 className="text-4xl font-bold text-white mb-2">Campus 19 Simulator</h1>
-                <p className="text-gray-300">Welcome, {user?.username}!</p>
+                <p className="text-gray-500">Welcome, {user?.username}!</p>
             </div>
 
             <div className="card w-full max-w-2xl p-6 bg-slate-800/80 backdrop-blur rounded-xl border border-slate-700">

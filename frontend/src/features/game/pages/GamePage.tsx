@@ -15,7 +15,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 
 export const GamePage = () => {
   // 1. CALL ALL HOOKS FIRST (Order must not change)
-  useSocket();
+  const { socket } = useSocket();
   const { user } = useAuth();
   const { gameId } = useParams<{ gameId: string }>(); // Get ID from URL
   const { playRoll } = useGameSound();
@@ -31,6 +31,40 @@ export const GamePage = () => {
     resetGame,
     autoPlayCPU,
   } = useGameLogic();
+
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000); // Update every second
+    return () => clearInterval(interval);
+  }, []);
+
+  // Emoji state for all players
+  const [playerEmojis, setPlayerEmojis] = useState<Record<number, string>>({});
+  
+  const handleEmojiChange = (playerId: number, emoji: string) => {
+    setPlayerEmojis(prev => ({ ...prev, [playerId]: emoji }));
+    
+    // Emit emoji change to other players via WebSocket
+    if (socket && gameId) {
+      socket.emit('player_emoji_change', { gameId, playerId, emoji });
+    }
+  };
+
+  // Listen for emoji changes from other players
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleEmojiUpdate = (data: { playerId: number; emoji: string }) => {
+      setPlayerEmojis(prev => ({ ...prev, [data.playerId]: data.emoji }));
+    };
+
+    socket.on('emoji_updated', handleEmojiUpdate);
+
+    return () => {
+      socket.off('emoji_updated', handleEmojiUpdate);
+    };
+  }, [socket]);
 
   // 2. Safe useEffect: Check dependencies carefully
   useEffect(() => {
@@ -67,6 +101,11 @@ export const GamePage = () => {
   const myPlayer = gameState.players.find(p => p.id === user?.id);
   const isRolling = gameState.diceValue !== null && !gameState.gameOver;
 
+  // check if roll is possible by timer
+  const isTimeLocked = gameState.rollAvailableAt && now < Number(gameState.rollAvailableAt);
+  const secondsLeft = isTimeLocked ? Math.ceil((Number(gameState.rollAvailableAt) - now) / 1000) : 0;
+  const isRollDisabled = !!(currentPlayer?.id !== user?.id || !!gameState.diceValue || gameState.gameOver || isTimeLocked);
+
   const handleRoll = () => {
     playRoll();
     rollDice();
@@ -90,6 +129,7 @@ export const GamePage = () => {
             currentPlayerIndex={gameState.currentPlayerIndex}
             globalEvent={gameState.currentGlobalEvent}
             lastMoveDescription={gameState.lastMoveDescription}
+            playerEmojis={playerEmojis}
           />
         </div>
 
@@ -180,6 +220,15 @@ export const GamePage = () => {
           <PlayersList
             players={gameState.players || []}
             currentPlayerIndex={gameState.currentPlayerIndex}
+            playerEmojis={playerEmojis}
+            onEmojiChange={handleEmojiChange}
+          />
+        </div>
+
+        <div className="sidebar-section chat-section max-h-150">
+          <ChatWindow
+            gameId={gameId || ''}
+            players={gameState.players || []}
           />
         </div>
 
@@ -202,26 +251,20 @@ export const GamePage = () => {
               onMove={handleMove}
               gameOver={gameState.gameOver}
               onReset={resetGame}
+              disabled={isRollDisabled}
+              rollLabel={isTimeLocked ? `Wait ${secondsLeft}s` : 'Roll Dice'}
             />
 
             <button
               className="shop-button-full"
               onClick={() => setIsShopOpen(true)}
-              disabled={gameState.gameOver}
+              disabled={gameState.gameOver || currentPlayer?.id !== user?.id}
             >
               🛒 Open Campus Shop
             </button>
           </div>
         </div>
       </aside>
-
-      {/* Bottom Chat Bar */}
-      <div className="chat-viewport">
-        <ChatWindow
-          gameId={gameId || ''}
-          players={gameState.players || []}
-        />
-      </div>
 
       {/* Modals */}
       {isShopOpen && (
