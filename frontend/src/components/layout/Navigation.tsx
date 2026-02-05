@@ -62,7 +62,7 @@ export const Navigation = () => {
                 className="navbar-link user-dropdown-toggle"
               >
                 <img
-                  src={user?.avatarUrl ? `${apiBase}${user.avatarUrl}` : defaultAvatarSvg}
+                  src={user?.avatar ? `${apiBase}${user.avatar}` : defaultAvatarSvg}
                   alt="Avatar"
                   className="user-avatar-nav"
                   onError={(e) => {

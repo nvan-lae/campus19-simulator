@@ -109,7 +109,7 @@ export const ProfilePage = () => {
       }
 
       const updatedUser = await res.json();
-      updateUser({ avatarUrl: updatedUser.avatarUrl });
+      updateUser({ avatar: updatedUser.avatar });
       setUploadError(null);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete avatar';
@@ -159,11 +159,11 @@ export const ProfilePage = () => {
 
       const updatedUser = JSON.parse(responseText);
 
-      if (!updatedUser || (typeof updatedUser.avatarUrl !== 'string' && updatedUser.avatarUrl !== null)) {
+      if (!updatedUser || (typeof updatedUser.avatar !== 'string' && updatedUser.avatar !== null)) {
         throw new Error('Invalid response format from server');
       }
 
-      updateUser({ avatarUrl: updatedUser.avatarUrl });
+      updateUser({ avatar: updatedUser.avatar });
       setUploadError(null);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to upload avatar';
@@ -216,7 +216,7 @@ export const ProfilePage = () => {
               <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
                 <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-muted shadow-sm transition-transform group-hover:scale-105">
                   <img
-                    src={getAvatarUrl(user.avatarUrl)}
+                    src={getAvatarUrl(user.avatar)}
                     alt={user.username}
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = defaultAvatarSvg;
@@ -250,7 +250,7 @@ export const ProfilePage = () => {
 
               <div className="flex items-center gap-2">
                 <Badge className='bg-gray-500'>Level 1</Badge>
-                <span className="text-xs text-gray-400">Joined {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}</span>
+                <span className="text-xs text-gray-400">Joined —</span>
               </div>
 
               {uploadError && (
@@ -259,7 +259,7 @@ export const ProfilePage = () => {
                 </div>
               )}
 
-              {user.avatarUrl && (
+              {user.avatar && (
                 <Button
                   variant="destructive"
                   size="sm"
