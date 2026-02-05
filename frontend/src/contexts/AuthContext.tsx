@@ -1,12 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode, useMemo } from 'react';
-
-interface User {
-  id: number;
-  username: string;
-  email: string;
-  avatarUrl?: string;
-  createdAt?: string;
-}
+import type { User } from '../types/game';
 
 interface AuthContextType {
   user: User | null;

@@ -86,7 +86,7 @@ export class GameService {
     if (!game) throw new Error('Game not found');
 
     const state = game.rollDice(userId);
-    this.checkForGameOver(gameId, state);
+    void this.checkForGameOver(gameId, state);
     return state;
   }
 
@@ -98,7 +98,7 @@ export class GameService {
     const game = this.activeGames.get(gameId);
     if (!game) throw new Error('Game not found');
     const state = game.makeMove(userId);
-    this.checkForGameOver(gameId, state);
+    void this.checkForGameOver(gameId, state);
     return state;
   }
 

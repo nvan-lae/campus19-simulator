@@ -318,7 +318,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('player_emoji_change')
   handleEmojiChange(
     @MessageBody() data: { gameId: string; playerId: number; emoji: string },
-    @ConnectedSocket() client: Socket,
+    @ConnectedSocket() _client: Socket,
   ) {
     // Broadcast emoji change to all players in the game (including sender)
     this.server.to(data.gameId).emit('emoji_updated', {
