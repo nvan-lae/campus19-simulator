@@ -59,6 +59,7 @@ export const PlayersList = ({ players, currentPlayerIndex, playerEmojis, onEmoji
                           setShowPicker(false);
                         }}
                         usedEmojis={usedEmojis}
+                        userStats={user?.stats ? { totalMatches: user.stats.totalMatches, wins: user.stats.wins } : undefined}
                       />
                     </div>
                   )}
