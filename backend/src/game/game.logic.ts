@@ -132,11 +132,6 @@ export class GameRoom {
     if (player.id !== userId) throw new Error('Not your turn');
     if (this.state.diceValue !== null) throw new Error('You already rolled');
 
-    // Check if player is stuck on piscineExam
-    if (player.stuckOnPiscineExam) {
-      throw new Error('You must complete the Piscine Exam before rolling');
-    }
-
     // Check if player needs to skip turns
     if (player.turnsToSkip > 0) {
       player.turnsToSkip--;
@@ -331,8 +326,6 @@ export class GameRoom {
       }
 
       case 'piscineExam': {
-        // Player is stuck on this tile until they answer correctly
-        player.stuckOnPiscineExam = true;
         // Pick a random question
         const qIndex = Math.floor(Math.random() * CODING_QUESTIONS.length);
         const question = CODING_QUESTIONS[qIndex];
@@ -370,14 +363,13 @@ export class GameRoom {
     const player = this.state.players.find((p) => p.id === userId);
     if (!player) throw new Error('Player not found');
 
-    const wasPiscineExam = player.stuckOnPiscineExam;
+    // Check if this was a piscineExam challenge (tile 9)
+    const isPiscineExam = player.position === 9;
 
     if (answerIndex === question.correctIndex) {
       player.coins += question.rewardCoins;
       
-      // Release from piscineExam if they were stuck
-      if (wasPiscineExam) {
-        player.stuckOnPiscineExam = false;
+      if (isPiscineExam) {
         this.state.lastMoveDescription = `✅ Correct! ${player.username} passed the Piscine Exam and earned ${question.rewardCoins} coins!`;
       } else {
         this.state.lastMoveDescription = `✅ Correct! ${player.username} earned ${question.rewardCoins} coins!`;
@@ -394,14 +386,10 @@ export class GameRoom {
         }
       });
     } else {
-      // For piscineExam, player remains stuck if they get it wrong
-      if (wasPiscineExam) {
-        this.state.lastMoveDescription = `❌ Wrong! ${player.username} returns 1 tile. The correct answer was: ${question.options[question.correctIndex]}`;
-        // Don't clear challenge, keep player stuck - they must try again
-        this.state.activeChallenge = null;
+      // For piscineExam, move player back 1 tile
+      if (isPiscineExam) {
         player.position = Math.max(0, player.position - 1);
-        // Don't move to next turn, current player stays
-        return this.state;
+        this.state.lastMoveDescription = `❌ Wrong! ${player.username} moves back 1 tile. The correct answer was: ${question.options[question.correctIndex]}`;
       } else {
         this.state.lastMoveDescription = `❌ Wrong! The correct answer was: ${question.options[question.correctIndex]}`;
       }
