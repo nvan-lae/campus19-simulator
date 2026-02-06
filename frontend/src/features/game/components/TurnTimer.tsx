@@ -10,12 +10,11 @@ interface TurnTimerProps {
 }
 
 export const TurnTimer = ({ turnStartTime, turnTimeLimit, gameId, isMyTurn }: TurnTimerProps) => {
-  const [timeRemaining, setTimeRemaining] = useState<number>(0);
+  const [timeRemaining, setTimeRemaining] = useState<number>(turnTimeLimit / 1000);
   const { socket } = useSocket();
 
   useEffect(() => {
     if (!turnStartTime) {
-      setTimeRemaining(turnTimeLimit / 1000);
       return;
     }
 

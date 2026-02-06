@@ -146,7 +146,7 @@ export const GamePage = () => {
           }
         }
       } catch (error) {
-        console.log('Could not join rematch game, creating new one');
+        console.log('Could not join rematch game, creating new one:', error);
       }
       // If join failed or game is full, redirect to main menu/lobby
       navigate('/');
