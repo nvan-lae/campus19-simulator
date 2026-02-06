@@ -64,7 +64,7 @@ export interface GameState {
   } | null;
   rollAvailableAt: number | null; // Timestamp when next roll is available
   turnStartTime: number | null; // Timestamp when current turn started
-  turnTimeLimit: number; // Turn duration in milliseconds (90 seconds = 90000ms)
+  turnTimeLimit: number; // Turn duration in milliseconds (60 seconds = 60000ms)
 }
 
 export class GameRoom {
