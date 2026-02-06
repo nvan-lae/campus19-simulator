@@ -137,9 +137,6 @@ export class GameRoom {
     if (player.id !== userId) throw new Error('Not your turn');
     if (this.state.diceValue !== null) throw new Error('You already rolled');
 
-    // Player rolled in time, clear the turn timer
-    this.state.turnStartTime = null;
-
     // Check if player needs to skip turns
     if (player.turnsToSkip > 0) {
       player.turnsToSkip--;
