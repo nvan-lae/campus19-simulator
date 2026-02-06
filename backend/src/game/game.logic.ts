@@ -63,6 +63,8 @@ export interface GameState {
     outcome: 'low' | 'high';
   } | null;
   rollAvailableAt: number | null; // Timestamp when next roll is available
+  turnStartTime: number | null; // Timestamp when current turn started
+  turnTimeLimit: number; // Turn duration in milliseconds (90 seconds = 90000ms)
 }
 
 export class GameRoom {
@@ -87,6 +89,8 @@ export class GameRoom {
       currentTurnBets: [],
       rollBetResult: null,
       rollAvailableAt: null,
+      turnStartTime: null,
+      turnTimeLimit: 60000, // 60 seconds
     };
   }
 
@@ -116,6 +120,7 @@ export class GameRoom {
 
     this.state.status = 'PLAYING';
     this.state.lastMoveDescription = 'Game Started! Good Luck!';
+    this.state.turnStartTime = Date.now(); // Start timer for first player
     return this.state;
   }
 
@@ -131,6 +136,9 @@ export class GameRoom {
 
     if (player.id !== userId) throw new Error('Not your turn');
     if (this.state.diceValue !== null) throw new Error('You already rolled');
+
+    // Player rolled in time, clear the turn timer
+    this.state.turnStartTime = null;
 
     // Check if player needs to skip turns
     if (player.turnsToSkip > 0) {
@@ -565,6 +573,7 @@ export class GameRoom {
       (this.state.currentPlayerIndex + 1) % this.state.players.length;
     
     this.state.rollAvailableAt = Date.now() + 3000;
+    this.state.turnStartTime = Date.now(); // Start timer for new turn
     // Clear bets for new turn
     this.state.currentTurnBets = [];
 
@@ -709,6 +718,60 @@ export class GameRoom {
     }
 
     this.state.currentTurnBets.push({ playerId: userId, bet: prediction });
+    return this.state;
+  }
+
+  // Check if current player's turn has timed out
+  isTurnTimedOut(): boolean {
+    if (this.state.status !== 'PLAYING') return false;
+    if (this.state.turnStartTime === null) return false;
+    
+    const timeElapsed = Date.now() - this.state.turnStartTime;
+    return timeElapsed >= this.state.turnTimeLimit;
+  }
+
+  // Kick the current player for timeout and skip their turn
+  kickIdlePlayer(): GameState {
+    if (this.state.status !== 'PLAYING') {
+      throw new Error('Game not in progress');
+    }
+
+    const currentPlayer = this.state.players[this.state.currentPlayerIndex];
+    this.state.lastMoveDescription = `⏱️ ${currentPlayer.username} was kicked for inactivity!`;
+
+    // Remove player from the game
+    this.state.players.splice(this.state.currentPlayerIndex, 1);
+
+    // Check if we have enough players to continue
+    if (this.state.players.length < 2) {
+      // If only 1 player left, they win by default
+      if (this.state.players.length === 1) {
+        this.state.gameOver = true;
+        this.state.status = 'FINISHED';
+        this.state.winner = this.state.players[0];
+        this.state.lastMoveDescription += ` ${this.state.players[0].username} wins by default!`;
+      } else {
+        // No players left, end game
+        this.state.gameOver = true;
+        this.state.status = 'FINISHED';
+        this.state.winner = null;
+        this.state.lastMoveDescription = 'All players were kicked. Game over!';
+      }
+      this.state.turnStartTime = null;
+      return this.state;
+    }
+
+    // Adjust current player index after removal
+    if (this.state.currentPlayerIndex >= this.state.players.length) {
+      this.state.currentPlayerIndex = 0;
+    }
+
+    // Clear dice and start next turn
+    this.state.diceValue = null;
+    this.state.rollAvailableAt = Date.now() + 3000;
+    this.state.turnStartTime = Date.now();
+    this.state.currentTurnBets = [];
+
     return this.state;
   }
 }

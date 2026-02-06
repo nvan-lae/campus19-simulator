@@ -135,6 +135,8 @@ export interface GameState {
     outcome: 'low' | 'high';
   } | null;
   rollAvailableAt: string | null;
+  turnStartTime: number | null;
+  turnTimeLimit: number;
 }
 
 // --- Match History (optional, for Lobby/Profile) ---

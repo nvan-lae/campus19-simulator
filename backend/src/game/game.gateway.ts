@@ -325,4 +325,33 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       emoji: data.emoji,
     });
   }
+
+  @SubscribeMessage('check_turn_timeout')
+  handleCheckTurnTimeout(
+    @MessageBody() data: { gameId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    try {
+      const newState = this.gameService.checkTurnTimeout(data.gameId);
+      if (newState) {
+        // Player was kicked, broadcast updated state to all players
+        this.server.to(data.gameId).emit('game_state_update', newState);
+        this.server.to(data.gameId).emit('player_kicked', {
+          message: 'A player was kicked for inactivity',
+        });
+      }
+    } catch (e) {
+      client.emit('game_error', { message: e.message });
+    }
+  }
+
+  @SubscribeMessage('create_rematch')
+  handleCreateRematch(
+    @MessageBody() data: { oldGameId: string; newGameId: string },
+  ) {
+    // Broadcast to all players in the old game that a rematch was created
+    this.server.to(data.oldGameId).emit('rematch_created', {
+      gameId: data.newGameId,
+    });
+  }
 }

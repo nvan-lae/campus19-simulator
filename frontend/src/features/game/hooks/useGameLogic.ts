@@ -74,11 +74,6 @@ export const useGameLogic = () => {
     // console.log("CPU Auto-play triggered (not implemented)");
   }, []);
 
-  const resetGame = useCallback(() => {
-    //go back to home screen
-    window.location.href = '/';
-  }, []);
-
   return {
     gameState,
     rollDice,
@@ -89,7 +84,6 @@ export const useGameLogic = () => {
     submitChallenge,
     placeBet,
     sendReaction,
-    resetGame,
     autoPlayCPU,
     players: gameState?.players || [],
     currentPlayer: gameState?.players[gameState?.currentPlayerIndex || 0],
