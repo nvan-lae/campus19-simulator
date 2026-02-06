@@ -7,6 +7,8 @@ interface Lobby {
     host: string;
     players: number;
     maxPlayers: number;
+    status: 'LOBBY' | 'PLAYING';
+    playerIds: number[];
 }
 
 export const MainMenu = () => {
@@ -88,12 +90,28 @@ export const MainMenu = () => {
                 </div>
 
                 <div className="space-y-3">
-                    {lobbies.length === 0 ? (
+                    {lobbies.filter(lobby => {
+                        // Show all LOBBY games to everyone
+                        if (lobby.status === 'LOBBY') return true;
+                        // Show PLAYING games only to members
+                        if (lobby.status === 'PLAYING') {
+                            return user?.id && lobby.playerIds.includes(user.id);
+                        }
+                        return false;
+                    }).length === 0 ? (
                         <div className="text-center py-8 text-gray-400">
                             No open games found. Create one to start playing!
                         </div>
                     ) : (
-                        lobbies.map((lobby) => (
+                        lobbies.filter(lobby => {
+                            // Show all LOBBY games to everyone
+                            if (lobby.status === 'LOBBY') return true;
+                            // Show PLAYING games only to members
+                            if (lobby.status === 'PLAYING') {
+                                return user?.id && lobby.playerIds.includes(user.id);
+                            }
+                            return false;
+                        }).map((lobby) => (
                             <div
                                 key={lobby.gameId}
                                 className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors border border-slate-600"
@@ -103,6 +121,11 @@ export const MainMenu = () => {
                                     <p className="text-sm text-gray-400">Game ID: {lobby.gameId}</p>
                                 </div>
                                 <div className="flex items-center gap-4">
+                                    {lobby.status === 'PLAYING' && (
+                                        <span className="text-xs px-2 py-1 bg-amber-500/20 text-amber-400 rounded-full font-medium">
+                                            In Progress
+                                        </span>
+                                    )}
                                     <span className="text-sm px-3 py-1 bg-slate-800 rounded-full text-gray-300">
                                         {lobby.players} / {lobby.maxPlayers} Players
                                     </span>
@@ -110,7 +133,7 @@ export const MainMenu = () => {
                                         onClick={() => joinGame(lobby.gameId)}
                                         className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-semibold transition-colors"
                                     >
-                                        Join
+                                        {lobby.status === 'PLAYING' ? 'Rejoin' : 'Join'}
                                     </button>
                                 </div>
                             </div>

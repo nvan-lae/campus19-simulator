@@ -50,15 +50,17 @@ export class GameService {
   }
 
   getOpenLobbies() {
-    const lobbies: { gameId: string; host: string; players: number; maxPlayers: number }[] = [];
+    const lobbies: { gameId: string; host: string; players: number; maxPlayers: number; status: string; playerIds: number[] }[] = [];
     for (const [id, game] of this.activeGames) {
       const state = game.getState();
-      if (state.status === 'LOBBY') {
+      if (state.status === 'LOBBY' || state.status === 'PLAYING') {
         lobbies.push({
           gameId: id,
           host: state.players[0]?.username || 'Unknown',
           players: state.players.length,
           maxPlayers: 4, // Expose constant?
+          status: state.status,
+          playerIds: state.players.map(p => p.id),
         });
       }
     }
@@ -103,9 +105,20 @@ export class GameService {
   }
 
   private async checkForGameOver(gameId: string, state: GameState) {
-    if (state.gameOver && state.winner) {
-      this.logger.log(`Game ${gameId} ended. Winner: ${state.winner.username}`);
-      await this.saveMatch(gameId, state);
+    if (state.gameOver) {
+      if (state.winner) {
+        this.logger.log(`Game ${gameId} ended. Winner: ${state.winner.username}`);
+        await this.saveMatch(gameId, state);
+      } else {
+        // Game ended with no winner (all players kicked)
+        this.logger.log(`Game ${gameId} ended with no winner (all players kicked)`);
+        // Optional: still save match with no winner, or just clean up
+        // For now, just remove the game after a delay
+        setTimeout(() => {
+          this.removeGame(gameId);
+          this.logger.log(`Game ${gameId} removed from active games`);
+        }, 10000); // 10 seconds to allow players to see the final state
+      }
     }
   }
 
@@ -189,5 +202,19 @@ export class GameService {
     const game = this.activeGames.get(gameId);
     if (!game) throw new Error('Game not found');
     return game.placeRollBet(userId, prediction);
+  }
+
+  checkTurnTimeout(gameId: string): GameState | null {
+    const game = this.activeGames.get(gameId);
+    if (!game) return null;
+
+    if (game.isTurnTimedOut()) {
+      this.logger.warn(`Turn timeout in game ${gameId}, kicking idle player`);
+      const state = game.kickIdlePlayer();
+      void this.checkForGameOver(gameId, state);
+      return state;
+    }
+    
+    return null;
   }
 }

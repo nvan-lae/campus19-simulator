@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom'; // Added useParams
+import { useParams, useNavigate } from 'react-router-dom'; // Added useParams
 import './GamePage.css';
 import { GameBoard } from '../components/GameBoard';
 import { GameControls } from '../components/GameControls';
@@ -12,12 +12,14 @@ import { ChatWindow } from '../components/ChatWindow';
 import { PredictionPanel } from '../components/PredictionPanel';
 import { useGameSound } from '../../../hooks/useGameSound';
 import { useAuth } from '../../../contexts/AuthContext';
+import { TurnTimer } from '../components/TurnTimer';
 
 export const GamePage = () => {
   // 1. CALL ALL HOOKS FIRST (Order must not change)
   const { socket } = useSocket();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const { gameId } = useParams<{ gameId: string }>(); // Get ID from URL
+  const navigate = useNavigate();
   const { playRoll } = useGameSound();
 
   const {
@@ -28,7 +30,6 @@ export const GamePage = () => {
     useItem: activateItem,
     payEscape,
     submitChallenge,
-    resetGame,
     autoPlayCPU,
   } = useGameLogic();
 
@@ -41,6 +42,7 @@ export const GamePage = () => {
 
   // Emoji state for all players
   const [playerEmojis, setPlayerEmojis] = useState<Record<number, string>>({});
+  const [rematchGameId, setRematchGameId] = useState<string | null>(null);
   
   const handleEmojiChange = (playerId: number, emoji: string) => {
     setPlayerEmojis(prev => ({ ...prev, [playerId]: emoji }));
@@ -59,10 +61,17 @@ export const GamePage = () => {
       setPlayerEmojis(prev => ({ ...prev, [data.playerId]: data.emoji }));
     };
 
+    const handleRematchCreated = (data: { gameId: string }) => {
+      console.log('Rematch game created:', data.gameId);
+      setRematchGameId(data.gameId);
+    };
+
     socket.on('emoji_updated', handleEmojiUpdate);
+    socket.on('rematch_created', handleRematchCreated);
 
     return () => {
       socket.off('emoji_updated', handleEmojiUpdate);
+      socket.off('rematch_created', handleRematchCreated);
     };
   }, [socket]);
 
@@ -113,6 +122,41 @@ export const GamePage = () => {
 
   const handleMove = () => {
     movePlayer();
+  };
+
+  const createNewGame = async () => {
+    const API_URL = import.meta.env.VITE_API_URL || 'https://localhost:3000';
+
+    // If someone already created a rematch game, go directly to its lobby
+    if (rematchGameId) {
+      navigate(`/lobby/${rematchGameId}`);
+      return;
+    }
+
+    // Create a new game
+    try {
+      const response = await fetch(`${API_URL}/games/create`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.ok) {
+        const { gameId: newGameId } = await response.json();
+        
+        // Broadcast to other players that a rematch game was created
+        if (socket && gameId) {
+          socket.emit('create_rematch', { oldGameId: gameId, newGameId });
+        }
+        
+        setRematchGameId(newGameId);
+        navigate(`/lobby/${newGameId}`);
+      }
+    } catch (error) {
+      console.error('Failed to create new game', error);
+      navigate('/');
+    }
   };
 
   // Check if current user has an active challenge (it's my challenge to answer)
@@ -243,6 +287,16 @@ export const GamePage = () => {
 
         <div className="sidebar-section controls-section">
           <div className="controls-card">
+            {/* Turn Timer */}
+            {gameState.turnStartTime && !gameState.gameOver && (
+              <TurnTimer
+                turnStartTime={gameState.turnStartTime}
+                turnTimeLimit={gameState.turnTimeLimit}
+                gameId={gameId || ''}
+                isMyTurn={currentPlayer?.id === user?.id}
+              />
+            )}
+
             <GameControls
               diceValue={gameState.diceValue}
               currentPlayerName={currentPlayer?.username || 'Unknown'}
@@ -250,7 +304,7 @@ export const GamePage = () => {
               onRoll={handleRoll}
               onMove={handleMove}
               gameOver={gameState.gameOver}
-              onReset={resetGame}
+              onReset={createNewGame}
               disabled={isRollDisabled}
               rollLabel={isTimeLocked ? `Wait ${secondsLeft}s` : 'Roll Dice'}
             />
@@ -323,7 +377,7 @@ export const GamePage = () => {
             🎉 {gameState.winner.username} WINS! 🎉
           </div>
           <button
-            onClick={resetGame}
+            onClick={createNewGame}
             className="bg-white text-indigo-600 font-black py-4 px-12 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all"
           >
             PLAY AGAIN
