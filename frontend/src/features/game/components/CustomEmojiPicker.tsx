@@ -2,12 +2,12 @@ import { useState } from 'react';
 
 // Unlock requirements for each category
 const UNLOCK_REQUIREMENTS = {
-  'Smileys': { gamesPlayed: 0, wins: 0 }, // Always unlocked
-  'Animals': { gamesPlayed: 3, wins: 0 },
-  'Food': { gamesPlayed: 0, wins: 5 },
-  'Activities': { gamesPlayed: 10, wins: 3 },
-  'Objects': { gamesPlayed: 15, wins: 5 },
-  'Symbols': { gamesPlayed: 20, wins: 10 },
+  'Smileys': { totalMatches: 0, wins: 0 }, // Always unlocked
+  'Animals': { totalMatches: 3, wins: 0 },
+  'Food': { totalMatches: 6, wins: 5 },
+  'Activities': { totalMatches: 10, wins: 3 },
+  'Objects': { totalMatches: 15, wins: 5 },
+  'Symbols': { totalMatches: 20, wins: 10 },
 };
 
 // Comprehensive emoji list organized by category
@@ -19,8 +19,6 @@ const EMOJI_CATEGORIES = {
   'Objects': ['⌚','📱','📲','💻','⌨️','🖥️','🖨️','🖱️','🖲️','🕹️','🗜️','💾','💿','📀','📼','📷','📸','📹','🎥','📽️','🎞️','📞','☎️','📟','📠','📺','📻','🎙️','🎚️','🎛️','🧭','⏱️','⏲️','⏰','🕰️','⌛','⏳','📡','🔋','🔌','💡','🔦','🕯️','🪔','🧯','🛢️','💸','💵','💴','💶','💷','💰','💳','💎','⚖️','🪜','🧰','🪛','🔧','🔨','⚒️','🛠️','⛏️','🪚','🔩','⚙️','🪤','🧱','⛓️','🧲','🔫','💣','🧨','🪓','🔪','🗡️','⚔️','🛡️','🚬','⚰️','🪦','⚱️','🏺','🔮','📿','🧿','💈','⚗️','🔭','🔬','🕳️','🩹','🩺','💊','💉','🩸','🧬','🦠','🧫','🧪','🌡️','🧹','🧺','🧻','🪣','🧼','🪒','🧽','🧴','🛁','🛀','🧖','🚪','🪞','🪟','🛏️','🛋️','🪑','🚽','🪠','🚿','🛁','🪤','🪒','🧴','🧷','🧹','🧺','🧻','🪣','🧼','🪥','🪒','🧽'],
   'Symbols': ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','☮️','✝️','☪️','🕉️','☸️','✡️','🔯','🕎','☯️','☦️','🛐','⛎','♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓','🆔','⚛️','🉑','☢️','☣️','📴','📳','🈶','🈚','🈸','🈺','🈷️','✴️','🆚','💮','🉐','㊙️','㊗️','🈴','🈵','🈹','🈲','🅰️','🅱️','🆎','🆑','🅾️','🆘','❌','⭕','🛑','⛔','📛','🚫','💯','💢','♨️','🚷','🚯','🚳','🚱','🔞','📵','🚭','❗','❕','❓','❔','‼️','⁉️','🔅','🔆','〽️','⚠️','🚸','🔱','⚜️','🔰','♻️','✅','🈯','💹','❇️','✳️','❎','🌐','💠','Ⓜ️','🌀','💤','🏧','🚾','♿','🅿️','🈳','🈂️','🛂','🛃','🛄','🛅'],
 };
-
-const ALL_EMOJIS = Object.values(EMOJI_CATEGORIES).flat();
 
 interface CustomEmojiPickerProps {
   onSelect: (emoji: string) => void;
@@ -36,7 +34,7 @@ export const CustomEmojiPicker = ({ onSelect, usedEmojis = [], userStats = { tot
     if (category === 'All') return true;
     const req = UNLOCK_REQUIREMENTS[category as keyof typeof UNLOCK_REQUIREMENTS];
     if (!req) return true;
-    return userStats.totalMatches >= req.gamesPlayed && userStats.wins >= req.wins;
+    return userStats.totalMatches >= req.totalMatches && userStats.wins >= req.wins;
   };
 
   // Get unlock message for locked category (short version for button)
@@ -44,7 +42,7 @@ export const CustomEmojiPicker = ({ onSelect, usedEmojis = [], userStats = { tot
     const req = UNLOCK_REQUIREMENTS[category as keyof typeof UNLOCK_REQUIREMENTS];
     if (!req) return '';
     const parts = [];
-    if (req.gamesPlayed > 0) parts.push(`Games:${req.gamesPlayed}`);
+    if (req.totalMatches > 0) parts.push(`Games:${req.totalMatches}`);
     if (req.wins > 0) parts.push(`Wins:${req.wins}`);
     return parts.join(' ');
   };
@@ -54,14 +52,16 @@ export const CustomEmojiPicker = ({ onSelect, usedEmojis = [], userStats = { tot
     const req = UNLOCK_REQUIREMENTS[category as keyof typeof UNLOCK_REQUIREMENTS];
     if (!req) return '';
     const parts = [];
-    if (req.gamesPlayed > 0) parts.push(`${req.gamesPlayed} games`);
+    if (req.totalMatches > 0) parts.push(`${req.totalMatches} games`);
     if (req.wins > 0) parts.push(`${req.wins} wins`);
     return `Unlock: ${parts.join(' + ')}`;
   };
 
   // Filter emojis by category
   const displayEmojis = selectedCategory === 'All' 
-    ? ALL_EMOJIS 
+    ? Object.entries(EMOJI_CATEGORIES)
+        .filter(([category]) => isCategoryUnlocked(category))
+        .flatMap(([, emojis]) => emojis)
     : EMOJI_CATEGORIES[selectedCategory as keyof typeof EMOJI_CATEGORIES] || [];
   
   const categoryLocked = !isCategoryUnlocked(selectedCategory);

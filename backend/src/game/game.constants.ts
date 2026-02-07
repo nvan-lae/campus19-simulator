@@ -28,9 +28,8 @@ export type TileEffectType =
 export const SPECIAL_TILES: Record<number, TileEffectType> = {
   10: 'bridge', // Bridge to 12
   19: 'inn', // Inn (wait)
-  31: 'well', // Well (wait)
   42: 'labyrinth', // Labyrinth (back to 30 or 39?) Classic is 42->30
-  34: 'death', // Death (back to Start)
+  34: 'death', // Black Hole (back to Start)
 
   // Add 3 coding challenges scattered
   15: 'challenge',

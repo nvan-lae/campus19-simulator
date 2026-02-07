@@ -311,7 +311,7 @@ export class GameRoom {
         return position;
 
       case 'death':
-        this.state.lastMoveDescription = `${player.username} landed on death and starts over!`;
+        this.state.lastMoveDescription = `${player.username} fell into a Black Hole and starts from the piscine!`;
         return 0;
 
       case 'challenge': {
@@ -444,8 +444,8 @@ export class GameRoom {
       player.stuckInWell = false;
       this.state.lastMoveDescription = `${player.username} paid ${cost} coins to escape the ${effect}!`;
     } else if (effect === 'death') {
-      // For death, they can pay to NOT restart - keep position
-      this.state.lastMoveDescription = `${player.username} paid ${cost} coins to cheat death!`;
+      // For black hole, they can pay to NOT restart - keep position
+      this.state.lastMoveDescription = `${player.username} paid ${cost} coins to escape the Black Hole!`;
     }
 
     return this.state;

@@ -9,6 +9,7 @@ interface ShopProps {
     onUseItem: (itemId: string, targetPlayerId?: number) => void;
     onPayEscape: () => void;
     disabled: boolean;
+    currentGlobalEvent?: 'gravity_flux' | 'inflation' | 'windy' | null;
 }
 
 export const Shop = ({
@@ -18,11 +19,20 @@ export const Shop = ({
     onUseItem,
     onPayEscape,
     disabled,
+    currentGlobalEvent,
 }: ShopProps) => {
     const [selectedItem, setSelectedItem] = useState<string | null>(null);
     const [selectingTarget, setSelectingTarget] = useState(false);
 
     if (!currentPlayer) return null;
+
+    // Calculate price with inflation if active
+    const getItemPrice = (baseCost: number) => {
+        if (currentGlobalEvent === 'inflation') {
+            return Math.ceil(baseCost * 1.5);
+        }
+        return baseCost;
+    };
 
     const handleItemClick = (itemId: string) => {
         const item = SHOP_ITEMS.find((i) => i.id === itemId);
@@ -66,20 +76,30 @@ export const Shop = ({
             )}
 
             <div className="shop-section">
-                <h4>Shop</h4>
+                <h4>Shop{currentGlobalEvent === 'inflation' ? ' 💰 +50%' : ''}</h4>
                 <div className="shop-items">
-                    {SHOP_ITEMS.map((item) => (
-                        <button
-                            key={item.id}
-                            className="shop-item"
-                            onClick={() => onPurchase(item.id)}
-                            disabled={disabled || currentPlayer.coins < item.cost}
-                            title={item.description}
-                        >
-                            <span className="item-name">{item.name}</span>
-                            <span className="item-cost">{item.cost} 🪙</span>
-                        </button>
-                    ))}
+                    {SHOP_ITEMS.map((item) => {
+                        const price = getItemPrice(item.cost);
+                        return (
+                            <button
+                                key={item.id}
+                                className="shop-item"
+                                onClick={() => onPurchase(item.id)}
+                                disabled={disabled || currentPlayer.coins < price}
+                                title={item.description}
+                            >
+                                <span className="item-name">{item.name}</span>
+                                <span className="item-cost">
+                                    {currentGlobalEvent === 'inflation' && (
+                                        <span className="original-price" style={{ textDecoration: 'line-through', opacity: 0.6, marginRight: '4px' }}>
+                                            {item.cost}
+                                        </span>
+                                    )}
+                                    {price} 🪙
+                                </span>
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 

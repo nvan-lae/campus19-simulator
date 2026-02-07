@@ -64,7 +64,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (res.ok) {
           const userData = await res.json();
           console.log('[Auth] User loaded:', userData.username);
-          setUser(userData);
+          
+          // Fetch stats separately
+          try {
+            const statsRes = await fetch(`${apiBase}/users/me/stats`, {
+              method: 'GET',
+              headers: {
+                Authorization: `Bearer ${storedToken}`,
+                'Content-Type': 'application/json',
+              },
+            });
+            
+            if (statsRes.ok && isMounted) {
+              const stats = await statsRes.json();
+              setUser({ ...userData, stats });
+            } else {
+              setUser(userData);
+            }
+          } catch {
+            // If stats fetch fails, still set user without stats
+            setUser(userData);
+          }
         } else if (res.status === 401) {
           console.log('[Auth] Token invalid (401), clearing');
           localStorage.removeItem('access_token');
@@ -96,9 +116,31 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
 
       const userData = await res.json();
-      localStorage.setItem('access_token', newToken);
-      setToken(newToken);
-      setUser(userData);
+      
+      // Fetch stats
+      try {
+        const statsRes = await fetch(`${apiBase}/users/me/stats`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${newToken}`,
+          },
+        });
+        
+        if (statsRes.ok) {
+          const stats = await statsRes.json();
+          localStorage.setItem('access_token', newToken);
+          setToken(newToken);
+          setUser({ ...userData, stats });
+        } else {
+          localStorage.setItem('access_token', newToken);
+          setToken(newToken);
+          setUser(userData);
+        }
+      } catch {
+        localStorage.setItem('access_token', newToken);
+        setToken(newToken);
+        setUser(userData);
+      }
     } catch (err) {
       console.error('Login error:', err);
       localStorage.removeItem('access_token');
