@@ -16,4 +16,4 @@ RUN npm install
 COPY backend .
 
 EXPOSE 3000
-CMD ["npm", "run", "start:dev"]
+CMD ["sh", "-c", "npx prisma generate && until npx prisma migrate deploy; do echo 'Waiting for database...'; sleep 3; done; npm run start:dev"]
