@@ -127,29 +127,9 @@ export const GamePage = () => {
   const createNewGame = async () => {
     const API_URL = import.meta.env.VITE_API_URL || 'https://localhost:3000';
 
-    // If someone already created a rematch game, try to join it
+    // If someone already created a rematch game, go directly to its lobby
     if (rematchGameId) {
-      try {
-        // Try to join the existing rematch game
-        const joinResponse = await fetch(`${API_URL}/games/${rematchGameId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        
-        if (joinResponse.ok) {
-          const gameData = await joinResponse.json();
-          // Check if game is full (assuming max 4 players)
-          if (gameData.players < 4) {
-            navigate(`/lobby/${rematchGameId}`);
-            return;
-          }
-        }
-      } catch (error) {
-        console.log('Could not join rematch game, creating new one:', error);
-      }
-      // If join failed or game is full, redirect to main menu/lobby
-      navigate('/');
+      navigate(`/lobby/${rematchGameId}`);
       return;
     }
 

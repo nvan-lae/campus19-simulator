@@ -64,7 +64,7 @@ export interface GameState {
   } | null;
   rollAvailableAt: number | null; // Timestamp when next roll is available
   turnStartTime: number | null; // Timestamp when current turn started
-  turnTimeLimit: number; // Turn duration in milliseconds (90 seconds = 90000ms)
+  turnTimeLimit: number; // Turn duration in milliseconds (60 seconds = 60000ms)
 }
 
 export class GameRoom {
@@ -136,9 +136,6 @@ export class GameRoom {
 
     if (player.id !== userId) throw new Error('Not your turn');
     if (this.state.diceValue !== null) throw new Error('You already rolled');
-
-    // Player rolled in time, clear the turn timer
-    this.state.turnStartTime = null;
 
     // Check if player needs to skip turns
     if (player.turnsToSkip > 0) {
