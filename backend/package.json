@@ -21,6 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@campus19/shared": "file:../shared",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/jwt": "^11.0.2",
@@ -28,6 +29,7 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/platform-socket.io": "^11.1.11",
+    "@nestjs/schedule": "^6.1.1",
     "@nestjs/websockets": "^11.1.11",
     "@prisma/client": "^6.19.1",
     "bcrypt": "^6.0.0",
@@ -37,7 +39,6 @@
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "@campus19/shared": "file:../shared",
     "socket.io": "^4.8.3"
   },
   "devDependencies": {

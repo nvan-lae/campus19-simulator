@@ -49,18 +49,36 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
     setBoardSize({ width, height });
   }, []);
 
-  // Set up resize observer
+  const lastSizeRef = useRef({ width: 0, height: 0 });
+
   useEffect(() => {
+    // 1. Initial calculation
     calculateBoardSize();
-    
-    const resizeObserver = new ResizeObserver(() => {
-      calculateBoardSize();
+
+    // 2. Setup the Observer with the check
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+
+        if (
+          Math.abs(width - lastSizeRef.current.width) < 2 &&
+          Math.abs(height - lastSizeRef.current.height) < 2
+        ) {
+          return; 
+        }
+
+        lastSizeRef.current = { width, height };
+
+        window.requestAnimationFrame(() => {
+          calculateBoardSize();
+        });
+      }
     });
-    
+
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
     }
-    
+
     return () => resizeObserver.disconnect();
   }, [calculateBoardSize]);
 

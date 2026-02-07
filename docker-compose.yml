@@ -55,6 +55,9 @@ services:
       - ./backend/secrets:/app/frontend/secrets
     networks:
       - transcendence_network
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
 
 # Define persistent storage for the DB
 volumes:
