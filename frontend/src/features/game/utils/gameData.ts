@@ -5,7 +5,7 @@ export { type TileEffectType };
 export const BOARD_SIZE = 47;
 
 // Goose tiles - landing here doubles your roll and earns coins
-export const GOOSE_TILES = [5, 14, 23, 27, 32, 36, 41];
+export const GOOSE_TILES = [5, 14, 23, 27, 32, 41];
 export const PISCINE_TILES = [1, 2, 3, 4, 6 ,7 ,8];
 
 // Special tiles configuration
@@ -14,14 +14,12 @@ export const SPECIAL_TILES: Record<number, TileEffectType> = {
   19: 'inn', // Skip 1 turn
   31: 'well', // Stuck until someone else lands or pay coins
   42: 'labyrinth', // Go back to tile 30
-  52: 'prison', // Skip 2 turns or pay coins
-  58: 'death', // Start over or pay coins
+  34: 'death', // Death (back to Start)
 
   // Scatered challenges
   9: 'piscineExam',
   15: 'challenge',
   35: 'challenge',
-  55: 'challenge',
 };
 
 // Get the effect type for a given tile
