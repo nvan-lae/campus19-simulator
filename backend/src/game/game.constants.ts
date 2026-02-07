@@ -7,8 +7,8 @@ export const STARTING_COINS = 10;
 export const COLORS = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3'];
 
 // Goose tiles - landing here doubles your roll and earns coins
-// Classic Goose tiles: 5, 14, 18, 23, 27, 32, 36, 41, 45, 50, 54, 59
-export const GOOSE_TILES = [5, 14, 18, 23, 27, 32, 36, 41, 45, 50, 54, 59];
+// Classic Goose tiles: 5, 14, 18, 23, 27, 32, 41,
+export const GOOSE_TILES = [5, 14, 23, 27, 32, 41];
 export const GOOSE_COIN_REWARD = 5;
 
 // Special tile types
@@ -28,15 +28,12 @@ export type TileEffectType =
 export const SPECIAL_TILES: Record<number, TileEffectType> = {
   10: 'bridge', // Bridge to 12
   19: 'inn', // Inn (wait)
-  31: 'well', // Well (wait)
   42: 'labyrinth', // Labyrinth (back to 30 or 39?) Classic is 42->30
-  52: 'prison', // Prison (wait)
-  58: 'death', // Death (back to Start)
+  34: 'death', // Black Hole (back to Start)
 
   // Add 3 coding challenges scattered
   15: 'challenge',
   35: 'challenge',
-  55: 'challenge',
 
   // PiscineExam - player gets stuck until they answer correctly
   9: 'piscineExam',

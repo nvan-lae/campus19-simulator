@@ -421,7 +421,7 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
                       {effectType === 'well' && "Stuck until rescue or pay 10 coins"}
                       {effectType === 'labyrinth' && "Go back to tile 30"}
                       {effectType === 'prison' && "Skip 2 turns or pay 15 coins"}
-                      {effectType === 'death' && "Restart at Start or pay 20 coins"}
+                      {effectType === 'death' && "Black Hole - Restart at the piscine"}
                       {effectType === 'challenge' && "Coding Challenge! Win coins!"}
                       {effectType === 'piscineExam' && "Piscine Exam! Pass to be able to go to the next tile."}
                     </div>

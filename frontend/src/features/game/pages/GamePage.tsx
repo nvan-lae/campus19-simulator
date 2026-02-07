@@ -351,6 +351,7 @@ export const GamePage = () => {
                 }}
                 onPayEscape={payEscape}
                 disabled={gameState.gameOver}
+                currentGlobalEvent={gameState.currentGlobalEvent}
               />
             </div>
           </div>
