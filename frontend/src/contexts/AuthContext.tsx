@@ -75,17 +75,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               },
             });
             
-            if (statsRes.ok && isMounted) {
+            if (statsRes.ok) {
               const stats = await statsRes.json();
+              if (!isMounted) return;
               setUser({ ...userData, stats });
             } else {
+              if (!isMounted) return;
               setUser(userData);
             }
           } catch {
             // If stats fetch fails, still set user without stats
+            if (!isMounted) return;
             setUser(userData);
           }
         } else if (res.status === 401) {
+          if (!isMounted) return;
           console.log('[Auth] Token invalid (401), clearing');
           localStorage.removeItem('access_token');
           setToken(null);
