@@ -31,9 +31,6 @@
     "paths": {
       "@/*": [
         "./src/*"
-      ],
-      "@campus19/shared": [
-        "../shared/src"
       ]
     }
   },
