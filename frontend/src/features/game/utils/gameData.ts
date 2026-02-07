@@ -1,32 +1,6 @@
-import type { TileEffectType } from '../../../types/game';
+import  { type TileEffectType, getTileEffect } from '@campus19/shared';
+export { getTileEffect as getEffectType };
 
-export { type TileEffectType };
-
-export const BOARD_SIZE = 47;
-
-// Goose tiles - landing here doubles your roll and earns coins
-export const GOOSE_TILES = [5, 14, 23, 27, 32, 41];
-export const PISCINE_TILES = [1, 2, 3, 4, 6 ,7 ,8];
-
-// Special tiles configuration
-export const SPECIAL_TILES: Record<number, TileEffectType> = {
-  10: 'bridge', // Jump to tile 12
-  19: 'inn', // Skip 1 turn
-  42: 'labyrinth', // Go back to tile 30
-  34: 'death', // Black Hole (back to Start)
-
-  // Scatered challenges
-  9: 'piscineExam',
-  15: 'challenge',
-  35: 'challenge',
-};
-
-// Get the effect type for a given tile
-export const getEffectType = (position: number): TileEffectType => {
-  if (GOOSE_TILES.includes(position)) return 'goose';
-  if (PISCINE_TILES.includes(position)) return 'piscine';
-  return SPECIAL_TILES[position] || 'none';
-};
 
 // Tile display info for UI
 export interface TileInfo {

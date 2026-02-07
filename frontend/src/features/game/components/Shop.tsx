@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import './Shop.css';
-import { SHOP_ITEMS, type GamePlayer } from '../../../types/game';
+import {SHOP_ITEMS, type GamePlayer} from '@campus19/shared';
 
 interface ShopProps {
     currentPlayer: GamePlayer | undefined;

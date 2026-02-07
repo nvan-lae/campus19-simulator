@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import './GameBoard.css';
-import { getEffectType, BOARD_SIZE, TILE_INFO } from '../utils/gameData';
+import { BOARD_SIZE } from '@campus19/shared';
+import { getEffectType, TILE_INFO } from '../utils/gameData';
 import type { GamePlayer } from '../../../types/game';
 import confetti from 'canvas-confetti';
 import { useGameSound } from '../../../hooks/useGameSound';

@@ -17,7 +17,9 @@ services:
 
   # 2. Backend Service (NestJS)
   backend:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: transcendence_backend
     restart: on-failure
     depends_on:
@@ -28,25 +30,29 @@ services:
       - "3000:3000"
     volumes:
       # Mount source code for "Hot Reloading" during development
-      - ./backend:/usr/src/app
-      - /usr/src/app/node_modules
+      - ./backend:/app/backend
+      - ./shared:/app/shared
+      - /app/backend/node_modules
       # Store user uploads in a named volume to avoid polluting the repo
-      - uploads_data:/usr/src/app/uploads
+      - uploads_data:/app/backend/uploads
     networks:
       - transcendence_network
 
   # 3. Frontend Service (React + Vite)
   frontend:
-    build: ./frontend
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
     container_name: transcendence_frontend
     restart: on-failure
     ports:
       - "5173:5173"
     volumes:
       # Mount source code for "Hot Reloading"
-      - ./frontend:/app
-      - /app/node_modules
-      - ./backend/secrets:/app/secrets
+      - ./frontend:/app/frontend
+      - ./shared:/app/shared
+      - /app/frontend/node_modules
+      - ./backend/secrets:/app/frontend/secrets
     networks:
       - transcendence_network
 
