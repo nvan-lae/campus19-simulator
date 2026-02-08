@@ -2,13 +2,18 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY shared ./shared
+WORKDIR /app/shared
+RUN npm install
+RUN npm run build
+
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
 
 RUN npm install
 
-COPY . .
+COPY frontend .
 
-# Vite default port is 5173
 EXPOSE 5173
 
 # Host 0.0.0.0 is required for Docker networking

@@ -1,5 +1,5 @@
 import { GameRoom } from './game.logic';
-import { STARTING_COINS } from './game.constants';
+import { STARTING_COINS } from '@campus19/shared';
 
 describe('GameRoom Logic', () => {
     let gameRoom: GameRoom;

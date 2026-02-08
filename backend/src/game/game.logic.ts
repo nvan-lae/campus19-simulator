@@ -9,7 +9,7 @@ import {
   SHOP_ITEMS,
   TileEffectType,
   CODING_QUESTIONS,
-} from './game.constants';
+} from '@campus19/shared';
 import { User } from '@prisma/client';
 
 export interface InventoryItem {

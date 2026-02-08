@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import './GameBoard.css';
-import { getEffectType, BOARD_SIZE, TILE_INFO } from '../utils/gameData';
+import { BOARD_SIZE } from '@campus19/shared';
+import { getEffectType, TILE_INFO } from '../utils/gameData';
 import type { GamePlayer } from '../../../types/game';
 import confetti from 'canvas-confetti';
 import { useGameSound } from '../../../hooks/useGameSound';
@@ -48,18 +49,36 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
     setBoardSize({ width, height });
   }, []);
 
-  // Set up resize observer
+  const lastSizeRef = useRef({ width: 0, height: 0 });
+
   useEffect(() => {
+    // 1. Initial calculation
     calculateBoardSize();
-    
-    const resizeObserver = new ResizeObserver(() => {
-      calculateBoardSize();
+
+    // 2. Setup the Observer with the check
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+
+        if (
+          Math.abs(width - lastSizeRef.current.width) < 2 &&
+          Math.abs(height - lastSizeRef.current.height) < 2
+        ) {
+          return; 
+        }
+
+        lastSizeRef.current = { width, height };
+
+        window.requestAnimationFrame(() => {
+          calculateBoardSize();
+        });
+      }
     });
-    
+
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
     }
-    
+
     return () => resizeObserver.disconnect();
   }, [calculateBoardSize]);
 
