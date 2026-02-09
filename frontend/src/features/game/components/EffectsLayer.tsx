@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
 import './EffectsLayer.css';
 
@@ -9,25 +9,44 @@ interface EffectsLayerProps {
 
 export const EffectsLayer = ({ globalEvent, lastMoveDescription }: EffectsLayerProps) => {
     const [showBanner, setShowBanner] = useState(false);
+    const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const lastConfettiAtRef = useRef(0);
 
     // Show banner ephemeral
     useEffect(() => {
-        if (globalEvent) {
-            setTimeout(() => setShowBanner(true), 0);
-            const timer = setTimeout(() => {
-                setShowBanner(false);
-            }, 4000);
-            return () => clearTimeout(timer);
-        } else {
-            setTimeout(() => setShowBanner(false), 0);
+        if (hideTimerRef.current) {
+            clearTimeout(hideTimerRef.current);
+            hideTimerRef.current = null;
         }
+
+        if (globalEvent) {
+            setShowBanner(true);
+            hideTimerRef.current = setTimeout(() => {
+                setShowBanner(false);
+                hideTimerRef.current = null;
+            }, 4000);
+            return () => {
+                if (hideTimerRef.current) {
+                    clearTimeout(hideTimerRef.current);
+                    hideTimerRef.current = null;
+                }
+            };
+        }
+
+        setShowBanner(false);
     }, [globalEvent]);
 
     // Confetti for wins/big moments
     useEffect(() => {
         if (!lastMoveDescription) return;
 
+        const now = Date.now();
+        if (now - lastConfettiAtRef.current < 1500) {
+            return;
+        }
+
         if (lastMoveDescription.includes('WINS')) {
+            lastConfettiAtRef.current = now;
             confetti({
                 particleCount: 200,
                 spread: 100,
@@ -35,6 +54,7 @@ export const EffectsLayer = ({ globalEvent, lastMoveDescription }: EffectsLayerP
                 colors: ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3']
             });
         } else if (lastMoveDescription.includes('goose')) {
+            lastConfettiAtRef.current = now;
             confetti({
                 particleCount: 50,
                 spread: 50,
@@ -42,6 +62,7 @@ export const EffectsLayer = ({ globalEvent, lastMoveDescription }: EffectsLayerP
                 colors: ['#FFD700', '#FFA500'] // Gold colors
             });
         } else if (lastMoveDescription.includes('CHAOS ORB')) {
+            lastConfettiAtRef.current = now;
             // Chaos effect
             confetti({
                 particleCount: 100,
