@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
 import './GameBoard.css';
 import { BOARD_SIZE } from '@campus19/shared';
 import { getEffectType, TILE_INFO } from '../utils/gameData';
@@ -19,7 +19,7 @@ interface GameBoardProps {
 // Board aspect ratio
 const BOARD_ASPECT_RATIO = 10 / 10;
 
-export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDescription, onTileClick, playerEmojis }: GameBoardProps) => {
+const GameBoardBase = ({ players, currentPlayerIndex, globalEvent, lastMoveDescription, onTileClick, playerEmojis }: GameBoardProps) => {
   const [hoveredTile, setHoveredTile] = useState<number | null>(null);
   const { playWin, playMove } = useGameSound(); // removed playSwap if unused or keep if needed
 
@@ -311,6 +311,21 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
 
   const tiles = Array.from({ length: BOARD_SIZE }, (_, i) => i);
 
+  const playersByTile = useMemo(() => {
+    const map = new Map<number, GamePlayer[]>();
+    players.forEach(p => {
+      // Calculate visual position exactly as we do in the render loop
+      const currentVisPos = visualPositions[p.id] ?? p.position;
+      const integerPos = Math.round(currentVisPos);
+      
+      if (!map.has(integerPos)) {
+        map.set(integerPos, []);
+      }
+      map.get(integerPos)!.push(p);
+    });
+    return map;
+  }, [players, visualPositions]);
+
   return (
     <div className="game-board-container" ref={containerRef}>
       <div className="game-board-wrapper">
@@ -461,12 +476,7 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
             const integerPos = Math.round(currentVisPos);
             const coords = getGridCoords(integerPos);
 
-            // Calculate offset if multiple players on same tile
-            // Filter by integer pos
-            const playersOnSameTile = players.filter(p => {
-              const v = visualPositions[p.id] ?? p.position;
-              return Math.round(v) === integerPos;
-            });
+            const playersOnSameTile = playersByTile.get(integerPos) || [];
             const pIndex = playersOnSameTile.findIndex(p => p.id === player.id);
 
              // Calculate cell size based on board size
@@ -528,3 +538,23 @@ export const GameBoard = ({ players, currentPlayerIndex, globalEvent, lastMoveDe
     </div>
   );
 };
+
+export const GameBoard = memo(GameBoardBase, (prevProps, nextProps) => {
+  // Return TRUE if props are equal (DO NOT re-render)
+  // Return FALSE if props are different (DO re-render)
+  
+  return (
+    // 1. Check simple values
+    prevProps.currentPlayerIndex === nextProps.currentPlayerIndex &&
+    prevProps.lastMoveDescription === nextProps.lastMoveDescription &&
+    prevProps.globalEvent === nextProps.globalEvent &&
+    
+    // 2. Check Players Array Reference 
+    // (If gameState doesn't change, this reference stays the same)
+    prevProps.players === nextProps.players &&
+    
+    // 3. Deep compare player emojis (since it's an object)
+    // We use JSON.stringify for a cheap deep comparison of the simple emoji map
+    JSON.stringify(prevProps.playerEmojis) === JSON.stringify(nextProps.playerEmojis)
+  );
+});
