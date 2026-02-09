@@ -20,7 +20,6 @@ interface GameBoardProps {
 const BOARD_ASPECT_RATIO = 10 / 10;
 
 const GameBoardBase = ({ players, currentPlayerIndex, globalEvent, lastMoveDescription, onTileClick, playerEmojis }: GameBoardProps) => {
-  const [hoveredTile, setHoveredTile] = useState<number | null>(null);
   const { playWin, playMove } = useGameSound(); // removed playSwap if unused or keep if needed
 
   const hasWonRef = useRef(false);
@@ -286,7 +285,8 @@ const GameBoardBase = ({ players, currentPlayerIndex, globalEvent, lastMoveDescr
 
   // Use visual position for focus to follow animation smoothly
   const focusPos = focusPlayer ? (visualPositions[focusPlayer.id] ?? focusPlayer.position) : 0;
-  const focusCoords = getGridCoords(Math.round(focusPos)); // Snap to nearest tile for calc
+  const focusTileIndex = Math.round(focusPos);
+  const focusCoords = getGridCoords(focusTileIndex); // Snap to nearest tile for calc
 
   // Calculate zoom origin based on focus tile
   // 9 Columns -> (col-1)/8 * 100%
@@ -306,7 +306,39 @@ const GameBoardBase = ({ players, currentPlayerIndex, globalEvent, lastMoveDescr
   });
 
   // Zoom Level - User requested heavily zoomed on player (approx 3 squares)
-  const zoomScale = isMoving ? 3.0 : 1.0; // 3.0x zoom when moving, 1.0 when idle
+  const focusEffectType = getEffectType(focusTileIndex);
+  const isSpecialFocus = focusEffectType !== 'none' && focusEffectType !== 'piscine';
+  const [isZoomed, setIsZoomed] = useState(false);
+  const zoomTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastZoomTileRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (isMoving) {
+      setIsZoomed(false);
+      return;
+    }
+
+    if (!isSpecialFocus) {
+      setIsZoomed(false);
+      return;
+    }
+
+    if (lastZoomTileRef.current === focusTileIndex) return;
+
+    lastZoomTileRef.current = focusTileIndex;
+    setIsZoomed(true);
+
+    if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current);
+    zoomTimeoutRef.current = setTimeout(() => {
+      setIsZoomed(false);
+    }, 1200);
+
+    return () => {
+      if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current);
+    };
+  }, [isMoving, isSpecialFocus, focusTileIndex]);
+
+  const zoomScale = isZoomed ? 3.0 : 1.0; // Brief zoom on special tile landings
   const inverseScale = 1 / zoomScale;
 
   const tiles = Array.from({ length: BOARD_SIZE }, (_, i) => i);
@@ -393,7 +425,6 @@ const GameBoardBase = ({ players, currentPlayerIndex, globalEvent, lastMoveDescr
             const effectType = getEffectType(tileNumber);
             const tileInfo = TILE_INFO[effectType];
             const isSpecial = effectType !== 'none' && effectType !== 'piscine';
-            const isHovered = hoveredTile === tileNumber;
             const isTopRow = coords.row === 1; // Check if tile is on row 1
             const isWin = tileNumber === BOARD_SIZE - 1;
             const isStart = tileNumber === 0;
@@ -407,8 +438,6 @@ const GameBoardBase = ({ players, currentPlayerIndex, globalEvent, lastMoveDescr
                   gridRow: coords.row,
                 }}
                 onClick={() => onTileClick?.(tileNumber)}
-                onMouseEnter={() => setHoveredTile(tileNumber)}
-                onMouseLeave={() => setHoveredTile(null)}
               >
                 {/* Number scales from top-left to stay in corner but maintain size */}
                 <div
@@ -437,7 +466,7 @@ const GameBoardBase = ({ players, currentPlayerIndex, globalEvent, lastMoveDescr
                   )}
                 </div>
                 {/* Custom Popover */}
-                {isHovered && isSpecial && (
+                {isSpecial && (
                   <div
                     className={`tile-popover ${isTopRow ? 'tile-popover-below' : ''}`}
                     style={{

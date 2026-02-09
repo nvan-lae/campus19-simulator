@@ -1,12 +1,30 @@
 import { useCallback } from 'react';
 
+let sharedAudioContext: AudioContext | null = null;
+
+const getSharedAudioContext = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const AudioContextCtor = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextCtor) return null;
+
+    if (!sharedAudioContext) {
+        sharedAudioContext = new AudioContextCtor();
+    }
+
+    if (sharedAudioContext.state === 'suspended') {
+        sharedAudioContext.resume().catch(() => {
+            // Ignore resume failures (often blocked until user gesture).
+        });
+    }
+
+    return sharedAudioContext;
+};
+
 export const useGameSound = () => {
     const playTone = useCallback((frequency: number, type: OscillatorType, duration: number) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-        if (!AudioContext) return;
+        const ctx = getSharedAudioContext();
+        if (!ctx) return;
 
-        const ctx = new AudioContext();
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
 
@@ -19,8 +37,13 @@ export const useGameSound = () => {
         osc.connect(gain);
         gain.connect(ctx.destination);
 
+        const stopTime = ctx.currentTime + duration;
         osc.start();
-        osc.stop(ctx.currentTime + duration);
+        osc.stop(stopTime);
+        osc.onended = () => {
+            osc.disconnect();
+            gain.disconnect();
+        };
     }, []);
 
     const playMove = () => playTone(300, 'sine', 0.1);
