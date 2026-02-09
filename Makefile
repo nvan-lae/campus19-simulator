@@ -32,6 +32,8 @@ logs:
 
 # Updates dependencies inside running containers (Use this after git pull!)
 update:
+	@echo "$(GREEN)Updating Shared dependencies and building...$(RESET)"
+	@docker-compose -f $(COMPOSE_FILE) exec backend sh -c "cd ../shared && npm install && npm run build"
 	@echo "$(GREEN)Updating Backend dependencies...$(RESET)"
 	@docker-compose -f $(COMPOSE_FILE) exec backend npm install
 	@echo "$(GREEN)Updating Frontend dependencies...$(RESET)"
