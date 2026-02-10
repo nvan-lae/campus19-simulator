@@ -1,4 +1,3 @@
-// backend/src/auth/auth.module.ts
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
@@ -8,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { FortyTwoStrategy } from './strategies/forty-two.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
+import { TwoFactorService } from './two-factor.service';
 
 @Module({
   imports: [
@@ -19,8 +19,14 @@ import { LocalStrategy } from './strategies/local.strategy';
       signOptions: { expiresIn: '1d' },
     }),
   ],
-  providers: [AuthService, FortyTwoStrategy, JwtStrategy, LocalStrategy],
   controllers: [AuthController],
+  providers: [
+    AuthService,
+    TwoFactorService,
+    FortyTwoStrategy,
+    JwtStrategy,
+    LocalStrategy,
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}

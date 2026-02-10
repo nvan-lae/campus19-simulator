@@ -22,3 +22,6 @@ frontend/dist/
 # 5. Docker / Database specific
 postgres-data/
 *.log
+
+Makefile
+.gitignore

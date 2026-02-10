@@ -33,13 +33,16 @@
     "@nestjs/websockets": "^11.1.11",
     "@prisma/client": "^6.19.1",
     "bcrypt": "^6.0.0",
+    "nodemailer": "^8.0.1",
     "passport": "^0.7.0",
     "passport-42": "^1.2.6",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
+    "qrcode": "^1.5.4",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "socket.io": "^4.8.3"
+    "socket.io": "^4.8.3",
+    "speakeasy": "^2.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
