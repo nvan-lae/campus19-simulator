@@ -573,17 +573,11 @@ export const GameBoard = memo(GameBoardBase, (prevProps, nextProps) => {
   // Return FALSE if props are different (DO re-render)
   
   return (
-    // 1. Check simple values
     prevProps.currentPlayerIndex === nextProps.currentPlayerIndex &&
     prevProps.lastMoveDescription === nextProps.lastMoveDescription &&
     prevProps.globalEvent === nextProps.globalEvent &&
-    
-    // 2. Check Players Array Reference 
-    // (If gameState doesn't change, this reference stays the same)
-    prevProps.players === nextProps.players &&
-    
-    // 3. Deep compare player emojis (since it's an object)
-    // We use JSON.stringify for a cheap deep comparison of the simple emoji map
+
+    JSON.stringify(prevProps.players) === JSON.stringify(nextProps.players) &&
     JSON.stringify(prevProps.playerEmojis) === JSON.stringify(nextProps.playerEmojis)
   );
 });

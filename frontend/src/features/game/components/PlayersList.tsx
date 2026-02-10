@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, memo } from 'react';
 import './PlayersList.css';
 import type { GamePlayer } from '../../../types/game';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -11,15 +11,17 @@ interface PlayersListProps {
   onEmojiChange: (playerId: number, emoji: string) => void;
 }
 
-export const PlayersList = ({ players, currentPlayerIndex, playerEmojis, onEmojiChange }: PlayersListProps) => {
+export const PlayersList = memo(({ players, currentPlayerIndex, playerEmojis, onEmojiChange }: PlayersListProps) => {
   const { user } = useAuth();
   const [showPicker, setShowPicker] = useState(false);
 
   // Get list of emojis already used by other players
-  const usedEmojis = Object.entries(playerEmojis)
-    .filter(([playerId]) => Number(playerId) !== user?.id) // Exclude current user
-    .map(([, emoji]) => emoji)
-    .filter(emoji => emoji && emoji.match(/^[\p{Emoji}\p{Extended_Pictographic}]/u)); // Only actual emojis
+  const usedEmojis = useMemo(() => {
+    return Object.entries(playerEmojis)
+      .filter(([playerId]) => Number(playerId) !== user?.id)
+      .map(([, emoji]) => emoji)
+      .filter(emoji => emoji && emoji.match(/^[\p{Emoji}\p{Extended_Pictographic}]/u));
+  }, [playerEmojis, user?.id]);
 
   return (
     <div className="players-list">
@@ -96,4 +98,4 @@ export const PlayersList = ({ players, currentPlayerIndex, playerEmojis, onEmoji
       </div>
     </div>
   );
-};
+});
