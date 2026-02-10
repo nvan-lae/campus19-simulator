@@ -350,15 +350,11 @@ export const GamePage = () => {
 
       {/* Challenge Modals */}
       {hasActiveChallenge && gameState.activeChallenge && myPlayer && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border border-indigo-500/50">
-            <ChallengeModal
-              challenge={gameState.activeChallenge}
-              currentPlayerName={myPlayer.username}
-              onSubmit={submitChallenge}
-            />
-          </div>
-        </div>
+        <ChallengeModal
+            challenge={gameState.activeChallenge}
+            currentPlayerName={myPlayer.username}
+            onSubmit={submitChallenge}
+        />
       )}
 
       {/* Winner Overlay */}
