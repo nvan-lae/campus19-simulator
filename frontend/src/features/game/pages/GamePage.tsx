@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom'; // Added useParams
+import { useParams, useNavigate } from 'react-router-dom';
 import './GamePage.css';
 import { GameBoard } from '../components/GameBoard';
 import { GameControls } from '../components/GameControls';
 import { PlayersList } from '../components/PlayersList';
 import { Shop } from '../components/Shop';
 import { useGameLogic } from '../hooks/useGameLogic';
-import { useSocket } from '../../../contexts/SocketContext'; // Keep hooks together
+import { useSocket } from '../../../contexts/SocketContext';
 import { ChallengeModal } from '../components/ChallengeModal';
 import { ChatWindow } from '../components/ChatWindow';
 import { PredictionPanel } from '../components/PredictionPanel';
@@ -30,7 +30,6 @@ export const GamePage = () => {
     useItem: activateItem,
     payEscape,
     submitChallenge,
-    autoPlayCPU,
   } = useGameLogic();
 
   // Emoji state for all players
@@ -70,19 +69,15 @@ export const GamePage = () => {
 
   // 2. Safe useEffect: Check dependencies carefully
   useEffect(() => {
-    if (!gameState || !autoPlayCPU) return;
+    if (!gameState) return;
 
-    // Only run if it's a CPU turn (example logic, adjust as needed)
     // const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-    // if (currentPlayer.isCpu) { ... }
-
     const timer = setTimeout(() => {
-      autoPlayCPU();
     }, 100);
 
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameState?.currentPlayerIndex, autoPlayCPU]); // Use optional chaining
+  }, [gameState?.currentPlayerIndex]); // Use optional chaining
 
   // 3. All Hooks must be called before early returns
   const [isShopOpen, setIsShopOpen] = useState(false);

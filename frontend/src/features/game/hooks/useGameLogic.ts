@@ -70,10 +70,6 @@ export const useGameLogic = () => {
     socket.emit('send_reaction', { gameId, emoji });
   }, [socket, gameId]);
 
-  const autoPlayCPU = useCallback(() => {
-    // console.log("CPU Auto-play triggered (not implemented)");
-  }, []);
-
   return {
     gameState,
     rollDice,
@@ -84,7 +80,6 @@ export const useGameLogic = () => {
     submitChallenge,
     placeBet,
     sendReaction,
-    autoPlayCPU,
     players: gameState?.players || [],
     currentPlayer: gameState?.players[gameState?.currentPlayerIndex || 0],
     isMyTurn: false, // You can implement logic here: user.id === currentPlayer.id
