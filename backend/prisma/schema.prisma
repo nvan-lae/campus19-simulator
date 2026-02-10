@@ -28,10 +28,10 @@ model User {
   intraId   String?  @unique
 
   // For 2FA
-  isTwoFactorEnabled     Boolean          @default(false)
-  twoFactorMethod        TwoFactorMethod?
-  twoFactorSecret        String?
-  twoFactorTempSecret    String?
+  twoFactorEnabled           Boolean  @default(false)
+  twoFactorSecretEncrypted   String?           // AES-GCM encrypted base64
+  twoFactorRecoveryHashes    String?           // JSON array of bcrypt/argon2 hashes
+  twoFactorConfirmedAt       DateTime?
 
   securityQuestion       String?
   securityAnswerHash     String?
