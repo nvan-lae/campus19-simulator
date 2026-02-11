@@ -81,6 +81,9 @@ shell-frontend:
 shell-db:
 	@$(COMPOSE) -f $(COMPOSE_FILE) exec postgres psql -U postgres -d transcendence_db
 
+env:
+	@sh script/env.sh
+
 # **************************************************************************** #
 #                                 DATABASE                                     #
 # **************************************************************************** #
