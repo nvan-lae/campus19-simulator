@@ -161,13 +161,20 @@ export class AuthController {
   @Get('42/callback')
   @UseGuards(AuthGuard('42'))
   async callback(@Req() req, @Res() res) {
-    const { access_token } = await this.authService.login(req.user);
+    const result = await this.authService.login(req.user);
 
     const frontend = (
       process.env.FRONTEND_URL || 'https://localhost:5173'
     ).replace(/\/$/, '');
 
-    res.redirect(`${frontend}/login?token=${access_token}`);
+    // If 2FA is required, redirect to dedicated 2FA page with userId
+    if (result.twoFactorRequired) {
+      res.redirect(`${frontend}/verify-2fa?userId=${result.userId}`);
+      return;
+    }
+
+    // Otherwise, redirect with access token
+    res.redirect(`${frontend}/login?token=${result.access_token}`);
   }
 
   @Throttle({ default: { limit: 5, ttl: 60000 } })

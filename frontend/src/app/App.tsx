@@ -8,6 +8,7 @@ import { GamePage } from '../features/game/pages/GamePage';
 import { ProfilePage } from '../features/profile/ProfilePage';
 import { LoginPage } from '../features/login/LoginPage';
 import { RegisterPage } from '../features/login/RegisterPage';
+import { TwoFactorPage } from '../features/login/TwoFactorPage';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/home" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/verify-2fa" element={<TwoFactorPage />} />
         <Route
           path="/lobby/:gameId"
           element={

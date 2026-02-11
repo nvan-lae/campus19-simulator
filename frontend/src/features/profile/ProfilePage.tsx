@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Camera, Trophy, Medal, Star, Gamepad2} from 'lucide-react';
+import { Trash2, Camera, Trophy, Medal, Star, Gamepad2, ShieldCheck, Copy, X } from 'lucide-react';
 // CSS imported via index.css
 
 interface MatchPlayer {
@@ -36,6 +36,15 @@ export const ProfilePage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+
+  // 2FA State
+  const [show2FASetup, setShow2FASetup] = useState(false);
+  const [show2FADisable, setShow2FADisable] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
+  const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [is2FALoading, setIs2FALoading] = useState(false);
+  const [twoFactorError, setTwoFactorError] = useState<string | null>(null);
 
   const apiBase = useMemo(() => {
     return import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'https://localhost:3000';
@@ -82,6 +91,92 @@ export const ProfilePage = () => {
       })
       .catch((err) => console.error('Failed to fetch matches:', err));
   }, [apiBase, token]);
+
+  const handle2FAToggle = async (enabled: boolean) => {
+    if (enabled) {
+      setIs2FALoading(true);
+      setTwoFactorError(null);
+      try {
+        const res = await fetch(`${apiBase}/auth/2fa/setup`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error('Failed to generate 2FA setup');
+        const data = await res.json();
+        setQrCodeUrl(data.qrCodeDataURL);
+        setShow2FASetup(true);
+      } catch (err) {
+        setTwoFactorError(err instanceof Error ? err.message : 'Failed to setup 2FA');
+      } finally {
+        setIs2FALoading(false);
+      }
+    } else {
+      setShow2FADisable(true);
+      setVerificationCode('');
+      setTwoFactorError(null);
+    }
+  };
+
+  const handleVerify2FASetup = async () => {
+    if (!verificationCode || verificationCode.length !== 6) {
+      setTwoFactorError('Please enter a valid 6-digit code');
+      return;
+    }
+    setIs2FALoading(true);
+    setTwoFactorError(null);
+    try {
+      const res = await fetch(`${apiBase}/auth/2fa/verify-setup`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: verificationCode }),
+      });
+      if (!res.ok) throw new Error('Invalid verification code');
+      const data = await res.json();
+      if (data.recoveryCodes) {
+        setRecoveryCodes(data.recoveryCodes);
+        updateUser({ twoFactorEnabled: true });
+      }
+    } catch (err) {
+      setTwoFactorError(err instanceof Error ? err.message : 'Verification failed');
+    } finally {
+      setIs2FALoading(false);
+    }
+  };
+
+  const handleDisable2FA = async () => {
+    if (!verificationCode || verificationCode.length !== 6) {
+      setTwoFactorError('Please enter a valid 6-digit code');
+      return;
+    }
+    setIs2FALoading(true);
+    setTwoFactorError(null);
+    try {
+      const res = await fetch(`${apiBase}/auth/2fa/disable`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: verificationCode }),
+      });
+      if (!res.ok) throw new Error('Invalid verification code');
+      updateUser({ twoFactorEnabled: false });
+      setShow2FADisable(false);
+      setVerificationCode('');
+    } catch (err) {
+      setTwoFactorError(err instanceof Error ? err.message : 'Failed to disable 2FA');
+    } finally {
+      setIs2FALoading(false);
+    }
+  };
+
+  const closeSetupModal = () => {
+    setShow2FASetup(false);
+    setRecoveryCodes([]);
+    setVerificationCode('');
+    setQrCodeUrl('');
+    setTwoFactorError(null);
+  };
+
+  const copyRecoveryCodes = () => {
+    navigator.clipboard.writeText(recoveryCodes.join('\n'));
+  };
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
@@ -200,10 +295,127 @@ export const ProfilePage = () => {
             <h1 className="text-3xl font-bold tracking-tight text-white">Player Profile</h1>
             <p className="text-muted-foreground mt-1 text-gray-400">Manage your account settings and view your stats.</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <input 
+                type="checkbox" 
+                className="checkbox checkbox-success"
+                checked={user.twoFactorEnabled || false}
+                onChange={(e) => handle2FAToggle(e.target.checked)}
+                disabled={is2FALoading}
+              />
+              <div className="flex items-center gap-1">
+                <ShieldCheck className={`w-4 h-4 ${user.twoFactorEnabled ? 'text-green-500' : 'text-gray-400'}`} />
+                <p className='text-white'>2FA</p>
+              </div>
+            </div>
             <Badge variant="secondary" className="text-sm px-3 py-1 bg-green-500">Online</Badge>
           </div>
         </div>
+
+        {/* 2FA Setup Modal */}
+        {show2FASetup && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <Card className="w-full max-w-md bg-slate-800 border-slate-700">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5 text-green-500" />
+                    {recoveryCodes.length > 0 ? 'Save Recovery Codes' : 'Setup Two-Factor Authentication'}
+                  </CardTitle>
+                  <button onClick={closeSetupModal} className="text-gray-400 hover:text-white">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {recoveryCodes.length > 0 ? (
+                  <>
+                    <p className="text-sm text-gray-300">
+                      Save these recovery codes in a secure location. You'll need them if you lose access to your authenticator app.
+                    </p>
+                    <div className="bg-slate-900 p-4 rounded-lg space-y-2">
+                      {recoveryCodes.map((code, idx) => (
+                        <div key={idx} className="font-mono text-sm text-white">{code}</div>
+                      ))}
+                    </div>
+                    <Button onClick={copyRecoveryCodes} className="w-full">
+                      <Copy className="w-4 h-4 mr-2" />Copy Codes
+                    </Button>
+                    <Button onClick={closeSetupModal} variant="outline" className="w-full">Done</Button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-gray-300">
+                      Scan this QR code with your authenticator app (Google Authenticator, Authy, 1Password, etc.)
+                    </p>
+                    {qrCodeUrl && (
+                      <div className="flex justify-center bg-white p-4 rounded-lg">
+                        <img src={qrCodeUrl} alt="QR Code" className="w-48 h-48" />
+                      </div>
+                    )}
+                    <div className="space-y-2">
+                      <label className="text-sm text-gray-300">Enter the 6-digit code from your app:</label>
+                      <input
+                        type="text"
+                        maxLength={6}
+                        value={verificationCode}
+                        onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
+                        className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-center text-2xl tracking-widest"
+                        placeholder="000000"
+                      />
+                    </div>
+                    {twoFactorError && (
+                      <div className="text-sm text-red-400 bg-red-900/20 px-3 py-2 rounded-md">{twoFactorError}</div>
+                    )}
+                    <div className="flex gap-2">
+                      <Button onClick={handleVerify2FASetup} disabled={is2FALoading || verificationCode.length !== 6} className="flex-1">
+                        {is2FALoading ? 'Verifying...' : 'Verify & Enable'}
+                      </Button>
+                      <Button onClick={closeSetupModal} variant="outline">Cancel</Button>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* 2FA Disable Modal */}
+        {show2FADisable && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <Card className="w-full max-w-md bg-slate-800 border-slate-700">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-white">Disable Two-Factor Authentication</CardTitle>
+                  <button onClick={() => setShow2FADisable(false)} className="text-gray-400 hover:text-white">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-gray-300">Enter your current 6-digit code to disable 2FA:</p>
+                <input
+                  type="text"
+                  maxLength={6}
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
+                  className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-center text-2xl tracking-widest"
+                  placeholder="000000"
+                />
+                {twoFactorError && (
+                  <div className="text-sm text-red-400 bg-red-900/20 px-3 py-2 rounded-md">{twoFactorError}</div>
+                )}
+                <div className="flex gap-2">
+                  <Button onClick={handleDisable2FA} disabled={is2FALoading || verificationCode.length !== 6} variant="destructive" className="flex-1">
+                    {is2FALoading ? 'Disabling...' : 'Disable 2FA'}
+                  </Button>
+                  <Button onClick={() => setShow2FADisable(false)} variant="outline">Cancel</Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
           {/* User Info Card */}
@@ -339,7 +551,7 @@ export const ProfilePage = () => {
                 </CardHeader>
                 <CardContent>
                   {matches.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+                    <div className="flex flex-col items-center justify-center py-8 text-white">
                       <p>No matches played yet.</p>
                     </div>
                   ) : (
