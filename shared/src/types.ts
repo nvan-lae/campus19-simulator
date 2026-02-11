@@ -13,7 +13,7 @@ export type InventoryItem = {
 
 export type TileEffectType =
   | 'none'
-  | 'goose'
+  | 'eval'
   | 'marioKart'
   | 'stage'
   | 'death'
@@ -73,7 +73,7 @@ export type GameState = {
   gameOver: boolean;
   winner: GamePlayer | null;
   lastMoveDescription: string | null;
-  pendingGooseRoll: boolean;
+  pendingEvalRoll: boolean;
   activeChallenge: ActiveChallenge | null;
   turnCount: number;
   currentGlobalEvent: 'gravity_flux' | 'inflation' | 'windy' | null;

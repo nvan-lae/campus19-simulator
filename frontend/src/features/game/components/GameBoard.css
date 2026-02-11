@@ -139,9 +139,9 @@
   border-color: #e67e22;
 }
 
-.game-tile.goose {
-  background: linear-gradient(135deg, #ff9ff3 0%, #feca57 100%);
-  border-color: #ff6b6b;
+.game-tile.eval {
+  background: linear-gradient(135deg, #2bc53d 0%, #26821c 100%);
+  border-color: #00f629;
   animation: glow 2s infinite alternate;
 }
 
@@ -197,10 +197,9 @@
   color: rgba(255, 255, 255, 0.8);
 }
 
-.game-tile.stage,
 .game-tile.stage {
   background: linear-gradient(135deg, #d2c800 0%, #454b00 100%);
-  border-color: #d63031;
+  border-color: #b4c90f;
 }
 
 .game-tile.death {

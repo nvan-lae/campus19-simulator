@@ -3,7 +3,7 @@ import {
   MAX_PLAYERS,
   COLORS,
   STARTING_COINS,
-  GOOSE_COIN_REWARD,
+  EVAL_COIN_REWARD,
   getTileEffect,
   ESCAPE_COSTS,
   SHOP_ITEMS,
@@ -28,7 +28,7 @@ export class GameRoom {
       gameOver: false,
       winner: null,
       lastMoveDescription: null,
-      pendingGooseRoll: false,
+      pendingEvalRoll: false,
       activeChallenge: null,
       turnCount: 0,
       currentGlobalEvent: null,
@@ -137,7 +137,7 @@ export class GameRoom {
       });
 
       this.state.rollBetResult = { winners, losers, outcome };
-      // Clear bets so they aren't processed again on a re-roll (e.g. goose)
+      // Clear bets so they aren't processed again on a re-roll (e.g. eval)
       this.state.currentTurnBets = [];
     }
 
@@ -158,10 +158,10 @@ export class GameRoom {
     const oldPosition = player.position;
     let newPosition = oldPosition + dice;
 
-    // Handle goose double movement
-    if (this.state.pendingGooseRoll) {
+    // Handle eval double movement
+    if (this.state.pendingEvalRoll) {
       newPosition = oldPosition + dice * 2;
-      this.state.pendingGooseRoll = false;
+      this.state.pendingEvalRoll = false;
     }
 
     // Check for piscineExam tiles in the path and stop at the first one
@@ -201,7 +201,7 @@ export class GameRoom {
       this.state.winner = player;
       this.state.lastMoveDescription = `🎉 ${player.username} reaches tile ${BOARD_SIZE - 1} and WINS!`;
     }
-    else if (!this.state.pendingGooseRoll && !this.state.activeChallenge) {
+    else if (!this.state.pendingEvalRoll && !this.state.activeChallenge) {
       this.nextTurn();
     }
 
@@ -224,10 +224,10 @@ export class GameRoom {
     }
 
     switch (effect) {
-      case 'goose':
-        player.coins += GOOSE_COIN_REWARD;
-        this.state.pendingGooseRoll = true;
-        this.state.lastMoveDescription = `${player.username} landed on a goose! +${GOOSE_COIN_REWARD} coins, roll again to double!`;
+      case 'eval':
+        player.coins += EVAL_COIN_REWARD;
+        this.state.pendingEvalRoll = true;
+        this.state.lastMoveDescription = `${player.username} landed on a good evaluation! +${EVAL_COIN_REWARD} coins, roll again to double!`;
         return position;
 
       case 'marioKart':
@@ -340,7 +340,7 @@ export class GameRoom {
 
     // Clear challenge and move next
     this.state.activeChallenge = null;
-    if (!this.state.pendingGooseRoll) {
+    if (!this.state.pendingEvalRoll) {
       this.nextTurn();
     }
     return this.state;
@@ -424,7 +424,7 @@ export class GameRoom {
 
       case 'extra_roll':
         // Allow another roll after current move
-        this.state.pendingGooseRoll = true;
+        this.state.pendingEvalRoll = true;
         this.state.lastMoveDescription = `${player.username} uses Extra Roll!`;
         break;
 

@@ -110,7 +110,7 @@ export const LobbyPage = () => {
     <div className="min-h-screen bg-slate-900 flex flex-col items-center p-8">
       <div className="w-full max-w-4xl space-y-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
+          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-cyan-400">
             Lobby: {gameId}
           </h1>
           <p className="text-slate-400 mt-2">Waiting for players...</p>

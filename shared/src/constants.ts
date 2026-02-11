@@ -4,10 +4,10 @@ export const BOARD_SIZE = 47;
 export const MAX_PLAYERS = 4;
 export const COLORS = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3'];
 
-export const GOOSE_TILES = [5, 14, 23, 27, 32, 41];
+export const EVAL_TILES = [5, 14, 23, 27, 32, 41];
 export const PISCINE_TILES = [1, 2, 3, 4, 6, 7, 8];
 export const STARTING_COINS = 10;
-export const GOOSE_COIN_REWARD = 5;
+export const EVAL_COIN_REWARD = 5;
 
 export const SPECIAL_TILES: Record<number, TileEffectType> = {
   19: 'marioKart',

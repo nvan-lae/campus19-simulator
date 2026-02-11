@@ -153,7 +153,7 @@ const StaticBoardLayer = memo(({ onTileClick, inverseScale }: StaticBoardLayerPr
                   {tileInfo.emoji} {tileInfo.label}
                 </div>
                 <div className="popover-body">
-                  {effectType === 'goose' && "Double roll + 5 coins!"}
+                  {effectType === 'eval' && "Double roll + 5 coins!"}
                   {effectType === 'marioKart' && "8 Races good for everyone?"}
                   {effectType === 'stage' && "Go back to tile 30"}
                   {effectType === 'death' && "Black Hole - Return to the start"}

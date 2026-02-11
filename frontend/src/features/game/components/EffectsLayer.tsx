@@ -53,14 +53,6 @@ export const EffectsLayer = ({ globalEvent, lastMoveDescription }: EffectsLayerP
                 origin: { y: 0.6 },
                 colors: ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3']
             });
-        } else if (lastMoveDescription.includes('goose')) {
-            lastConfettiAtRef.current = now;
-            confetti({
-                particleCount: 50,
-                spread: 50,
-                origin: { y: 0.7 },
-                colors: ['#FFD700', '#FFA500'] // Gold colors
-            });
         } else if (lastMoveDescription.includes('CHAOS ORB')) {
             lastConfettiAtRef.current = now;
             // Chaos effect

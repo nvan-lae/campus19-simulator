@@ -10,7 +10,7 @@ export interface TileInfo {
 
 export const TILE_INFO: Record<TileEffectType, TileInfo> = {
   none: {},
-  goose: { emoji: '🪿', label: 'Goose' },
+  eval: { emoji: '✅', label: 'Good Evaluation' },
   marioKart: { emoji: '🏎️', label: 'Mario Kart' },
   stage: { emoji: '👨‍💼', label: 'Looking for an internship' },
   death: { emoji: '🕳️', label: 'Black Hole' },
