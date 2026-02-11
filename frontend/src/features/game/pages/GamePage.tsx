@@ -288,7 +288,6 @@ export const GamePage = () => {
               onRoll={handleRoll}
               onMove={handleMove}
               gameOver={gameState.gameOver}
-              onReset={createNewGame}
               disabled={isRollDisabled}
               rollAvailableAt={gameState.rollAvailableAt}
             />
