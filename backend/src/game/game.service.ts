@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GameRoom, GameState } from './game.logic';
+import { GameRoom } from './game.logic';
+import { type GameState } from '@campus19/shared';
 import { User } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 

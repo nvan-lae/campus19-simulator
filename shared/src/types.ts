@@ -6,7 +6,7 @@ export interface ShopItem {
   targetOther: boolean;
 }
 
-export interface InventoryItem {
+export type InventoryItem = {
   itemId: string;
   name: string;
 }
@@ -42,7 +42,7 @@ export interface GameStats {
 }
 
 // Core Game Objects
-export interface GamePlayer {
+export type GamePlayer = {
   id: number;
   username: string;
   color: string;
@@ -54,9 +54,10 @@ export interface GamePlayer {
   stuckOnPiscineExam: boolean;
   hasShield: boolean;
   inventory: InventoryItem[];
+  isReady: boolean;
 }
 
-export interface ActiveChallenge {
+export type ActiveChallenge = {
   playerId: number;
   questionId: string;
   questionText: string;
@@ -65,8 +66,11 @@ export interface ActiveChallenge {
   bets: { playerId: number; prediction: 'success' | 'fail' }[];
 }
 
+export type GameStatus = 'LOBBY' | 'PLAYING' | 'FINISHED';
+
 // The Full Game State
-export interface GameState {
+export type GameState = {
+  status: GameStatus;
   players: GamePlayer[];
   currentPlayerIndex: number;
   diceValue: number | null;
@@ -84,7 +88,7 @@ export interface GameState {
     losers: number[];
     outcome: 'low' | 'high';
   } | null;
-  rollAvailableAt: string | null;
+  rollAvailableAt: number | null;
   turnStartTime: number | null;
   turnTimeLimit: number;
 }
