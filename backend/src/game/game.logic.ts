@@ -87,9 +87,6 @@ export class GameRoom {
     // Check if player needs to skip turns
     if (player.turnsToSkip > 0) {
       player.turnsToSkip--;
-      if (player.turnsToSkip === 0) {
-        player.stuckInWell = false; // Release from well if penalty is paid/served
-      }
       this.state.lastMoveDescription = `${player.username} skips a turn (${player.turnsToSkip} remaining)`;
       this.nextTurn();
       return this.state;
@@ -219,7 +216,7 @@ export class GameRoom {
     // Check if player has shield
     if (
       player.hasShield &&
-      ['inn', 'well', 'prison', 'death'].includes(effect)
+      ['inn', 'death'].includes(effect)
     ) {
       player.hasShield = false;
       this.state.lastMoveDescription = `${player.username}'s shield blocked the ${effect}!`;
@@ -233,32 +230,17 @@ export class GameRoom {
         this.state.lastMoveDescription = `${player.username} landed on a goose! +${GOOSE_COIN_REWARD} coins, roll again to double!`;
         return position;
 
-      case 'bridge':
-        this.state.lastMoveDescription = `${player.username} crossed the bridge from ${position} to 12!`;
-        return 12;
-
       case 'inn':
         player.turnsToSkip = 1;
         this.state.lastMoveDescription = `${player.username} stays at the inn and skips 1 turn`;
-        return position;
-
-      case 'well':
-        player.stuckInWell = true;
-        player.turnsToSkip = 4; // 4 turn penalty instead of stuck forever
-        this.state.lastMoveDescription = `${player.username} fell in the well! Skip 4 turns or pay 10 coins.`;
         return position;
 
       case 'labyrinth':
         this.state.lastMoveDescription = `${player.username} got lost in the labyrinth and goes back to 30!`;
         return 30;
 
-      case 'prison':
-        player.turnsToSkip = 2;
-        this.state.lastMoveDescription = `${player.username} is in prison and skips 2 turns`;
-        return position;
-
       case 'death':
-        this.state.lastMoveDescription = `${player.username} fell into a Black Hole and starts from the piscine!`;
+        this.state.lastMoveDescription = `${player.username} fell into a Black Hole and returns to the start!`;
         return 0;
 
       case 'challenge': {
@@ -366,7 +348,7 @@ export class GameRoom {
     return this.state;
   }
 
-  // Escape from well, prison, or death by paying coins
+  // Escape from the black hole by paying coins
   payToEscape(userId: number): GameState {
     if (this.state.status !== 'PLAYING') throw new Error('Game not started');
 
@@ -386,11 +368,7 @@ export class GameRoom {
     player.coins -= cost;
 
     // Logic to clear penalty
-    if (effect === 'well' || effect === 'prison') {
-      player.turnsToSkip = 0;
-      player.stuckInWell = false;
-      this.state.lastMoveDescription = `${player.username} paid ${cost} coins to escape the ${effect}!`;
-    } else if (effect === 'death') {
+    if (effect === 'death') {
       // For black hole, they can pay to NOT restart - keep position
       this.state.lastMoveDescription = `${player.username} paid ${cost} coins to escape the Black Hole!`;
     }
@@ -615,7 +593,6 @@ export class GameRoom {
       order: order,
       coins: STARTING_COINS,
       turnsToSkip: 0,
-      stuckInWell: false,
       stuckOnPiscineExam: false,
       hasShield: false,
       inventory: [],

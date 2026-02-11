@@ -188,15 +188,6 @@
   }
 }
 
-.game-tile.bridge {
-  background: linear-gradient(135deg, #c9a11b 0%, #8a7f2d 100%);
-  border-color: #e3af13;
-}
-
-.game-tile.bridge .tile-number {
-  color: rgba(255, 255, 255, 0.8);
-}
-
 .game-tile.inn {
   background: linear-gradient(135deg, #fab1a0 0%, #e17055 100%);
   border-color: #d63031;
@@ -206,22 +197,8 @@
   color: rgba(255, 255, 255, 0.8);
 }
 
-.game-tile.well {
-  background: linear-gradient(135deg, #636e72 0%, #2d3436 100%);
-  border-color: #d63031;
-}
-
 .game-tile.labyrinth {
   background: linear-gradient(135deg, #d2c800 0%, #454b00 100%);
-  border-color: #d63031;
-}
-
-.game-tile.prison {
-  background: repeating-linear-gradient(45deg,
-      #bdc3c7,
-      #bdc3c7 10px,
-      #7f8c8d 10px,
-      #7f8c8d 20px);
   border-color: #d63031;
 }
 
@@ -346,7 +323,7 @@
   border-color: rgba(22, 33, 62, 0.95) transparent transparent transparent;
 }
 
-/* Popover that appears below the tile (for piscine) */
+/* Popover that appears below the tile (for top row tiles) */
 .tile-popover-below {
   bottom: auto;
   top: 110%;

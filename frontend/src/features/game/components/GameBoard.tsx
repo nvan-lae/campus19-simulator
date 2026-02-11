@@ -154,12 +154,9 @@ const StaticBoardLayer = memo(({ onTileClick, inverseScale }: StaticBoardLayerPr
                 </div>
                 <div className="popover-body">
                   {effectType === 'goose' && "Double roll + 5 coins!"}
-                  {effectType === 'bridge' && "Jump ahead to tile 12"}
                   {effectType === 'inn' && "Skip 1 turn to rest"}
-                  {effectType === 'well' && "Stuck until rescue or pay 10 coins"}
                   {effectType === 'labyrinth' && "Go back to tile 30"}
-                  {effectType === 'prison' && "Skip 2 turns or pay 15 coins"}
-                  {effectType === 'death' && "Black Hole - Restart at the piscine"}
+                  {effectType === 'death' && "Black Hole - Return to the start"}
                   {effectType === 'challenge' && "Coding Challenge! Win coins!"}
                   {effectType === 'piscineExam' && "Piscine Exam! Pass to be able to go to the next tile."}
                 </div>

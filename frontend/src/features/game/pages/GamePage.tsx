@@ -28,7 +28,6 @@ export const GamePage = () => {
     movePlayer,
     purchaseItem,
     useItem: activateItem,
-    payEscape,
     submitChallenge,
   } = useGameLogic();
 
@@ -334,7 +333,6 @@ export const GamePage = () => {
                   activateItem(itemId, targetId);
                   setIsShopOpen(false);
                 }}
-                onPayEscape={payEscape}
                 disabled={gameState.gameOver}
                 currentGlobalEvent={gameState.currentGlobalEvent}
               />

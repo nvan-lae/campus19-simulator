@@ -14,11 +14,8 @@ export type InventoryItem = {
 export type TileEffectType =
   | 'none'
   | 'goose'
-  | 'bridge'
   | 'inn'
-  | 'well'
   | 'labyrinth'
-  | 'prison'
   | 'death'
   | 'challenge'
   | 'piscineExam'
@@ -50,7 +47,6 @@ export type GamePlayer = {
   order: number;
   coins: number;
   turnsToSkip: number;
-  stuckInWell: boolean;
   stuckOnPiscineExam: boolean;
   hasShield: boolean;
   inventory: InventoryItem[];

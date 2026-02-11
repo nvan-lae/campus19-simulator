@@ -50,11 +50,6 @@ export const useGameLogic = () => {
     socket.emit('use_item', { gameId, itemId, targetPlayerId });
   }, [socket, gameId]);
 
-  const payEscape = useCallback(() => {
-    if (!socket || !gameId) return;
-    socket.emit('pay_escape', { gameId });
-  }, [socket, gameId]);
-
   const submitChallenge = useCallback((answerIndex: number) => {
     if (!socket || !gameId) return;
     socket.emit('submit_challenge', { gameId, answerIndex });
@@ -76,7 +71,6 @@ export const useGameLogic = () => {
     movePlayer,
     purchaseItem,
     useItem,
-    payEscape,
     submitChallenge,
     placeBet,
     sendReaction,

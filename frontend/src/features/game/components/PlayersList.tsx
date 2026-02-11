@@ -78,8 +78,7 @@ export const PlayersList = memo(({ players, currentPlayerIndex, playerEmojis, on
                   {player.username}
                 <div className="status-icons">
                   {player.hasShield && <span title="Shielded">🛡️</span>}
-                  {player.stuckInWell && <span title="Stuck in Well">🕳️</span>}
-                  {player.turnsToSkip > 0 && !player.stuckInWell && (
+                  {player.turnsToSkip > 0 && (
                     <span title={`Skipping ${player.turnsToSkip} turn(s)`}>
                       {player.turnsToSkip === 1 ? '💤' : '⛓️'}
                     </span>

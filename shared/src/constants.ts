@@ -10,7 +10,6 @@ export const STARTING_COINS = 10;
 export const GOOSE_COIN_REWARD = 5;
 
 export const SPECIAL_TILES: Record<number, TileEffectType> = {
-  10: 'bridge',
   19: 'inn',
   42: 'labyrinth',
   34: 'death',
@@ -66,8 +65,6 @@ export const SHOP_ITEMS: ShopItem[] = [
 
 // Escape costs for special tiles
 export const ESCAPE_COSTS: Partial<Record<TileEffectType, number>> = {
-  well: 10,
-  prison: 15,
   death: 20,
 };
 
