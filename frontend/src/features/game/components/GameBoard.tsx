@@ -84,27 +84,6 @@ const getGridCoords = (index: number) => {
   return { col: 6, row: 4 }; // WIN tile
 };
 
-const getDirectionArrow = (tileNumber: number): string | null => {
-  if (tileNumber >= BOARD_SIZE) return null; 
-  
-  const current = getGridCoords(tileNumber);
-  const next = getGridCoords(tileNumber + 1);
-  
-  const dx = next.col - current.col;
-  const dy = next.row - current.row;
-  
-  if (dx > 0 && dy === 0) return '→';
-  if (dx < 0 && dy === 0) return '←';
-  if (dx === 0 && dy > 0) return '↓';
-  if (dx === 0 && dy < 0) return '↑';
-  if (dx > 0 && dy < 0) return '↗';
-  if (dx > 0 && dy > 0) return '↘';
-  if (dx < 0 && dy < 0) return '↖';
-  if (dx < 0 && dy > 0) return '↙';
-  
-  return null;
-};
-
 // --- StaticBoardLayer ---
 // This component only re-renders when boardSize or scale changes, 
 // IGNORING player movements/animations.
@@ -119,42 +98,6 @@ const StaticBoardLayer = memo(({ onTileClick, inverseScale }: StaticBoardLayerPr
 
   return (
     <>
-      {/* Path Connectors */}
-      {tiles.slice(0, -1).map((tileNumber) => {
-        const current = getGridCoords(tileNumber);
-        const next = getGridCoords(tileNumber + 1);
-        const arrow = getDirectionArrow(tileNumber);
-        
-        if (!arrow) return null;
-        
-        const dx = next.col - current.col;
-        const dy = next.row - current.row;
-        
-        let positionClass = '';
-        if (dx > 0) positionClass = 'edge-right';
-        else if (dx < 0) positionClass = 'edge-left';
-        else if (dy > 0) positionClass = 'edge-bottom';
-        else if (dy < 0) positionClass = 'edge-top';
-        
-        return (
-          <div
-            key={`connector-${tileNumber}`}
-            className={`path-connector ${positionClass}`}
-            style={{
-              gridColumn: current.col,
-              gridRow: current.row,
-            }}
-          >
-            <span 
-              className="connector-arrow"
-              style={{ transform: `scale(${inverseScale})` }}
-            >
-              {arrow}
-            </span>
-          </div>
-        );
-      })}
-
       {/* Tiles */}
       {tiles.map((tileNumber) => {
         const coords = getGridCoords(tileNumber);
@@ -433,7 +376,7 @@ const GameBoardBase = ({ players, currentPlayerIndex, globalEvent, lastMoveDescr
             transition: 'transform-origin 0.5s ease, transform 0.5s ease',
           }}
         >
-          {/* STATIC LAYER: Tiles and Path Connectors */}
+          {/* STATIC LAYER: Tiles */}
           <StaticBoardLayer 
             onTileClick={onTileClick}
             inverseScale={inverseScale}

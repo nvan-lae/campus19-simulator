@@ -54,7 +54,7 @@
   width: 100%;
   /* Fill grid cell */
   height: 100%;
-  background: linear-gradient(135deg, #e0e0e0 0%, #bebebe 100%);
+  background: linear-gradient(135deg, #275f98 0%, #414762 100%);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -63,13 +63,17 @@
   position: relative;
   /* Grid items relative by default */
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  border: 3px solid #95a5a6;
+  border: 3px solid #23494c;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-  cursor: help;
+  cursor: default;
   z-index: 10;
 }
 
-.game-tile:hover {
+.game-tile.special-tile {
+  cursor: help;
+}
+
+.game-tile.special-tile:hover {
   z-index: 50;
   transform: scale(1.15) !important;
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
@@ -85,7 +89,7 @@
 .tile-number {
   font-size: 11px;
   font-weight: 900;
-  color: #7f8c8d;
+  color: #ffffff;
   position: absolute;
   top: 4px;
   left: 6px;
@@ -93,63 +97,6 @@
   /* Fixed size - doesn't scale with container */
   line-height: 1;
   white-space: nowrap;
-}
-
-/* Path Connector Arrows Between Tiles */
-.path-connector {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  z-index: 15;
-  width: 100%;
-  height: 100%;
-}
-
-/* Position arrow at tile edges */
-.path-connector.edge-right {
-  justify-content: flex-end;
-  align-items: center;
-}
-
-.path-connector.edge-left {
-  justify-content: flex-start;
-  align-items: center;
-}
-
-.path-connector.edge-bottom {
-  justify-content: center;
-  align-items: flex-end;
-}
-
-.path-connector.edge-top {
-  justify-content: center;
-  align-items: flex-start;
-}
-
-.connector-arrow {
-  position: absolute;
-  font-size: 18px;
-  font-weight: bold;
-  color: rgba(255, 255, 255, 0.7);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.path-connector.edge-right .connector-arrow {
-  right: -10px;
-}
-
-.path-connector.edge-left .connector-arrow {
-  left: -10px;
-}
-
-.path-connector.edge-bottom .connector-arrow {
-  bottom: -10px;
-}
-
-.path-connector.edge-top .connector-arrow {
-  top: -10px;
 }
 
 .tile-emoji {
@@ -242,13 +189,21 @@
 }
 
 .game-tile.bridge {
-  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
-  border-color: #0984e3;
+  background: linear-gradient(135deg, #c9a11b 0%, #8a7f2d 100%);
+  border-color: #e3af13;
+}
+
+.game-tile.bridge .tile-number {
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .game-tile.inn {
   background: linear-gradient(135deg, #fab1a0 0%, #e17055 100%);
   border-color: #d63031;
+}
+
+.game-tile.inn .tile-number {
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .game-tile.well {
@@ -287,9 +242,23 @@
 }
 
 .game-tile.piscine {
-  background: linear-gradient(135deg, #c2c2c2 0%, #444444 100%);
+  background: linear-gradient(135deg, #2887e6 0%, #444444 100%);
   border: 3px solid #313131;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.game-tile.piscine .tile-number {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.game-tile.piscineExam {
+  background: linear-gradient(135deg, #6dd5fa 0%, #68b6eb 100%);
+  border-color: #1b4f72;
+  box-shadow: 0 0 12px rgba(41, 128, 185, 0.6);
+}
+
+.game-tile.piscineExam .tile-number {
+  color: rgba(255, 255, 255, 0.85);
 }
 
 /* Player Tokens */
@@ -361,7 +330,7 @@
   transition: opacity 0.15s ease-out, visibility 0.15s ease-out;
 }
 
-.game-tile:hover .tile-popover {
+.game-tile.special-tile:hover .tile-popover {
   opacity: 1;
   visibility: visible;
 }
