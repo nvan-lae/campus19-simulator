@@ -276,6 +276,8 @@ export const ProfilePage = () => {
     return null;
   }
 
+  const highestCoins = matches.length > 0 ? Math.max(...matches.map(m => m.coins)) : 0;
+
   const userInitial = user.username?.charAt(0).toUpperCase() || '?';
   const defaultAvatarSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%234f46e5;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%237c3aed;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='200' height='200' fill='url(%23grad)'/%3E%3Ccircle cx='100' cy='60' r='30' fill='white'/%3E%3Cpath d='M 40 130 Q 40 100 100 100 Q 160 100 160 130 L 160 180 Q 160 200 100 200 Q 40 200 40 180 Z' fill='white'/%3E%3Ctext x='100' y='80' font-size='44' font-weight='bold' fill='%234f46e5' text-anchor='middle' dominant-baseline='middle'%3E${userInitial}%3C/text%3E%3C/svg%3E`;
 
@@ -295,20 +297,21 @@ export const ProfilePage = () => {
             <h1 className="text-3xl font-bold tracking-tight text-white">Player Profile</h1>
             <p className="text-muted-foreground mt-1 text-gray-400">Manage your account settings and view your stats.</p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <input 
-                type="checkbox" 
-                className="checkbox checkbox-success"
-                checked={user.twoFactorEnabled || false}
-                onChange={(e) => handle2FAToggle(e.target.checked)}
-                disabled={is2FALoading}
-              />
-              <div className="flex items-center gap-1">
-                <ShieldCheck className={`w-4 h-4 ${user.twoFactorEnabled ? 'text-green-500' : 'text-gray-400'}`} />
-                <p className='text-white'>2FA</p>
-              </div>
-            </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => handle2FAToggle(!user.twoFactorEnabled)}
+              disabled={is2FALoading}
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-full border transition-all hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed ${
+                user.twoFactorEnabled 
+                  ? 'bg-green-500 border-green-600 text-secondary-foreground' 
+                  : 'bg-red-500 border-red-600 text-white'
+              }`}
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span className="text-sm font-medium">
+                2FA {user.twoFactorEnabled ? 'Enabled' : 'Disabled'}
+              </span>
+            </button>
             <Badge variant="secondary" className="text-sm px-3 py-1 bg-green-500">Online</Badge>
           </div>
         </div>
@@ -540,7 +543,7 @@ export const ProfilePage = () => {
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-border">
                     <span className="text-gray-400">Highest Coins</span>
-                    <span className="font-mono font-medium text-white">Coming Soon</span>
+                    <span className="font-mono font-medium text-white">{highestCoins} 🪙</span>
                   </div>
                 </CardContent>
               </Card>
@@ -557,7 +560,7 @@ export const ProfilePage = () => {
                   ) : (
                     <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
                       {matches.map((match) => (
-                        <div key={match.id} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                        <div key={match.id} className="flex justify-between items-center p-3 bg-slate-700 rounded-lg">
                           <div className="flex items-center gap-3">
                             <div
                               className={`w-2 h-2 rounded-full ${match.isWinner ? 'bg-green-500' : 'bg-red-500'
@@ -567,17 +570,17 @@ export const ProfilePage = () => {
                               <span className="font-medium block">
                                 {match.isWinner ? 'Victory' : `Rank #${match.rank}`}
                               </span>
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-xs text-gray-300">
                                 {match.coins} coins
                               </span>
                             </div>
                           </div>
                           <div className="text-right">
-                            <span className="text-xs text-muted-foreground block">
+                            <span className="text-xs text-gray-300 block">
                               {new Date(match.endedAt).toLocaleDateString()}
                             </span>
-                            <span className="text-[10px] text-muted-foreground">
-                              {new Date(match.endedAt).toLocaleTimeString()}
+                            <span className="text-[10px] text-gray-300">
+                              {new Date(match.endedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                           </div>
                         </div>
