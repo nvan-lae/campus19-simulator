@@ -358,9 +358,15 @@ export const GamePage = () => {
           </div>
           <button
             onClick={createNewGame}
-            className="bg-white text-indigo-600 font-black py-4 px-12 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all"
+            className="mt-4 bg-white text-indigo-600 font-black py-4 px-12 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all"
           >
             PLAY AGAIN
+          </button>
+          <button
+            onClick={() => navigate('/')}
+            className="mt-4 bg-white text-indigo-600 font-black py-4 px-12 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all"
+          >
+            GO TO HOME
           </button>
         </div>
       )}
