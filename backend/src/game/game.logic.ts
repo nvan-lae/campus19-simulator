@@ -216,7 +216,7 @@ export class GameRoom {
     // Check if player has shield
     if (
       player.hasShield &&
-      ['MarioKart', 'death'].includes(effect)
+      ['marioKart', 'death'].includes(effect)
     ) {
       player.hasShield = false;
       this.state.lastMoveDescription = `${player.username}'s shield blocked the ${effect}!`;
@@ -232,11 +232,11 @@ export class GameRoom {
 
       case 'marioKart':
         player.turnsToSkip = 1;
-        this.state.lastMoveDescription = `${player.username} stays at the Mario Kart and skips 1 turn`;
+        this.state.lastMoveDescription = `${player.username} starts playing Mario Kart and skips 1 turn`;
         return position;
 
       case 'stage':
-        this.state.lastMoveDescription = `${player.username} is looking for the stage and goes back to 30!`;
+        this.state.lastMoveDescription = `${player.username} is looking for an internship and goes back to 30!`;
         return 30;
 
       case 'death':
@@ -316,16 +316,14 @@ export class GameRoom {
           if (bettor) bettor.coins += 5; // Fixed reward for simplicity
         } else {
           const bettor = this.state.players.find((p) => p.id === bet.playerId);
-          if (bettor) bettor.coins = Math.max(0, bettor.coins - 5);
+          if (bettor) bettor.coins -= 5;
         }
       });
     } else {
       // For piscineExam, move player back 1 tile
       if (isPiscineExam) {
-        player.position = Math.max(0, player.position - 1);
+        player.position =  player.position - 1;
         this.state.lastMoveDescription = `❌ Wrong! ${player.username} moves back 1 tile. The correct answer was: ${question.options[question.correctIndex]}`;
-      } else {
-        this.state.lastMoveDescription = `❌ Wrong! The correct answer was: ${question.options[question.correctIndex]}`;
       }
       
       // Payout bets (FAIL)
@@ -335,7 +333,7 @@ export class GameRoom {
           if (bettor) bettor.coins += 5;
         } else {
           const bettor = this.state.players.find((p) => p.id === bet.playerId);
-          if (bettor) bettor.coins = Math.max(0, bettor.coins - 5);
+          if (bettor) bettor.coins -= 5;
         }
       });
     }
@@ -514,44 +512,7 @@ export class GameRoom {
       const newEvent = events[Math.floor(Math.random() * events.length)];
       this.state.currentGlobalEvent = newEvent;
       this.state.lastMoveDescription = `🌍 GLOBAL EVENT: ${newEvent.toUpperCase()}! (Lasts 10 turns)`;
-    } else if (this.state.turnCount % 10 === 0 && this.state.currentPlayerIndex === 0) {
-      // Logic adjustment: The above condition sets it at turn % 10 == 0.
-      // But if we want it to LAST 10 turns, we need to clear it appropriately.
-      // If we set it at 10, 20, 30...
-      // We should probably check expiry. Simpler approach:
-      // If turnCount % 10 is 0 -> START event.
-      // If turnCount % 10 is 5 -> END event (if we want 5 turns) or keep it until next start?
-      // The comment said "Lasts 10 turns". So it runs for the whole block?
-      // If it runs for the whole block, when does it clear?
-      // If we want it to clear, maybe we set it at X and clear at X+10.
-      // Let's assume we want 50% uptime or 100% uptime? "Lasts 10 turns" implies it ends.
-      // Let's make it last 5 turns.
     }
-
-    // Fix: Set/Clear logic was confusing. Let's make it explicit.
-    // Event starts at turn 10, 20, 30...
-    // Event ends at turn 19, 29, 39... (9 turns duration)
-    // To make it 10 turns: Start at 10, End at 20 (overlap?).
-    // Better: Start at turn % 20 === 0. End at turn % 20 === 10. (10 turns on, 10 turns off).
-
-    // Reverting to the requested fix: "current set/clear logic results in a 9-turn duration... Fix the off-by-one"
-    // Original code: set at %10 === 0, clear at %10 === 9.
-    // 0 -> set. 1..8 -> active. 9 -> clear.
-    // Turns active: 0, 1, 2, 3, 4, 5, 6, 7, 8. (9 turns).
-    // Review requires "Lasts 10 turns".
-    // So we should NOT clear at 9 if we want it to last until the next one replaces it?
-    // Or if we want periods of NO event. 
-    // If the message says "Lasts 10 turns", and it repeats every 10 turns, it means it is ALWAYS on (just changes).
-    // If we want it to toggle, say "Every 20 turns, lasts 10 turns".
-
-    // Let's IMPLEMENT: Change periodically every 10 turns.
-    // So we never clear it, just overwrite it? Or clear it?
-    // User message: "but the current set/clear logic results in a 9-turn duration (set at turn 10, cleared at turn 19)."
-    // Fix: Remove the clear logic if we want it to last until the next 10th turn.
-    // OR if we want a gap, adjust the numbers.
-    // Assuming "Lasts 10 turns" means we want it to encompass the full decagon of turns.
-    // But then there is no "clear".
-    // If we remove the 'else if' block, it persists until overwritten.
 
     if (this.state.turnCount > 0 && this.state.turnCount % 10 === 0) {
       const events: ('gravity_flux' | 'inflation' | 'windy')[] = [
@@ -563,12 +524,7 @@ export class GameRoom {
       this.state.currentGlobalEvent = newEvent;
       this.state.lastMoveDescription = `🌍 GLOBAL EVENT: ${newEvent.toUpperCase()}! (Lasts 10 turns)`;
     }
-    // Removed the "clear at 9" logic so it lasts full 10 turns until next one triggers.
-    // Wait, if we don't clear it, it stays forever. And at 10 it changes.
-    // This effectively makes it last 10 turns.
 
-
-    // Bounty Logic: Update every turn
     const sorted = [...this.state.players].sort(
       (a, b) => a.position - b.position,
     );
@@ -618,8 +574,6 @@ export class GameRoom {
       throw new Error('Already placed a bet');
 
     challenge.bets.push({ playerId: userId, prediction });
-    // DEDUCT COST? Maybe free to bet for now to encourage it?
-    // Let's make it risk/reward: win=5, lose=-5 (implemented in resolution)
 
     return this.state;
   }

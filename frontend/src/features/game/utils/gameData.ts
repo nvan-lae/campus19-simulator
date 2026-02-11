@@ -12,7 +12,7 @@ export const TILE_INFO: Record<TileEffectType, TileInfo> = {
   none: {},
   goose: { emoji: '🪿', label: 'Goose' },
   marioKart: { emoji: '🏎️', label: 'Mario Kart' },
-  stage: { emoji: '👨‍💼', label: 'Looking for Stage' },
+  stage: { emoji: '👨‍💼', label: 'Looking for an internship' },
   death: { emoji: '🕳️', label: 'Black Hole' },
   challenge: { emoji: '👾', label: 'Code' },
   mystery: { emoji: '❓', label: 'Mystery' },
