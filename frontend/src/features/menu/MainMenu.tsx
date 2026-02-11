@@ -35,7 +35,7 @@ export const MainMenu = () => {
         fetchLobbies();
         const interval = setInterval(fetchLobbies, 5000); // Poll every 5 seconds
         return () => clearInterval(interval);
-    }, [token]);
+    }, [token, API_URL]);
 
     const createGame = async () => {
         try {

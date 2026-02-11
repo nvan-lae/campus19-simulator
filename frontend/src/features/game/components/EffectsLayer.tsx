@@ -9,31 +9,48 @@ interface EffectsLayerProps {
 
 export const EffectsLayer = ({ globalEvent, lastMoveDescription }: EffectsLayerProps) => {
     const [showBanner, setShowBanner] = useState(false);
+    const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastConfettiAtRef = useRef(0);
 
     // Show banner ephemeral
     useEffect(() => {
+        if (showTimerRef.current) {
+            clearTimeout(showTimerRef.current);
+            showTimerRef.current = null;
+        }
+
         if (hideTimerRef.current) {
             clearTimeout(hideTimerRef.current);
             hideTimerRef.current = null;
         }
 
         if (globalEvent) {
-            setShowBanner(true);
+            showTimerRef.current = setTimeout(() => {
+                setShowBanner(true);
+                showTimerRef.current = null;
+            }, 0);
             hideTimerRef.current = setTimeout(() => {
                 setShowBanner(false);
                 hideTimerRef.current = null;
             }, 4000);
-            return () => {
-                if (hideTimerRef.current) {
-                    clearTimeout(hideTimerRef.current);
-                    hideTimerRef.current = null;
-                }
-            };
+        } else {
+            showTimerRef.current = setTimeout(() => {
+                setShowBanner(false);
+                showTimerRef.current = null;
+            }, 0);
         }
 
-        setShowBanner(false);
+        return () => {
+            if (showTimerRef.current) {
+                clearTimeout(showTimerRef.current);
+                showTimerRef.current = null;
+            }
+            if (hideTimerRef.current) {
+                clearTimeout(hideTimerRef.current);
+                hideTimerRef.current = null;
+            }
+        };
     }, [globalEvent]);
 
     // Confetti for wins/big moments

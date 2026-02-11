@@ -30,28 +30,24 @@ export const GameControls = ({
 }: GameControlsProps) => {
   const getDiceFace = (value: number) => DICE_FACES[value - 1] || '🎲';
 
-  const [secondsLeft, setSecondsLeft] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    if (!rollAvailableAt) {
-      setSecondsLeft(0);
-      return;
-    }
+    if (!rollAvailableAt) return;
 
-    const targetTime = Number(rollAvailableAt);
-    
-    const updateTimer = () => {
-      const now = Date.now();
-      const diff = Math.ceil((targetTime - now) / 1000);
-      setSecondsLeft(diff > 0 ? diff : 0);
+    const updateTimer = () => setNow(Date.now());
+    const timeout = setTimeout(updateTimer, 0);
+    const interval = setInterval(updateTimer, 1000);
+
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
     };
-
-    updateTimer(); // Run immediately
-    const interval = setInterval(updateTimer, 1000); // Run every second
-
-    return () => clearInterval(interval);
   }, [rollAvailableAt]);
 
+  const secondsLeft = rollAvailableAt
+    ? Math.max(0, Math.ceil((Number(rollAvailableAt) - now) / 1000))
+    : 0;
   const isTimeLocked = secondsLeft > 0;
 
   return (
