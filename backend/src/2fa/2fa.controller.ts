@@ -8,7 +8,7 @@ export class TwoFaController {
 
   @UseGuards(AuthGuard('jwt'))
   @Post('enroll')
-  async enroll(@Req() req) {
+  async enroll() {
     return this.twofa.enroll();
   }
 
