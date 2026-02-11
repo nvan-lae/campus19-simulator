@@ -5,30 +5,42 @@ describe('GameRoom Logic', () => {
     let gameRoom: GameRoom;
     const mockUser1 = {
         id: 1,
-        username: 'Player1',
         email: 'p1@test.com',
+        username: 'Player1',
         password: 'pw',
         avatarUrl: null,
-        victories: 0,
         intraId: null,
-        isTwoFactorEnabled: false,
-        twoFactorSecret: null,
+      
+        twoFactorEnabled: false,
+        twoFactorSecretEncrypted: null,
+        twoFactorRecoveryHashes: null,
+        twoFactorConfirmedAt: null,
+        securityQuestion: null,
+        securityAnswerHash: null,
+      
         createdAt: new Date(),
         updatedAt: new Date(),
-    };
-    const mockUser2 = {
+      };
+      
+      const mockUser2 = {
         id: 2,
-        username: 'Player2',
         email: 'p2@test.com',
+        username: 'Player2',
         password: 'pw',
         avatarUrl: null,
-        victories: 0,
         intraId: null,
-        isTwoFactorEnabled: false,
-        twoFactorSecret: null,
+      
+        twoFactorEnabled: false,
+        twoFactorSecretEncrypted: null,
+        twoFactorRecoveryHashes: null,
+        twoFactorConfirmedAt: null,
+        securityQuestion: null,
+        securityAnswerHash: null,
+      
         createdAt: new Date(),
         updatedAt: new Date(),
-    };
+      };
+      
 
     beforeEach(() => {
         gameRoom = new GameRoom('test-room');

@@ -1,7 +1,9 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import * as speakeasy from 'speakeasy';
 import * as qrcode from 'qrcode';
+import * as bcrypt from 'bcrypt';
+import { randomBytes, createCipheriv, createDecipheriv } from 'crypto';
 
 @Injectable()
 export class TwoFactorService {
@@ -20,84 +22,83 @@ export class TwoFactorService {
     if (!user) {
       throw new UnauthorizedException();
     }
-
-    const issuer = process.env.TWO_FA_ISSUER ?? 'Campus19 Simulator';
-
+    
+    if (user.twoFactorEnabled) {
+      throw new BadRequestException('2FA already enabled');
+    }    
+    const issuer = 'Campus19 Simulator';
+  
     const secret = speakeasy.generateSecret({
       length: 20,
-      name: `${issuer}:${user.email ?? user.username}`,
+      name: `${issuer}:${user.email}`,
       issuer,
     });
-
-    // Save TEMP secret only
+  
+    const encrypted = this.encrypt(secret.base32);
+  
     await this.prisma.user.update({
       where: { id: userId },
       data: {
-        twoFactorTempSecret: secret.base32,
+        twoFactorSecretEncrypted: encrypted,
+        twoFactorEnabled: false,
       },
     });
-
+  
     const qrCodeDataURL = await qrcode.toDataURL(secret.otpauth_url);
-
+  
     return {
       otpauthUrl: secret.otpauth_url,
       qrCodeDataURL,
-      ...(process.env.NODE_ENV !== 'production' && {
-        base32: secret.base32,
-      }),
     };
   }
+  
 
-  /**
-   * Verify a TOTP code (setup or login)
-   */
+  /*
+  * Verify a TOTP code (setup or login)
+  */
   async verifyTotpCodeForUser(
     userId: number,
     token: string,
     purpose: 'setup' | 'login',
-  ): Promise<boolean> {
+  ): Promise<boolean | { recoveryCodes: string[] }> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
-
-    if (!user) {
+  
+    if (!user || !user.twoFactorSecretEncrypted) {
       return false;
     }
-
-    const secret =
-      purpose === 'setup'
-        ? user.twoFactorTempSecret
-        : user.twoFactorSecret;
-
-    if (!secret) {
-      return false;
-    }
-
+  
+    const decryptedSecret = this.decrypt(user.twoFactorSecretEncrypted);
+  
     const isValid = speakeasy.totp.verify({
-      secret,
+      secret: decryptedSecret,
       encoding: 'base32',
       token,
-      window: Number(process.env.TWO_FA_CODE_WINDOW ?? 1),
+      window: 1,
     });
-
-    if (!isValid) {
-      return false;
-    }
-
+  
+    if (!isValid) return false;
+  
     if (purpose === 'setup') {
+      const { codes, hashes } = await this.generateRecoveryCodes();
+  
       await this.prisma.user.update({
         where: { id: userId },
         data: {
-          twoFactorSecret: secret,
-          twoFactorTempSecret: null,
-          isTwoFactorEnabled: true,
-          twoFactorMethod: 'totp',
+          twoFactorEnabled: true,
+          twoFactorRecoveryHashes: JSON.stringify(hashes),
+          twoFactorConfirmedAt: new Date(),
         },
       });
+  
+      return { recoveryCodes: codes };
     }
-
+  
     return true;
   }
+  
+  
 
   /**
    * Disable TOTP for a user
@@ -106,11 +107,65 @@ export class TwoFactorService {
     await this.prisma.user.update({
       where: { id: userId },
       data: {
-        isTwoFactorEnabled: false,
-        twoFactorMethod: null,
-        twoFactorSecret: null,
-        twoFactorTempSecret: null,
+        twoFactorEnabled: false,
+        twoFactorSecretEncrypted: null,
+        twoFactorRecoveryHashes: null,
+        twoFactorConfirmedAt: null,
       },
     });
   }
+  
+
+  private async generateRecoveryCodes() {
+    const codes: string[] = [];
+    const hashes: string[] = [];
+  
+    for (let i = 0; i < 8; i++) {
+      const code = Math.random().toString(36).slice(-10);
+      codes.push(code);
+      hashes.push(await bcrypt.hash(code, 10));
+    }
+  
+    return { codes, hashes };
+  }
+  
+  private readonly ENC_KEY = (() => {
+    const key = process.env.TWOFA_ENC_KEY;
+    if (!key || key.length !== 64) {
+      throw new Error('TWOFA_ENC_KEY must be 64 hex characters (32 bytes)');
+    }
+    return Buffer.from(key, 'hex');
+  })();
+  
+  private encrypt(text: string): string {
+    const iv = randomBytes(12); // 12 bytes for GCM
+    const cipher = createCipheriv('aes-256-gcm', this.ENC_KEY, iv);
+  
+    const encrypted = Buffer.concat([
+      cipher.update(text, 'utf8'),
+      cipher.final(),
+    ]);
+  
+    const tag = cipher.getAuthTag();
+  
+    return Buffer.concat([iv, tag, encrypted]).toString('base64');
+  }
+  
+  private decrypt(payload: string): string {
+    const buffer = Buffer.from(payload, 'base64');
+  
+    const iv = buffer.subarray(0, 12);
+    const tag = buffer.subarray(12, 28);
+    const encrypted = buffer.subarray(28);
+  
+    const decipher = createDecipheriv('aes-256-gcm', this.ENC_KEY, iv);
+    decipher.setAuthTag(tag);
+  
+    const decrypted = Buffer.concat([
+      decipher.update(encrypted),
+      decipher.final(),
+    ]);
+  
+    return decrypted.toString('utf8');
+  }  
 }

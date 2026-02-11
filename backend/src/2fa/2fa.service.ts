@@ -63,7 +63,7 @@ export class TwoFaService {
   }
 
   async verifyLogin(userId: number, token: string) {
-    const user = await this.users.findById(userId);
+    const user = await this.users.findOne(userId);
     if (!user?.twoFactorSecretEncrypted) throw new UnauthorizedException();
     const secret = this.decrypt(user.twoFactorSecretEncrypted);
     if (!this.verifyTotp(secret, token)) {

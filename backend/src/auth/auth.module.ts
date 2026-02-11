@@ -16,7 +16,7 @@ import { TwoFactorService } from './two-factor.service';
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET || 'secretKey',
-      signOptions: { expiresIn: '1d' },
+      signOptions: { expiresIn: '15m' },
     }),
   ],
   controllers: [AuthController],

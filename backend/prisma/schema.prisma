@@ -32,7 +32,7 @@ model User {
   twoFactorSecretEncrypted   String?           // AES-GCM encrypted base64
   twoFactorRecoveryHashes    String?           // JSON array of bcrypt/argon2 hashes
   twoFactorConfirmedAt       DateTime?
-
+  
   securityQuestion       String?
   securityAnswerHash     String?
 

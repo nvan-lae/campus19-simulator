@@ -4,6 +4,8 @@ import * as express from 'express';
 import * as path from 'path';
 import * as fs from 'fs';
 import { validateEnvOrExit } from './config';
+import 'dotenv/config';
+import helmet from 'helmet';
 
 validateEnvOrExit();
 
@@ -30,8 +32,16 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule, { httpsOptions });
 
-  const frontendUrl = process.env.FRONTEND_URL || 'https://localhost:5173';
-
+  app.use(helmet());
+  const frontendUrl = process.env.FRONTEND_URL;
+  if (!frontendUrl) {
+    throw new Error('FRONTEND_URL must be defined in production');
+  }
+  // Als project klaar is moeten we dees doen zogezegd... - Paris
+  // app.enableCors({
+  //   origin: frontendUrl,
+  //   credentials: true,
+  // });
   app.enableCors({
     origin: [
       frontendUrl,

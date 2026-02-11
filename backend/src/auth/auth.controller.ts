@@ -15,6 +15,8 @@ import { TwoFactorService } from './two-factor.service';
 import { UsersService } from '../users/users.service';
 import { VerifyTotpDto } from './dto/verify-totp.dto';
 import { Verify2faDto } from './dto/verify-2fa.dto';
+import { Throttle } from '@nestjs/throttler';
+import * as bcrypt from 'bcrypt';
 
 @Controller('auth')
 export class AuthController {
@@ -56,7 +58,7 @@ export class AuthController {
     const user = req.user;
 
     // 🔐 If 2FA NOT enabled → issue JWT immediately
-    if (!user.isTwoFactorEnabled) {
+    if (!user.TwoFactorEnabled) {
       return this.authService.login(user);
     }
 
@@ -106,16 +108,21 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @Post('2fa/verify-setup')
   async verify2faSetup(@Req() req, @Body() dto: VerifyTotpDto) {
-    const ok = await this.twoFactorService.verifyTotpCodeForUser(
+    const result = await this.twoFactorService.verifyTotpCodeForUser(
       req.user.id,
       dto.token,
       'setup',
     );
-
-    if (!ok) {
+  
+    if (!result) {
       throw new UnauthorizedException('Invalid authentication code');
     }
-
+  
+    // If setup succeeded, service returns recovery codes
+    if (result !== true) {
+      return result; // { recoveryCodes: [...] }
+    }
+  
     return { ok: true };
   }
 
@@ -162,4 +169,32 @@ export class AuthController {
 
     res.redirect(`${frontend}/login?token=${access_token}`);
   }
+
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('2fa/recover')
+  async recover2fa(@Body() dto: { email: string; code: string }) {
+    const user = await this.usersService.findByEmail(dto.email);
+
+    if (!user || !user.twoFactorRecoveryHashes) {
+      throw new UnauthorizedException();
+    }
+
+    const hashes: string[] = JSON.parse(user.twoFactorRecoveryHashes);
+
+    for (let i = 0; i < hashes.length; i++) {
+      const match = await bcrypt.compare(dto.code, hashes[i]);
+      if (match) {
+        hashes.splice(i, 1); // single-use
+
+        await this.usersService.update(user.id, {
+          twoFactorRecoveryHashes: JSON.stringify(hashes),
+        });
+
+        return this.authService.login(user);
+      }
+    }
+
+    throw new UnauthorizedException('Invalid recovery code');
+  }
+
 }
