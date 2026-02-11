@@ -290,7 +290,7 @@ export const ProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-slate-900">
+    <div className="w-full bg-slate-900">
       <div className="container max-w-6xl mx-auto py-10 px-4 space-y-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
