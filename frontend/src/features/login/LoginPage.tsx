@@ -19,7 +19,8 @@ export const LoginPage = () => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
 
-    if (token) {
+    // Handle normal token login
+    if (token && token !== 'undefined') {
       initializeWithToken(token).then(() => {
         navigate('/', { replace: true });
       }).catch(() => {
@@ -45,6 +46,12 @@ export const LoginPage = () => {
       if (!res.ok) {
         setError(data?.message || 'Invalid credentials');
         setIsSubmitting(false);
+        return;
+      }
+
+      // Check if 2FA is required - redirect to dedicated 2FA page
+      if (data?.twoFactorRequired) {
+        navigate(`/verify-2fa?userId=${data.userId}`);
         return;
       }
 

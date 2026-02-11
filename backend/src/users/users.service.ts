@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { Prisma } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -111,4 +112,53 @@ export class UsersService {
       })),
     }));
   }
+
+
+async setTwoFactor(
+  userId: number,
+  encryptedSecret: string,
+  recoveryHashes: string,
+) {
+  return this.prisma.user.update({
+    where: { id: userId },
+    data: {
+      twoFactorEnabled: true,
+      twoFactorSecretEncrypted: encryptedSecret,
+      twoFactorRecoveryHashes: recoveryHashes,
+      twoFactorConfirmedAt: new Date(),
+    },
+  });
+}
+
+async clearTwoFactor(userId: number) {
+  return this.prisma.user.update({
+    where: { id: userId },
+    data: {
+      twoFactorEnabled: false,
+      twoFactorSecretEncrypted: null,
+      twoFactorRecoveryHashes: null,
+      twoFactorConfirmedAt: null,
+    },
+  });
+}
+
+  async consumeRecoveryCode(userId: number, code: string) {
+    const user = await this.findOne(userId);
+    if (!user?.twoFactorRecoveryHashes) return false;
+
+    const hashes: string[] = JSON.parse(user.twoFactorRecoveryHashes);
+
+    for (let i = 0; i < hashes.length; i++) {
+      if (await bcrypt.compare(code, hashes[i])) {
+        hashes.splice(i, 1);
+        await this.prisma.user.update({
+          where: { id: userId },
+          data: { twoFactorRecoveryHashes: JSON.stringify(hashes) },
+        });
+        return true;
+      }
+    }
+    return false;
+  }
+
 }

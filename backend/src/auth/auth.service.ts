@@ -42,11 +42,20 @@ export class AuthService {
   // 3. Login (Generate JWT Token)
   // eslint-disable-next-line @typescript-eslint/require-await
   async login(user: any) {
+    if (user.twoFactorEnabled) {
+      return {
+        twoFactorRequired: true,
+        method: 'totp',
+        userId: user.id,
+      };
+    }
+  
     const payload = { username: user.username, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
     };
   }
+  
 
   // 4. Register (for Email/Password users)
   async register(data: any) {

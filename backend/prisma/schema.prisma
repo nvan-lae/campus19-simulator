@@ -9,6 +9,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// 2FA type
+enum TwoFactorMethod {
+  totp
+  email
+  security_question
+}
+
 // 3. The User Model
 model User {
   id        Int      @id @default(autoincrement())
@@ -21,8 +28,13 @@ model User {
   intraId   String?  @unique
 
   // For 2FA
-  isTwoFactorEnabled Boolean @default(false)
-  twoFactorSecret    String?
+  twoFactorEnabled           Boolean  @default(false)
+  twoFactorSecretEncrypted   String?           // AES-GCM encrypted base64
+  twoFactorRecoveryHashes    String?           // JSON array of bcrypt/argon2 hashes
+  twoFactorConfirmedAt       DateTime?
+  
+  securityQuestion       String?
+  securityAnswerHash     String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

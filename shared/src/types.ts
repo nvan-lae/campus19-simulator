@@ -32,6 +32,7 @@ export interface PublicUser {
   email: string;
   avatar?: string;
   stats?: GameStats;
+  twoFactorEnabled?: boolean;
 }
 
 export interface GameStats {

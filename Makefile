@@ -1,13 +1,34 @@
-COMPOSE_FILE = docker-compose.yml
+# **************************************************************************** #
+#                                   COLORS                                     #
+# **************************************************************************** #
 
-GREEN = \033[0;32m
-RESET = \033[0m
+RESET   = \033[0m
+RED     = \033[1;31m
+GREEN   = \033[1;32m
+YELLOW  = \033[1;33m
+BLUE    = \033[1;34m
+PURPLE  = \033[1;35m
+
+# **************************************************************************** #
+#                                   PROJECT                                    #
+# **************************************************************************** #
+
+NAME        = transcendence
+COMPOSE     = docker compose
+COMPOSE_FILE= docker-compose.yml
+
+# **************************************************************************** #
+#                                   DEFAULT                                    #
+# **************************************************************************** #
 
 all: up
 
-# Generate SSL certificates for backend
+# **************************************************************************** #
+#                                   SETUP                                      #
+# **************************************************************************** #
+
 certs:
-	@echo "$(GREEN)Generating SSL certificates...$(RESET)"
+	@echo "$(BLUE)[$(NAME)] Generating SSL certificates...$(RESET)"
 	@mkdir -p backend/secrets
 	@if [ ! -f backend/secrets/key.pem ]; then \
 		openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
@@ -15,71 +36,93 @@ certs:
 		-out backend/secrets/cert.pem \
 		-subj "/C=BE/ST=Antwerp/L=Antwerp/O=42/OU=Student/CN=localhost"; \
 	fi
+	@echo "$(GREEN)[$(NAME)] Certificates ready$(RESET)"
 
-# Build and start the containers in the background
+# **************************************************************************** #
+#                                CONTAINERS                                    #
+# **************************************************************************** #
+
 up: certs
-	@echo "$(GREEN)Building and starting containers...$(RESET)"
-	docker-compose -f $(COMPOSE_FILE) up -d --build
+	@echo "$(PURPLE)[$(NAME)] Starting containers...$(RESET)"
+	@$(COMPOSE) -f $(COMPOSE_FILE) up -d
+	@echo "$(GREEN)[$(NAME)] Stack is up$(RESET)"
 
-# Stop the containers
 down:
-	@echo "$(GREEN)Stopping containers...$(RESET)"
-	docker-compose -f $(COMPOSE_FILE) down
+	@echo "$(YELLOW)[$(NAME)] Stopping containers...$(RESET)"
+	@$(COMPOSE) -f $(COMPOSE_FILE) down
+	@echo "$(GREEN)[$(NAME)] Containers stopped$(RESET)"
 
-# Show logs (follow mode)
 logs:
-	docker-compose -f $(COMPOSE_FILE) logs -f
+	@$(COMPOSE) -f $(COMPOSE_FILE) logs -f
 
-# Updates dependencies inside running containers (Use this after git pull!)
+# **************************************************************************** #
+#                              MAINTENANCE                                     #
+# **************************************************************************** #
+
 update:
-	@echo "$(GREEN)Updating Shared dependencies and building...$(RESET)"
-	@docker-compose -f $(COMPOSE_FILE) exec backend sh -c "cd ../shared && npm install && npm run build"
-	@echo "$(GREEN)Updating Backend dependencies...$(RESET)"
-	@docker-compose -f $(COMPOSE_FILE) exec backend npm install
-	@echo "$(GREEN)Updating Frontend dependencies...$(RESET)"
-	@docker-compose -f $(COMPOSE_FILE) exec frontend npm install
-	@echo "$(GREEN)Done! Containers are up to date.$(RESET)"
+	@echo "$(BLUE)[$(NAME)] Updating shared dependencies...$(RESET)"
+	@$(COMPOSE) -f $(COMPOSE_FILE) exec backend sh -c "cd ../shared && npm install && npm run build"
+	@echo "$(BLUE)[$(NAME)] Updating backend dependencies...$(RESET)"
+	@$(COMPOSE) -f $(COMPOSE_FILE) exec backend npm install
+	@echo "$(BLUE)[$(NAME)] Updating frontend dependencies...$(RESET)"
+	@$(COMPOSE) -f $(COMPOSE_FILE) exec frontend npm install
+	@echo "$(GREEN)[$(NAME)] Update complete$(RESET)"
 
-# Enter the backend container shell
+# **************************************************************************** #
+#                                 SHELLS                                       #
+# **************************************************************************** #
+
 shell-backend:
-	docker-compose -f $(COMPOSE_FILE) exec backend sh
+	@$(COMPOSE) -f $(COMPOSE_FILE) exec backend sh
 
-# Enter the frontend container shell
 shell-frontend:
-	docker-compose -f $(COMPOSE_FILE) exec frontend sh
+	@$(COMPOSE) -f $(COMPOSE_FILE) exec frontend sh
 
-# Enter the database (Postgres) shell
 shell-db:
-	docker-compose -f $(COMPOSE_FILE) exec postgres psql -U postgres -d transcendence_db
+	@$(COMPOSE) -f $(COMPOSE_FILE) exec postgres psql -U postgres -d transcendence_db
 
-# Run database migrations (Required on new machines/fresh volumes)
+# **************************************************************************** #
+#                                 DATABASE                                     #
+# **************************************************************************** #
+
 migrate:
-	@echo "$(GREEN)Running database migrations...$(RESET)"
-	docker-compose -f $(COMPOSE_FILE) exec backend npx prisma migrate dev
+	@echo "$(BLUE)[$(NAME)] Running database migrations...$(RESET)"
+	@$(COMPOSE) -f $(COMPOSE_FILE) exec backend npx prisma migrate dev
 
-# Start everything and initialize the database (First time setup)
 init:
-	@make up
-	@echo "$(GREEN)Waiting for Database to start...$(RESET)"
+	@$(MAKE) up
+	@echo "$(BLUE)[$(NAME)] Waiting for database...$(RESET)"
 	@sleep 5
-	@make migrate
+	@$(MAKE) migrate
 
-# Stop containers and remove networks
+# **************************************************************************** #
+#                                 CLEANING                                     #
+# **************************************************************************** #
+
 clean:
-	@echo "$(GREEN)Cleaning containers and networks...$(RESET)"
-	docker-compose -f $(COMPOSE_FILE) down --rmi all --remove-orphans
+	@echo "$(RED)[$(NAME)] Removing containers + volumes...$(RESET)"
+	@$(COMPOSE) -f $(COMPOSE_FILE) down -v --remove-orphans
+	@echo "$(GREEN)[$(NAME)] Clean done$(RESET)"
 
-# Full clean including volumes
 fclean:
-	@echo "$(GREEN)Full clean: removing containers, images, and volumes...$(RESET)"
-	docker-compose -f $(COMPOSE_FILE) down --rmi all --volumes --remove-orphans
+	@echo "$(RED)[WARNING] This will REMOVE all Docker images, volumes, and networks.$(RESET)"
+	@printf "Type 'y' to confirm: "; \
+	read ans; \
+	if [ "$$ans" = "y" ]; then \
+		echo "$(PURPLE)[$(NAME)] Full cleanup...$(RESET)"; \
+		$(COMPOSE) -f $(COMPOSE_FILE) down -v --remove-orphans; \
+		docker system prune -af --volumes; \
+		echo "$(GREEN)[$(NAME)] Full cleanup complete$(RESET)"; \
+	else \
+		echo "$(YELLOW)[$(NAME)] fclean aborted$(RESET)"; \
+	fi
 
-# Prune unused Docker resources
-prune:
-	@echo "$(GREEN)Pruning unused Docker resources...$(RESET)"
-	docker system prune -f
-
-# Rebuild everything from scratch
 re: fclean all
 
-.PHONY: all up down logs update shell-backend shell-frontend shell-db clean fclean re prune
+# **************************************************************************** #
+#                                 EXTRA                                        #
+# **************************************************************************** #
+
+prune:
+	@echo "$(RED)[$(NAME)] Pruning unused Docker resources...$(RESET)"
+	@docker system prune -f
