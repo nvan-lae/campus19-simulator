@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom'; // Added useParams
+import { useParams, useNavigate } from 'react-router-dom';
 import './GamePage.css';
 import { GameBoard } from '../components/GameBoard';
 import { GameControls } from '../components/GameControls';
 import { PlayersList } from '../components/PlayersList';
 import { Shop } from '../components/Shop';
 import { useGameLogic } from '../hooks/useGameLogic';
-import { useSocket } from '../../../contexts/SocketContext'; // Keep hooks together
+import { useSocket } from '../../../contexts/SocketContext';
 import { ChallengeModal } from '../components/ChallengeModal';
 import { ChatWindow } from '../components/ChatWindow';
 import { PredictionPanel } from '../components/PredictionPanel';
@@ -28,17 +28,8 @@ export const GamePage = () => {
     movePlayer,
     purchaseItem,
     useItem: activateItem,
-    payEscape,
     submitChallenge,
-    autoPlayCPU,
   } = useGameLogic();
-
-  const [now, setNow] = useState(Date.now());
-
-  useEffect(() => {
-    const interval = setInterval(() => setNow(Date.now()), 1000); // Update every second
-    return () => clearInterval(interval);
-  }, []);
 
   // Emoji state for all players
   const [playerEmojis, setPlayerEmojis] = useState<Record<number, string>>({});
@@ -77,19 +68,15 @@ export const GamePage = () => {
 
   // 2. Safe useEffect: Check dependencies carefully
   useEffect(() => {
-    if (!gameState || !autoPlayCPU) return;
+    if (!gameState) return;
 
-    // Only run if it's a CPU turn (example logic, adjust as needed)
     // const currentPlayer = gameState.players[gameState.currentPlayerIndex];
-    // if (currentPlayer.isCpu) { ... }
-
     const timer = setTimeout(() => {
-      autoPlayCPU();
     }, 100);
 
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameState?.currentPlayerIndex, autoPlayCPU]); // Use optional chaining
+  }, [gameState?.currentPlayerIndex]); // Use optional chaining
 
   // 3. All Hooks must be called before early returns
   const [isShopOpen, setIsShopOpen] = useState(false);
@@ -110,10 +97,7 @@ export const GamePage = () => {
   const myPlayer = gameState.players.find(p => p.id === user?.id);
   const isRolling = gameState.diceValue !== null && !gameState.gameOver;
 
-  // check if roll is possible by timer
-  const isTimeLocked = gameState.rollAvailableAt && now < Number(gameState.rollAvailableAt);
-  const secondsLeft = isTimeLocked ? Math.ceil((Number(gameState.rollAvailableAt) - now) / 1000) : 0;
-  const isRollDisabled = !!(currentPlayer?.id !== user?.id || !!gameState.diceValue || gameState.gameOver || isTimeLocked);
+  const isRollDisabled = !!(currentPlayer?.id !== user?.id || !!gameState.diceValue || gameState.gameOver);
 
   const handleRoll = () => {
     playRoll();
@@ -306,7 +290,7 @@ export const GamePage = () => {
               gameOver={gameState.gameOver}
               onReset={createNewGame}
               disabled={isRollDisabled}
-              rollLabel={isTimeLocked ? `Wait ${secondsLeft}s` : 'Roll Dice'}
+              rollAvailableAt={gameState.rollAvailableAt}
             />
 
             <button
@@ -349,7 +333,6 @@ export const GamePage = () => {
                   activateItem(itemId, targetId);
                   setIsShopOpen(false);
                 }}
-                onPayEscape={payEscape}
                 disabled={gameState.gameOver}
                 currentGlobalEvent={gameState.currentGlobalEvent}
               />
@@ -360,20 +343,16 @@ export const GamePage = () => {
 
       {/* Challenge Modals */}
       {hasActiveChallenge && gameState.activeChallenge && myPlayer && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border border-indigo-500/50">
-            <ChallengeModal
-              challenge={gameState.activeChallenge}
-              currentPlayerName={myPlayer.username}
-              onSubmit={submitChallenge}
-            />
-          </div>
-        </div>
+        <ChallengeModal
+            challenge={gameState.activeChallenge}
+            currentPlayerName={myPlayer.username}
+            onSubmit={submitChallenge}
+        />
       )}
 
       {/* Winner Overlay */}
       {gameState.gameOver && gameState.winner && (
-        <div className="fixed inset-0 z-[120] flex flex-col items-center justify-center bg-indigo-600/90 backdrop-blur-md text-white">
+        <div className="fixed inset-0 z-120 flex flex-col items-center justify-center bg-indigo-600/90 backdrop-blur-md text-white">
           <div className="text-6xl font-black mb-8 animate-bounce">
             🎉 {gameState.winner.username} WINS! 🎉
           </div>

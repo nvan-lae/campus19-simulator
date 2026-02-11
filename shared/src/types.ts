@@ -6,19 +6,16 @@ export interface ShopItem {
   targetOther: boolean;
 }
 
-export interface InventoryItem {
+export type InventoryItem = {
   itemId: string;
   name: string;
 }
 
 export type TileEffectType =
   | 'none'
-  | 'goose'
-  | 'bridge'
-  | 'inn'
-  | 'well'
-  | 'labyrinth'
-  | 'prison'
+  | 'eval'
+  | 'marioKart'
+  | 'stage'
   | 'death'
   | 'challenge'
   | 'piscineExam'
@@ -43,7 +40,7 @@ export interface GameStats {
 }
 
 // Core Game Objects
-export interface GamePlayer {
+export type GamePlayer = {
   id: number;
   username: string;
   color: string;
@@ -51,13 +48,13 @@ export interface GamePlayer {
   order: number;
   coins: number;
   turnsToSkip: number;
-  stuckInWell: boolean;
   stuckOnPiscineExam: boolean;
   hasShield: boolean;
   inventory: InventoryItem[];
+  isReady: boolean;
 }
 
-export interface ActiveChallenge {
+export type ActiveChallenge = {
   playerId: number;
   questionId: string;
   questionText: string;
@@ -66,15 +63,18 @@ export interface ActiveChallenge {
   bets: { playerId: number; prediction: 'success' | 'fail' }[];
 }
 
+export type GameStatus = 'LOBBY' | 'PLAYING' | 'FINISHED';
+
 // The Full Game State
-export interface GameState {
+export type GameState = {
+  status: GameStatus;
   players: GamePlayer[];
   currentPlayerIndex: number;
   diceValue: number | null;
   gameOver: boolean;
   winner: GamePlayer | null;
   lastMoveDescription: string | null;
-  pendingGooseRoll: boolean;
+  pendingEvalRoll: boolean;
   activeChallenge: ActiveChallenge | null;
   turnCount: number;
   currentGlobalEvent: 'gravity_flux' | 'inflation' | 'windy' | null;
@@ -85,7 +85,7 @@ export interface GameState {
     losers: number[];
     outcome: 'low' | 'high';
   } | null;
-  rollAvailableAt: string | null;
+  rollAvailableAt: number | null;
   turnStartTime: number | null;
   turnTimeLimit: number;
 }

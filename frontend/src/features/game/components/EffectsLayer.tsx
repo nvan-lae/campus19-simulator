@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
 import './EffectsLayer.css';
 
@@ -9,39 +9,69 @@ interface EffectsLayerProps {
 
 export const EffectsLayer = ({ globalEvent, lastMoveDescription }: EffectsLayerProps) => {
     const [showBanner, setShowBanner] = useState(false);
+    const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const lastConfettiAtRef = useRef(0);
 
     // Show banner ephemeral
     useEffect(() => {
-        if (globalEvent) {
-            setTimeout(() => setShowBanner(true), 0);
-            const timer = setTimeout(() => {
-                setShowBanner(false);
-            }, 4000);
-            return () => clearTimeout(timer);
-        } else {
-            setTimeout(() => setShowBanner(false), 0);
+        if (showTimerRef.current) {
+            clearTimeout(showTimerRef.current);
+            showTimerRef.current = null;
         }
+
+        if (hideTimerRef.current) {
+            clearTimeout(hideTimerRef.current);
+            hideTimerRef.current = null;
+        }
+
+        if (globalEvent) {
+            showTimerRef.current = setTimeout(() => {
+                setShowBanner(true);
+                showTimerRef.current = null;
+            }, 0);
+            hideTimerRef.current = setTimeout(() => {
+                setShowBanner(false);
+                hideTimerRef.current = null;
+            }, 4000);
+        } else {
+            showTimerRef.current = setTimeout(() => {
+                setShowBanner(false);
+                showTimerRef.current = null;
+            }, 0);
+        }
+
+        return () => {
+            if (showTimerRef.current) {
+                clearTimeout(showTimerRef.current);
+                showTimerRef.current = null;
+            }
+            if (hideTimerRef.current) {
+                clearTimeout(hideTimerRef.current);
+                hideTimerRef.current = null;
+            }
+        };
     }, [globalEvent]);
 
     // Confetti for wins/big moments
     useEffect(() => {
         if (!lastMoveDescription) return;
 
+        const now = Date.now();
+        if (now - lastConfettiAtRef.current < 1500) {
+            return;
+        }
+
         if (lastMoveDescription.includes('WINS')) {
+            lastConfettiAtRef.current = now;
             confetti({
                 particleCount: 200,
                 spread: 100,
                 origin: { y: 0.6 },
                 colors: ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3']
             });
-        } else if (lastMoveDescription.includes('goose')) {
-            confetti({
-                particleCount: 50,
-                spread: 50,
-                origin: { y: 0.7 },
-                colors: ['#FFD700', '#FFA500'] // Gold colors
-            });
         } else if (lastMoveDescription.includes('CHAOS ORB')) {
+            lastConfettiAtRef.current = now;
             // Chaos effect
             confetti({
                 particleCount: 100,

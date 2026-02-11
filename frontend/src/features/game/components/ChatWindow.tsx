@@ -24,12 +24,18 @@ export const ChatWindow = ({ gameId, players }: ChatWindowProps) => {
     const [inputText, setInputText] = useState('');
     const [showReactions, setShowReactions] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
+    const shouldAutoScrollRef = useRef(true);
+    const MAX_MESSAGES = 200;
 
     useEffect(() => {
         if (!socket) return;
 
         const handleMessage = (msg: ChatMessage) => {
-            setMessages(prev => [...prev, msg]);
+            setMessages(prev => {
+                const next = [...prev, msg];
+                return next.length > MAX_MESSAGES ? next.slice(-MAX_MESSAGES) : next;
+            });
         };
 
         socket.on('chat_message', handleMessage);
@@ -40,10 +46,19 @@ export const ChatWindow = ({ gameId, players }: ChatWindowProps) => {
     }, [socket]);
 
     useEffect(() => {
-        if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        if (shouldAutoScrollRef.current && messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'auto' });
         }
     }, [messages]);
+
+    const handleScroll = () => {
+        const container = messagesContainerRef.current;
+        if (!container) return;
+
+        const bottomThreshold = 32;
+        const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+        shouldAutoScrollRef.current = distanceFromBottom <= bottomThreshold;
+    };
 
     const sendMessage = (e?: React.FormEvent, content: string = inputText) => {
         if (e) e.preventDefault();
@@ -58,7 +73,7 @@ export const ChatWindow = ({ gameId, players }: ChatWindowProps) => {
 
     return (
         <div className="chat-panel">
-            <div className="chat-messages">
+            <div className="chat-messages" ref={messagesContainerRef} onScroll={handleScroll}>
                 {messages.length === 0 && (
                     <div className="chat-empty">No messages yet. Say hi! 👋</div>
                 )}

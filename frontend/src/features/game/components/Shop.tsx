@@ -7,7 +7,6 @@ interface ShopProps {
     allPlayers: GamePlayer[];
     onPurchase: (itemId: string) => void;
     onUseItem: (itemId: string, targetPlayerId?: number) => void;
-    onPayEscape: () => void;
     disabled: boolean;
     currentGlobalEvent?: 'gravity_flux' | 'inflation' | 'windy' | null;
 }
@@ -17,7 +16,6 @@ export const Shop = ({
     allPlayers,
     onPurchase,
     onUseItem,
-    onPayEscape,
     disabled,
     currentGlobalEvent,
 }: ShopProps) => {
@@ -55,25 +53,12 @@ export const Shop = ({
         }
     };
 
-    const canEscape = currentPlayer.stuckInWell || currentPlayer.turnsToSkip > 0;
-    const escapeCost = currentPlayer.stuckInWell ? 10 : currentPlayer.turnsToSkip > 0 ? 15 : 0;
-
     return (
         <div className="shop-container">
             <div className="coin-display">
                 <span className="coin-icon">🪙</span>
                 <span className="coin-amount">{currentPlayer.coins}</span>
             </div>
-
-            {canEscape && currentPlayer.coins >= escapeCost && (
-                <button
-                    className="escape-button"
-                    onClick={onPayEscape}
-                    disabled={disabled}
-                >
-                    Pay {escapeCost} 🪙 to Escape!
-                </button>
-            )}
 
             <div className="shop-section">
                 <h4>Shop{currentGlobalEvent === 'inflation' ? ' 💰 +50%' : ''}</h4>

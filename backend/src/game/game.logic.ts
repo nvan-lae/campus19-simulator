@@ -3,69 +3,16 @@ import {
   MAX_PLAYERS,
   COLORS,
   STARTING_COINS,
-  GOOSE_COIN_REWARD,
+  EVAL_COIN_REWARD,
   getTileEffect,
   ESCAPE_COSTS,
   SHOP_ITEMS,
   TileEffectType,
   CODING_QUESTIONS,
+  type GamePlayer,
+  type GameState
 } from '@campus19/shared';
 import { User } from '@prisma/client';
-
-export interface InventoryItem {
-  itemId: string;
-  name: string;
-}
-
-export interface GamePlayer {
-  id: number; // db user id
-  username: string;
-  color: string;
-  position: number;
-  order: number;
-  coins: number;
-  turnsToSkip: number;
-  stuckInWell: boolean;
-  stuckOnPiscineExam: boolean;
-  hasShield: boolean;
-  inventory: InventoryItem[];
-  isReady: boolean;
-}
-
-export interface ActiveChallenge {
-  playerId: number;
-  questionId: string;
-  questionText: string;
-  options: string[];
-  reward: number;
-  bets: { playerId: number; prediction: 'success' | 'fail' }[];
-}
-
-export type GameStatus = 'LOBBY' | 'PLAYING' | 'FINISHED';
-
-export interface GameState {
-  status: GameStatus;
-  players: GamePlayer[];
-  currentPlayerIndex: number;
-  diceValue: number | null;
-  gameOver: boolean;
-  winner: GamePlayer | null;
-  lastMoveDescription: string | null;
-  pendingGooseRoll: boolean;
-  activeChallenge: ActiveChallenge | null;
-  turnCount: number;
-  currentGlobalEvent: 'gravity_flux' | 'inflation' | 'windy' | null;
-  bountyTargetId: number | null;
-  currentTurnBets: { playerId: number; bet: 'low' | 'high' }[];
-  rollBetResult: {
-    winners: number[];
-    losers: number[];
-    outcome: 'low' | 'high';
-  } | null;
-  rollAvailableAt: number | null; // Timestamp when next roll is available
-  turnStartTime: number | null; // Timestamp when current turn started
-  turnTimeLimit: number; // Turn duration in milliseconds (60 seconds = 60000ms)
-}
 
 export class GameRoom {
   private state: GameState;
@@ -81,7 +28,7 @@ export class GameRoom {
       gameOver: false,
       winner: null,
       lastMoveDescription: null,
-      pendingGooseRoll: false,
+      pendingEvalRoll: false,
       activeChallenge: null,
       turnCount: 0,
       currentGlobalEvent: null,
@@ -140,9 +87,6 @@ export class GameRoom {
     // Check if player needs to skip turns
     if (player.turnsToSkip > 0) {
       player.turnsToSkip--;
-      if (player.turnsToSkip === 0) {
-        player.stuckInWell = false; // Release from well if penalty is paid/served
-      }
       this.state.lastMoveDescription = `${player.username} skips a turn (${player.turnsToSkip} remaining)`;
       this.nextTurn();
       return this.state;
@@ -193,7 +137,7 @@ export class GameRoom {
       });
 
       this.state.rollBetResult = { winners, losers, outcome };
-      // Clear bets so they aren't processed again on a re-roll (e.g. goose)
+      // Clear bets so they aren't processed again on a re-roll (e.g. eval)
       this.state.currentTurnBets = [];
     }
 
@@ -214,10 +158,10 @@ export class GameRoom {
     const oldPosition = player.position;
     let newPosition = oldPosition + dice;
 
-    // Handle goose double movement
-    if (this.state.pendingGooseRoll) {
+    // Handle eval double movement
+    if (this.state.pendingEvalRoll) {
       newPosition = oldPosition + dice * 2;
-      this.state.pendingGooseRoll = false;
+      this.state.pendingEvalRoll = false;
     }
 
     // Check for piscineExam tiles in the path and stop at the first one
@@ -257,7 +201,7 @@ export class GameRoom {
       this.state.winner = player;
       this.state.lastMoveDescription = `🎉 ${player.username} reaches tile ${BOARD_SIZE - 1} and WINS!`;
     }
-    else if (!this.state.pendingGooseRoll && !this.state.activeChallenge) {
+    else if (!this.state.pendingEvalRoll && !this.state.activeChallenge) {
       this.nextTurn();
     }
 
@@ -272,7 +216,7 @@ export class GameRoom {
     // Check if player has shield
     if (
       player.hasShield &&
-      ['inn', 'well', 'prison', 'death'].includes(effect)
+      ['marioKart', 'death'].includes(effect)
     ) {
       player.hasShield = false;
       this.state.lastMoveDescription = `${player.username}'s shield blocked the ${effect}!`;
@@ -280,38 +224,23 @@ export class GameRoom {
     }
 
     switch (effect) {
-      case 'goose':
-        player.coins += GOOSE_COIN_REWARD;
-        this.state.pendingGooseRoll = true;
-        this.state.lastMoveDescription = `${player.username} landed on a goose! +${GOOSE_COIN_REWARD} coins, roll again to double!`;
+      case 'eval':
+        player.coins += EVAL_COIN_REWARD;
+        this.state.pendingEvalRoll = true;
+        this.state.lastMoveDescription = `${player.username} landed on a good evaluation! +${EVAL_COIN_REWARD} coins, roll again to double!`;
         return position;
 
-      case 'bridge':
-        this.state.lastMoveDescription = `${player.username} crossed the bridge from ${position} to 12!`;
-        return 12;
-
-      case 'inn':
+      case 'marioKart':
         player.turnsToSkip = 1;
-        this.state.lastMoveDescription = `${player.username} stays at the inn and skips 1 turn`;
+        this.state.lastMoveDescription = `${player.username} starts playing Mario Kart and skips 1 turn`;
         return position;
 
-      case 'well':
-        player.stuckInWell = true;
-        player.turnsToSkip = 4; // 4 turn penalty instead of stuck forever
-        this.state.lastMoveDescription = `${player.username} fell in the well! Skip 4 turns or pay 10 coins.`;
-        return position;
-
-      case 'labyrinth':
-        this.state.lastMoveDescription = `${player.username} got lost in the labyrinth and goes back to 30!`;
+      case 'stage':
+        this.state.lastMoveDescription = `${player.username} is looking for an internship and goes back to 30!`;
         return 30;
 
-      case 'prison':
-        player.turnsToSkip = 2;
-        this.state.lastMoveDescription = `${player.username} is in prison and skips 2 turns`;
-        return position;
-
       case 'death':
-        this.state.lastMoveDescription = `${player.username} fell into a Black Hole and starts from the piscine!`;
+        this.state.lastMoveDescription = `${player.username} fell into a Black Hole and returns to the start!`;
         return 0;
 
       case 'challenge': {
@@ -387,16 +316,14 @@ export class GameRoom {
           if (bettor) bettor.coins += 5; // Fixed reward for simplicity
         } else {
           const bettor = this.state.players.find((p) => p.id === bet.playerId);
-          if (bettor) bettor.coins = Math.max(0, bettor.coins - 5);
+          if (bettor) bettor.coins -= 5;
         }
       });
     } else {
       // For piscineExam, move player back 1 tile
       if (isPiscineExam) {
-        player.position = Math.max(0, player.position - 1);
+        player.position =  player.position - 1;
         this.state.lastMoveDescription = `❌ Wrong! ${player.username} moves back 1 tile. The correct answer was: ${question.options[question.correctIndex]}`;
-      } else {
-        this.state.lastMoveDescription = `❌ Wrong! The correct answer was: ${question.options[question.correctIndex]}`;
       }
       
       // Payout bets (FAIL)
@@ -406,20 +333,20 @@ export class GameRoom {
           if (bettor) bettor.coins += 5;
         } else {
           const bettor = this.state.players.find((p) => p.id === bet.playerId);
-          if (bettor) bettor.coins = Math.max(0, bettor.coins - 5);
+          if (bettor) bettor.coins -= 5;
         }
       });
     }
 
     // Clear challenge and move next
     this.state.activeChallenge = null;
-    if (!this.state.pendingGooseRoll) {
+    if (!this.state.pendingEvalRoll) {
       this.nextTurn();
     }
     return this.state;
   }
 
-  // Escape from well, prison, or death by paying coins
+  // Escape from the black hole by paying coins
   payToEscape(userId: number): GameState {
     if (this.state.status !== 'PLAYING') throw new Error('Game not started');
 
@@ -439,11 +366,7 @@ export class GameRoom {
     player.coins -= cost;
 
     // Logic to clear penalty
-    if (effect === 'well' || effect === 'prison') {
-      player.turnsToSkip = 0;
-      player.stuckInWell = false;
-      this.state.lastMoveDescription = `${player.username} paid ${cost} coins to escape the ${effect}!`;
-    } else if (effect === 'death') {
+    if (effect === 'death') {
       // For black hole, they can pay to NOT restart - keep position
       this.state.lastMoveDescription = `${player.username} paid ${cost} coins to escape the Black Hole!`;
     }
@@ -501,7 +424,7 @@ export class GameRoom {
 
       case 'extra_roll':
         // Allow another roll after current move
-        this.state.pendingGooseRoll = true;
+        this.state.pendingEvalRoll = true;
         this.state.lastMoveDescription = `${player.username} uses Extra Roll!`;
         break;
 
@@ -589,44 +512,7 @@ export class GameRoom {
       const newEvent = events[Math.floor(Math.random() * events.length)];
       this.state.currentGlobalEvent = newEvent;
       this.state.lastMoveDescription = `🌍 GLOBAL EVENT: ${newEvent.toUpperCase()}! (Lasts 10 turns)`;
-    } else if (this.state.turnCount % 10 === 0 && this.state.currentPlayerIndex === 0) {
-      // Logic adjustment: The above condition sets it at turn % 10 == 0.
-      // But if we want it to LAST 10 turns, we need to clear it appropriately.
-      // If we set it at 10, 20, 30...
-      // We should probably check expiry. Simpler approach:
-      // If turnCount % 10 is 0 -> START event.
-      // If turnCount % 10 is 5 -> END event (if we want 5 turns) or keep it until next start?
-      // The comment said "Lasts 10 turns". So it runs for the whole block?
-      // If it runs for the whole block, when does it clear?
-      // If we want it to clear, maybe we set it at X and clear at X+10.
-      // Let's assume we want 50% uptime or 100% uptime? "Lasts 10 turns" implies it ends.
-      // Let's make it last 5 turns.
     }
-
-    // Fix: Set/Clear logic was confusing. Let's make it explicit.
-    // Event starts at turn 10, 20, 30...
-    // Event ends at turn 19, 29, 39... (9 turns duration)
-    // To make it 10 turns: Start at 10, End at 20 (overlap?).
-    // Better: Start at turn % 20 === 0. End at turn % 20 === 10. (10 turns on, 10 turns off).
-
-    // Reverting to the requested fix: "current set/clear logic results in a 9-turn duration... Fix the off-by-one"
-    // Original code: set at %10 === 0, clear at %10 === 9.
-    // 0 -> set. 1..8 -> active. 9 -> clear.
-    // Turns active: 0, 1, 2, 3, 4, 5, 6, 7, 8. (9 turns).
-    // Review requires "Lasts 10 turns".
-    // So we should NOT clear at 9 if we want it to last until the next one replaces it?
-    // Or if we want periods of NO event. 
-    // If the message says "Lasts 10 turns", and it repeats every 10 turns, it means it is ALWAYS on (just changes).
-    // If we want it to toggle, say "Every 20 turns, lasts 10 turns".
-
-    // Let's IMPLEMENT: Change periodically every 10 turns.
-    // So we never clear it, just overwrite it? Or clear it?
-    // User message: "but the current set/clear logic results in a 9-turn duration (set at turn 10, cleared at turn 19)."
-    // Fix: Remove the clear logic if we want it to last until the next 10th turn.
-    // OR if we want a gap, adjust the numbers.
-    // Assuming "Lasts 10 turns" means we want it to encompass the full decagon of turns.
-    // But then there is no "clear".
-    // If we remove the 'else if' block, it persists until overwritten.
 
     if (this.state.turnCount > 0 && this.state.turnCount % 10 === 0) {
       const events: ('gravity_flux' | 'inflation' | 'windy')[] = [
@@ -638,12 +524,7 @@ export class GameRoom {
       this.state.currentGlobalEvent = newEvent;
       this.state.lastMoveDescription = `🌍 GLOBAL EVENT: ${newEvent.toUpperCase()}! (Lasts 10 turns)`;
     }
-    // Removed the "clear at 9" logic so it lasts full 10 turns until next one triggers.
-    // Wait, if we don't clear it, it stays forever. And at 10 it changes.
-    // This effectively makes it last 10 turns.
 
-
-    // Bounty Logic: Update every turn
     const sorted = [...this.state.players].sort(
       (a, b) => a.position - b.position,
     );
@@ -668,7 +549,6 @@ export class GameRoom {
       order: order,
       coins: STARTING_COINS,
       turnsToSkip: 0,
-      stuckInWell: false,
       stuckOnPiscineExam: false,
       hasShield: false,
       inventory: [],
@@ -694,8 +574,6 @@ export class GameRoom {
       throw new Error('Already placed a bet');
 
     challenge.bets.push({ playerId: userId, prediction });
-    // DEDUCT COST? Maybe free to bet for now to encourage it?
-    // Let's make it risk/reward: win=5, lose=-5 (implemented in resolution)
 
     return this.state;
   }

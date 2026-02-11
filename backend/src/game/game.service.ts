@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GameRoom, GameState } from './game.logic';
+import { GameRoom } from './game.logic';
+import { type GameState } from '@campus19/shared';
 import { User } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 
@@ -8,8 +9,15 @@ export class GameService {
   private readonly logger = new Logger(GameService.name);
   // Map<GameID, GameRoom>
   private activeGames: Map<string, GameRoom> = new Map();
+  private cleanupTimers: Map<string, NodeJS.Timeout> = new Map();
+  private readonly CLEANUP_DELAY_MS = 10000;
+  private readonly TIMEOUT_SWEEP_MS = 5000;
 
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {
+    setInterval(() => {
+      this.sweepForTimeoutsAndCleanup();
+    }, this.TIMEOUT_SWEEP_MS);
+  }
 
   createGame(user: User): string {
     // Generate a random game ID (or use numeric auto-inc if preferred, but string is fine)
@@ -93,6 +101,11 @@ export class GameService {
   }
 
   removeGame(gameId: string) {
+    const existingTimer = this.cleanupTimers.get(gameId);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+      this.cleanupTimers.delete(gameId);
+    }
     this.activeGames.delete(gameId);
   }
 
@@ -109,15 +122,11 @@ export class GameService {
       if (state.winner) {
         this.logger.log(`Game ${gameId} ended. Winner: ${state.winner.username}`);
         await this.saveMatch(gameId, state);
+        this.scheduleGameRemoval(gameId, 'finished');
       } else {
         // Game ended with no winner (all players kicked)
         this.logger.log(`Game ${gameId} ended with no winner (all players kicked)`);
-        // Optional: still save match with no winner, or just clean up
-        // For now, just remove the game after a delay
-        setTimeout(() => {
-          this.removeGame(gameId);
-          this.logger.log(`Game ${gameId} removed from active games`);
-        }, 10000); // 10 seconds to allow players to see the final state
+        this.scheduleGameRemoval(gameId, 'all players kicked');
       }
     }
   }
@@ -216,5 +225,30 @@ export class GameService {
     }
     
     return null;
+  }
+
+  private scheduleGameRemoval(gameId: string, reason: string) {
+    if (this.cleanupTimers.has(gameId)) return;
+    const timer = setTimeout(() => {
+      this.removeGame(gameId);
+      this.logger.log(`Game ${gameId} removed from active games (${reason})`);
+    }, this.CLEANUP_DELAY_MS);
+    this.cleanupTimers.set(gameId, timer);
+  }
+
+  private sweepForTimeoutsAndCleanup() {
+    for (const [gameId, game] of this.activeGames) {
+      const state = game.getState();
+      if (state.status === 'PLAYING' && game.isTurnTimedOut()) {
+        this.logger.warn(`Turn timeout in game ${gameId}, kicking idle player`);
+        const newState = game.kickIdlePlayer();
+        void this.checkForGameOver(gameId, newState);
+        continue;
+      }
+
+      if (state.status === 'FINISHED') {
+        this.scheduleGameRemoval(gameId, 'finished');
+      }
+    }
   }
 }

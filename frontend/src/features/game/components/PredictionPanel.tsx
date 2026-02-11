@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSocket } from '../../../contexts/SocketContext';
 
 interface PredictionPanelProps {
@@ -10,13 +10,6 @@ interface PredictionPanelProps {
 export const PredictionPanel = ({ gameId, isMyTurn, hasBet }: PredictionPanelProps) => {
     const { socket } = useSocket();
     const [betPlaced, setBetPlaced] = useState<'low' | 'high' | null>(null);
-
-    // Reset local bet state when turn changes (hasBet becomes false)
-    useEffect(() => {
-        if (!hasBet) {
-            setTimeout(() => setBetPlaced(null), 0);
-        }
-    }, [hasBet]);
 
     if (isMyTurn) return null; // Don't show if it's my turn
     if (hasBet) return (

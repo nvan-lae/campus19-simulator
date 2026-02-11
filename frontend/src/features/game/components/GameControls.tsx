@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import './GameControls.css';
 
 interface GameControlsProps {
@@ -10,6 +11,7 @@ interface GameControlsProps {
   onReset: () => void;
   disabled?: boolean;
   rollLabel?: string;
+  rollAvailableAt?: number | string | null;
 }
 
 const DICE_FACES = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
@@ -24,8 +26,29 @@ export const GameControls = ({
   onReset,
   disabled,
   rollLabel,
+  rollAvailableAt,
 }: GameControlsProps) => {
   const getDiceFace = (value: number) => DICE_FACES[value - 1] || '🎲';
+
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!rollAvailableAt) return;
+
+    const updateTimer = () => setNow(Date.now());
+    const timeout = setTimeout(updateTimer, 0);
+    const interval = setInterval(updateTimer, 1000);
+
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
+  }, [rollAvailableAt]);
+
+  const secondsLeft = rollAvailableAt
+    ? Math.max(0, Math.ceil((Number(rollAvailableAt) - now) / 1000))
+    : 0;
+  const isTimeLocked = secondsLeft > 0;
 
   return (
     <div className="controls-wrapper">
@@ -41,10 +64,14 @@ export const GameControls = ({
           <button
             className="roll-button"
             onClick={onRoll}
-            disabled={disabled || isRolling || gameOver}
+            // Check isTimeLocked here locally
+            disabled={disabled || isRolling || gameOver || isTimeLocked}
           >
             {isRolling ? (
               <span className="rolling-animation">🎲</span>
+            ) : isTimeLocked ? (
+              // Display the countdown locally
+              `Wait ${secondsLeft}s`
             ) : (
               <>{rollLabel || '🎲 Roll Dice'}</>
             )}
