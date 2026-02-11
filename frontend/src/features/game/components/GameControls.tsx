@@ -8,7 +8,6 @@ interface GameControlsProps {
   onRoll: () => void;
   onMove: (diceValue: number) => void;
   gameOver: boolean;
-  onReset: () => void;
   disabled?: boolean;
   rollLabel?: string;
   rollAvailableAt?: number | string | null;
@@ -23,7 +22,6 @@ export const GameControls = ({
   onRoll,
   onMove,
   gameOver,
-  onReset,
   disabled,
   rollLabel,
   rollAvailableAt,
