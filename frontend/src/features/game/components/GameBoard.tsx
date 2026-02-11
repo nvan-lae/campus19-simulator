@@ -442,8 +442,8 @@ const GameBoardBase = ({ players, currentPlayerIndex, globalEvent, lastMoveDescr
 
 export const GameBoard = memo(GameBoardBase, (prevProps, nextProps) => {
   return (
-    JSON.stringify(prevProps.currentPlayerIndex) === JSON.stringify(nextProps.currentPlayerIndex) &&
-    JSON.stringify(prevProps.lastMoveDescription) === JSON.stringify(nextProps.lastMoveDescription) &&
+    prevProps.currentPlayerIndex === nextProps.currentPlayerIndex &&
+    prevProps.lastMoveDescription === nextProps.lastMoveDescription &&
     JSON.stringify(prevProps.globalEvent) === JSON.stringify(nextProps.globalEvent) &&
     JSON.stringify(prevProps.players) === JSON.stringify(nextProps.players) &&
     JSON.stringify(prevProps.playerEmojis) === JSON.stringify(nextProps.playerEmojis)
