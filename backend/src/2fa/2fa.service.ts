@@ -12,7 +12,7 @@ const IV_LEN = 12;
 export class TwoFaService {
   constructor(private users: UsersService) {}
 
-  async enroll(userId: number) {
+  async enroll() {
     const secret = speakeasy.generateSecret({ length: 20 });
     const qr = await QRCode.toDataURL(secret.otpauth_url!);
     return { base32: secret.base32, otpauthUrl: secret.otpauth_url, qr };
