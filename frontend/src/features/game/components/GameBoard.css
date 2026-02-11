@@ -188,16 +188,17 @@
   }
 }
 
-.game-tile.inn {
+.game-tile.marioKart {
   background: linear-gradient(135deg, #fab1a0 0%, #e17055 100%);
   border-color: #d63031;
 }
 
-.game-tile.inn .tile-number {
+.game-tile.marioKart .tile-number {
   color: rgba(255, 255, 255, 0.8);
 }
 
-.game-tile.labyrinth {
+.game-tile.stage,
+.game-tile.stage {
   background: linear-gradient(135deg, #d2c800 0%, #454b00 100%);
   border-color: #d63031;
 }

@@ -216,7 +216,7 @@ export class GameRoom {
     // Check if player has shield
     if (
       player.hasShield &&
-      ['inn', 'death'].includes(effect)
+      ['MarioKart', 'death'].includes(effect)
     ) {
       player.hasShield = false;
       this.state.lastMoveDescription = `${player.username}'s shield blocked the ${effect}!`;
@@ -230,13 +230,13 @@ export class GameRoom {
         this.state.lastMoveDescription = `${player.username} landed on a goose! +${GOOSE_COIN_REWARD} coins, roll again to double!`;
         return position;
 
-      case 'inn':
+      case 'marioKart':
         player.turnsToSkip = 1;
-        this.state.lastMoveDescription = `${player.username} stays at the inn and skips 1 turn`;
+        this.state.lastMoveDescription = `${player.username} stays at the Mario Kart and skips 1 turn`;
         return position;
 
-      case 'labyrinth':
-        this.state.lastMoveDescription = `${player.username} got lost in the labyrinth and goes back to 30!`;
+      case 'stage':
+        this.state.lastMoveDescription = `${player.username} is looking for the stage and goes back to 30!`;
         return 30;
 
       case 'death':

@@ -14,8 +14,8 @@ export type InventoryItem = {
 export type TileEffectType =
   | 'none'
   | 'goose'
-  | 'inn'
-  | 'labyrinth'
+  | 'marioKart'
+  | 'stage'
   | 'death'
   | 'challenge'
   | 'piscineExam'

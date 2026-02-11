@@ -10,8 +10,9 @@ export const STARTING_COINS = 10;
 export const GOOSE_COIN_REWARD = 5;
 
 export const SPECIAL_TILES: Record<number, TileEffectType> = {
-  19: 'inn',
-  42: 'labyrinth',
+  19: 'marioKart',
+  12: 'marioKart',
+  42: 'stage',
   34: 'death',
   15: 'challenge',
   35: 'challenge',

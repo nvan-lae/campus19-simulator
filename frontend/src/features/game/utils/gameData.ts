@@ -11,8 +11,8 @@ export interface TileInfo {
 export const TILE_INFO: Record<TileEffectType, TileInfo> = {
   none: {},
   goose: { emoji: '🪿', label: 'Goose' },
-  inn: { emoji: '🏨', label: 'Inn' },
-  labyrinth: { emoji: '🧩', label: 'Maze' },
+  marioKart: { emoji: '🏎️', label: 'Mario Kart' },
+  stage: { emoji: '👨‍💼', label: 'Looking for Stage' },
   death: { emoji: '🕳️', label: 'Black Hole' },
   challenge: { emoji: '👾', label: 'Code' },
   mystery: { emoji: '❓', label: 'Mystery' },

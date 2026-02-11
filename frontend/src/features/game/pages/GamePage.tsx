@@ -352,7 +352,7 @@ export const GamePage = () => {
 
       {/* Winner Overlay */}
       {gameState.gameOver && gameState.winner && (
-        <div className="fixed inset-0 z-[120] flex flex-col items-center justify-center bg-indigo-600/90 backdrop-blur-md text-white">
+        <div className="fixed inset-0 z-120 flex flex-col items-center justify-center bg-indigo-600/90 backdrop-blur-md text-white">
           <div className="text-6xl font-black mb-8 animate-bounce">
             🎉 {gameState.winner.username} WINS! 🎉
           </div>
