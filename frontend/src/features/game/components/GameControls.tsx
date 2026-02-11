@@ -93,8 +93,8 @@ export const GameControls = ({
 
       {/* Game Over */}
       {gameOver && (
-        <button onClick={onReset} className="new-game-button">
-          🔄 New Game
+        <button onClick={() => window.location.href = '/'} className="new-game-button">
+          Go to home
         </button>
       )}
     </div>
