@@ -14,6 +14,7 @@ interface GameBoardProps {
   lastMoveDescription: string | null;
   onTileClick?: (tileNumber: number) => void;
   playerEmojis: Record<number, string>;
+  pauseZoom?: boolean;
 }
 
 // Board aspect ratio
@@ -171,7 +172,7 @@ const StaticBoardLayer = memo(({ onTileClick, inverseScale }: StaticBoardLayerPr
 
 // --- MAIN COMPONENT ---
 
-const GameBoardBase = ({ players, currentPlayerIndex, globalEvent, lastMoveDescription, onTileClick, playerEmojis }: GameBoardProps) => {
+const GameBoardBase = ({ players, currentPlayerIndex, globalEvent, lastMoveDescription, onTileClick, playerEmojis, pauseZoom = false }: GameBoardProps) => {
   const { playWin, playMove } = useGameSound();
 
   const hasWonRef = useRef(false);
@@ -315,6 +316,12 @@ const GameBoardBase = ({ players, currentPlayerIndex, globalEvent, lastMoveDescr
   const wasMovingRef = useRef(false);
 
   useEffect(() => {
+    if (pauseZoom) {
+      setIsZoomed(false);
+      wasMovingRef.current = isMoving;
+      return;
+    }
+
     if (zoomTimeoutRef.current) {
       clearTimeout(zoomTimeoutRef.current);
       zoomTimeoutRef.current = null;
@@ -346,7 +353,7 @@ const GameBoardBase = ({ players, currentPlayerIndex, globalEvent, lastMoveDescr
         zoomTimeoutRef.current = null;
       }
     };
-  }, [isMoving, isSpecialFocus, focusTileIndex]);
+  }, [isMoving, isSpecialFocus, focusTileIndex, pauseZoom]);
 
   const zoomScale = isZoomed ? 3.0 : 1.0; 
   const inverseScale = 1 / zoomScale;
@@ -449,11 +456,33 @@ const GameBoardBase = ({ players, currentPlayerIndex, globalEvent, lastMoveDescr
 };
 
 export const GameBoard = memo(GameBoardBase, (prevProps, nextProps) => {
+  const arePlayersEqual =
+    prevProps.players.length === nextProps.players.length &&
+    prevProps.players.every((prevPlayer, index) => {
+      const nextPlayer = nextProps.players[index];
+      return (
+        nextPlayer &&
+        prevPlayer.id === nextPlayer.id &&
+        prevPlayer.position === nextPlayer.position &&
+        prevPlayer.coins === nextPlayer.coins &&
+        prevPlayer.color === nextPlayer.color &&
+        prevPlayer.username === nextPlayer.username
+      );
+    });
+
+  const areEmojisEqual = (() => {
+    const prevKeys = Object.keys(prevProps.playerEmojis);
+    const nextKeys = Object.keys(nextProps.playerEmojis);
+    if (prevKeys.length !== nextKeys.length) return false;
+    return prevKeys.every((key) => prevProps.playerEmojis[Number(key)] === nextProps.playerEmojis[Number(key)]);
+  })();
+
   return (
     prevProps.currentPlayerIndex === nextProps.currentPlayerIndex &&
     prevProps.lastMoveDescription === nextProps.lastMoveDescription &&
-    JSON.stringify(prevProps.globalEvent) === JSON.stringify(nextProps.globalEvent) &&
-    JSON.stringify(prevProps.players) === JSON.stringify(nextProps.players) &&
-    JSON.stringify(prevProps.playerEmojis) === JSON.stringify(nextProps.playerEmojis)
+    prevProps.globalEvent === nextProps.globalEvent &&
+    prevProps.pauseZoom === nextProps.pauseZoom &&
+    arePlayersEqual &&
+    areEmojisEqual
   );
 });

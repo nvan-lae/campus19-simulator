@@ -158,6 +158,7 @@ export const GamePage = () => {
             globalEvent={gameState.currentGlobalEvent}
             lastMoveDescription={gameState.lastMoveDescription}
             playerEmojis={playerEmojis}
+            pauseZoom={!!hasActiveChallenge}
           />
         </div>
 
