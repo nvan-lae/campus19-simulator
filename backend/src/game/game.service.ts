@@ -117,6 +117,14 @@ export class GameService {
     return state;
   }
 
+  resolvePendingNegativeTeleport(gameId: string): GameState {
+    const game = this.activeGames.get(gameId);
+    if (!game) throw new Error('Game not found');
+    const state = game.resolvePendingNegativeTeleport();
+    void this.checkForGameOver(gameId, state);
+    return state;
+  }
+
   private async checkForGameOver(gameId: string, state: GameState) {
     if (state.gameOver) {
       if (state.winner) {

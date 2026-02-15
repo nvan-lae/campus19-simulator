@@ -63,6 +63,14 @@ export type ActiveChallenge = {
   bets: { playerId: number; prediction: 'success' | 'fail' }[];
 }
 
+export type PendingNegativeTeleport = {
+  playerId: number;
+  fromPosition: number;
+  toPosition: number;
+  effect: 'stage' | 'death';
+  executeAt: number;
+}
+
 export type GameStatus = 'LOBBY' | 'PLAYING' | 'FINISHED';
 
 // The Full Game State
@@ -88,6 +96,7 @@ export type GameState = {
   rollAvailableAt: number | null;
   turnStartTime: number | null;
   turnTimeLimit: number;
+  pendingNegativeTeleport: PendingNegativeTeleport | null;
 }
 
 // Match / Lobby
