@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import './ChatWindow.css';
 import { useSocket } from '../../../contexts/SocketContext';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -27,6 +27,14 @@ export const ChatWindow = ({ gameId, players }: ChatWindowProps) => {
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const shouldAutoScrollRef = useRef(true);
     const MAX_MESSAGES = 200;
+
+    const playerColors = useMemo(() => {
+        const map: Record<number, string> = {};
+        for (const player of players) {
+            map[player.id] = player.color;
+        }
+        return map;
+    }, [players]);
 
     useEffect(() => {
         if (!socket) return;
@@ -78,8 +86,7 @@ export const ChatWindow = ({ gameId, players }: ChatWindowProps) => {
                     <div className="chat-empty">No messages yet. Say hi! 👋</div>
                 )}
                 {messages.map((msg, idx) => {
-                    const player = players.find(p => p.id === msg.playerId);
-                    const color = player ? player.color : '#94a3b8';
+                    const color = playerColors[msg.playerId] || '#94a3b8';
                     const isMe = user?.id === msg.playerId;
 
                     return (

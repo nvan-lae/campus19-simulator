@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -59,6 +59,16 @@ export const MainMenu = () => {
         navigate(`/lobby/${gameId}`);
     };
 
+    const visibleLobbies = useMemo(() => {
+        return lobbies.filter((lobby) => {
+            if (lobby.status === 'LOBBY') return true;
+            if (lobby.status === 'PLAYING') {
+                return !!user?.id && lobby.playerIds.includes(user.id);
+            }
+            return false;
+        });
+    }, [lobbies, user?.id]);
+
     useEffect(() => {
         // Prevent scrolling globally
         const originalHtmlOverflow = document.documentElement.style.overflow;
@@ -90,28 +100,12 @@ export const MainMenu = () => {
                 </div>
 
                 <div className="space-y-3">
-                    {lobbies.filter(lobby => {
-                        // Show all LOBBY games to everyone
-                        if (lobby.status === 'LOBBY') return true;
-                        // Show PLAYING games only to members
-                        if (lobby.status === 'PLAYING') {
-                            return user?.id && lobby.playerIds.includes(user.id);
-                        }
-                        return false;
-                    }).length === 0 ? (
+                    {visibleLobbies.length === 0 ? (
                         <div className="text-center py-8 text-gray-400">
                             No open games found. Create one to start playing!
                         </div>
                     ) : (
-                        lobbies.filter(lobby => {
-                            // Show all LOBBY games to everyone
-                            if (lobby.status === 'LOBBY') return true;
-                            // Show PLAYING games only to members
-                            if (lobby.status === 'PLAYING') {
-                                return user?.id && lobby.playerIds.includes(user.id);
-                            }
-                            return false;
-                        }).map((lobby) => (
+                        visibleLobbies.map((lobby) => (
                             <div
                                 key={lobby.gameId}
                                 className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors border border-slate-600"
