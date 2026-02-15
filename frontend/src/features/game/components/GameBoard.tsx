@@ -312,31 +312,39 @@ const GameBoardBase = ({ players, currentPlayerIndex, globalEvent, lastMoveDescr
   const isSpecialFocus = focusEffectType !== 'none' && focusEffectType !== 'piscine';
   const [isZoomed, setIsZoomed] = useState(false);
   const zoomTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastZoomTileRef = useRef<number | null>(null);
+  const wasMovingRef = useRef(false);
 
   useEffect(() => {
+    if (zoomTimeoutRef.current) {
+      clearTimeout(zoomTimeoutRef.current);
+      zoomTimeoutRef.current = null;
+    }
+
     if (isMoving) {
+      wasMovingRef.current = true;
       setIsZoomed(false);
       return;
     }
 
-    if (!isSpecialFocus) {
+    const justLanded = wasMovingRef.current;
+    wasMovingRef.current = false;
+
+    if (!justLanded || !isSpecialFocus) {
       setIsZoomed(false);
       return;
     }
 
-    if (lastZoomTileRef.current === focusTileIndex) return;
-
-    lastZoomTileRef.current = focusTileIndex;
     setIsZoomed(true);
-
-    if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current);
     zoomTimeoutRef.current = setTimeout(() => {
       setIsZoomed(false);
+      zoomTimeoutRef.current = null;
     }, 1200);
 
     return () => {
-      if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current);
+      if (zoomTimeoutRef.current) {
+        clearTimeout(zoomTimeoutRef.current);
+        zoomTimeoutRef.current = null;
+      }
     };
   }, [isMoving, isSpecialFocus, focusTileIndex]);
 
