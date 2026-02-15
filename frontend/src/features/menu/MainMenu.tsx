@@ -67,7 +67,7 @@ export const MainMenu = () => {
             }
             return false;
         });
-    }, [lobbies, user?.id]);
+    }, [lobbies, user]);
 
     useEffect(() => {
         // Prevent scrolling globally
