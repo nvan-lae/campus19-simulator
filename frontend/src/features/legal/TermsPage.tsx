@@ -83,7 +83,7 @@ export const TermsPage = () => {
           
           <h3>5.1 Game Mechanics</h3>
           <ul>
-            <li>Games are played in real-time with 2-4 players</li>
+            <li>Games are played in real-time with 1-4 players</li>
             <li>Players roll dice, answer coding challenges, and navigate a board</li>
             <li>In-game currency (coins) is earned through gameplay</li>
             <li>Players can bet on dice outcomes</li>
