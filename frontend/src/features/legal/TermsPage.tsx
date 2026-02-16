@@ -41,7 +41,7 @@ export const TermsPage = () => {
           <h3>3.1 Account Creation</h3>
           <p>To use the Service, you must create an account by:</p>
           <ul>
-            <li>Registering with an email and passwordn OR Authenticating through 42 OAuth</li>
+            <li>Registering with an email and password OR Authenticating through 42 OAuth</li>
           </ul>
 
           <h3>3.2 Account Security</h3>
