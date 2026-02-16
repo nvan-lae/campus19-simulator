@@ -13,7 +13,7 @@ import { PredictionPanel } from '../components/PredictionPanel';
 import { useGameSound } from '../../../hooks/useGameSound';
 import { useAuth } from '../../../contexts/AuthContext';
 import { TurnTimer } from '../components/TurnTimer';
-import { Footer } from '@/components/layout/Footer';
+import { Navigation } from '../../../components/layout/Navigation';
 
 export const GamePage = () => {
   // 1. CALL ALL HOOKS FIRST (Order must not change)
@@ -149,9 +149,13 @@ export const GamePage = () => {
     gameState.activeChallenge.playerId === myPlayer?.id;
 
   return (
-    <div className="game-layout-container">
-      {/* Board Area */}
-      <div className="main-viewport relative">
+    <div className="relative min-h-screen">
+      <div className="fixed top-0 left-0 right-0 z-10">
+        <Navigation />
+      </div>
+      <div className="game-layout-container">
+        {/* Board Area */}
+        <div className="main-viewport relative">
         <div className="board-container">
           <GameBoard
             players={gameState.players || []}
@@ -216,8 +220,8 @@ export const GamePage = () => {
       </div>
 
       {/* Right Area: Sidebar */}
-      <aside className="game-sidebar">
-        <div className="sidebar-header">
+      <aside className="game-sidebar" style={{ zIndex: 100 }}>
+        <div className="sidebar-header" style={{ paddingTop: '40px' }}>
           <h1>Campus19 🎲</h1>
         </div>
 
@@ -371,7 +375,7 @@ export const GamePage = () => {
           </button>
         </div>
       )}
-      <Footer/>
+      </div>
     </div>
   );
 };
