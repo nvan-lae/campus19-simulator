@@ -13,94 +13,20 @@ PURPLE  = \033[1;35m
 #                                   PROJECT                                    #
 # **************************************************************************** #
 
-NAME        = transcendence
-COMPOSE     = docker compose
-COMPOSE_FILE= docker-compose.yml
+NAME         = transcendence
+COMPOSE      = docker compose
+COMPOSE_FILE = docker-compose.yml
 
 # **************************************************************************** #
-#                                   DEFAULT                                    #
+#                               MAIN TARGETS                                   #
 # **************************************************************************** #
 
-all: up
+all: start
 
-# **************************************************************************** #
-#                                   SETUP                                      #
-# **************************************************************************** #
+start: certs up wait-db update migrate
+	@echo "$(GREEN)[$(NAME)] Application is READY$(RESET)"
 
-certs:
-	@echo "$(BLUE)[$(NAME)] Generating SSL certificates...$(RESET)"
-	@mkdir -p backend/secrets
-	@if [ ! -f backend/secrets/key.pem ]; then \
-		openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-		-keyout backend/secrets/key.pem \
-		-out backend/secrets/cert.pem \
-		-subj "/C=BE/ST=Antwerp/L=Antwerp/O=42/OU=Student/CN=localhost"; \
-	fi
-	@echo "$(GREEN)[$(NAME)] Certificates ready$(RESET)"
-
-# **************************************************************************** #
-#                                CONTAINERS                                    #
-# **************************************************************************** #
-
-up: certs
-	@echo "$(PURPLE)[$(NAME)] Starting containers...$(RESET)"
-	@$(COMPOSE) -f $(COMPOSE_FILE) up -d
-	@echo "$(GREEN)[$(NAME)] Stack is up$(RESET)"
-
-down:
-	@echo "$(YELLOW)[$(NAME)] Stopping containers...$(RESET)"
-	@$(COMPOSE) -f $(COMPOSE_FILE) down
-	@echo "$(GREEN)[$(NAME)] Containers stopped$(RESET)"
-
-logs:
-	@$(COMPOSE) -f $(COMPOSE_FILE) logs -f
-
-# **************************************************************************** #
-#                              MAINTENANCE                                     #
-# **************************************************************************** #
-
-update:
-	@echo "$(BLUE)[$(NAME)] Updating shared dependencies...$(RESET)"
-	@$(COMPOSE) -f $(COMPOSE_FILE) exec backend sh -c "cd ../shared && npm install && npm run build"
-	@echo "$(BLUE)[$(NAME)] Updating backend dependencies...$(RESET)"
-	@$(COMPOSE) -f $(COMPOSE_FILE) exec backend npm install
-	@echo "$(BLUE)[$(NAME)] Updating frontend dependencies...$(RESET)"
-	@$(COMPOSE) -f $(COMPOSE_FILE) exec frontend npm install
-	@echo "$(GREEN)[$(NAME)] Update complete$(RESET)"
-
-# **************************************************************************** #
-#                                 SHELLS                                       #
-# **************************************************************************** #
-
-shell-backend:
-	@$(COMPOSE) -f $(COMPOSE_FILE) exec backend sh
-
-shell-frontend:
-	@$(COMPOSE) -f $(COMPOSE_FILE) exec frontend sh
-
-shell-db:
-	@$(COMPOSE) -f $(COMPOSE_FILE) exec postgres psql -U postgres -d transcendence_db
-
-env:
-	@sh script/env.sh
-
-# **************************************************************************** #
-#                                 DATABASE                                     #
-# **************************************************************************** #
-
-migrate:
-	@echo "$(BLUE)[$(NAME)] Running database migrations...$(RESET)"
-	@$(COMPOSE) -f $(COMPOSE_FILE) exec backend npx prisma migrate dev
-
-init:
-	@$(MAKE) up
-	@echo "$(BLUE)[$(NAME)] Waiting for database...$(RESET)"
-	@sleep 5
-	@$(MAKE) migrate
-
-# **************************************************************************** #
-#                                 CLEANING                                     #
-# **************************************************************************** #
+re: fclean all
 
 clean:
 	@echo "$(RED)[$(NAME)] Removing containers + volumes...$(RESET)"
@@ -120,10 +46,85 @@ fclean:
 		echo "$(YELLOW)[$(NAME)] fclean aborted$(RESET)"; \
 	fi
 
-re: fclean all
+# **************************************************************************** #
+#                            CONTAINER LIFECYCLE                               #
+# **************************************************************************** #
+
+up:
+	@echo "$(PURPLE)[$(NAME)] Starting containers...$(RESET)"
+	@$(COMPOSE) -f $(COMPOSE_FILE) up -d
+	@echo "$(GREEN)[$(NAME)] Stack is up$(RESET)"
+
+down:
+	@echo "$(YELLOW)[$(NAME)] Stopping containers...$(RESET)"
+	@$(COMPOSE) -f $(COMPOSE_FILE) down
+	@echo "$(GREEN)[$(NAME)] Containers stopped$(RESET)"
+
+logs:
+	@$(COMPOSE) -f $(COMPOSE_FILE) logs -f
+
+restart: down up
 
 # **************************************************************************** #
-#                                 EXTRA                                        #
+#                                   SETUP                                      #
+# **************************************************************************** #
+
+certs:
+	@echo "$(BLUE)[$(NAME)] Generating SSL certificates...$(RESET)"
+	@mkdir -p backend/secrets
+	@if [ ! -f backend/secrets/key.pem ]; then \
+		openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+		-keyout backend/secrets/key.pem \
+		-out backend/secrets/cert.pem \
+		-subj "/C=BE/ST=Antwerp/L=Antwerp/O=42/OU=Student/CN=localhost"; \
+	fi
+	@echo "$(GREEN)[$(NAME)] Certificates ready$(RESET)"
+
+update:
+	@echo "$(BLUE)[$(NAME)] Installing shared dependencies...$(RESET)"
+	@$(COMPOSE) -f $(COMPOSE_FILE) exec backend sh -c "cd ../shared && npm install && npm run build"
+
+	@echo "$(BLUE)[$(NAME)] Installing backend dependencies...$(RESET)"
+	@$(COMPOSE) -f $(COMPOSE_FILE) exec backend npm install
+
+	@echo "$(BLUE)[$(NAME)] Installing frontend dependencies...$(RESET)"
+	@$(COMPOSE) -f $(COMPOSE_FILE) exec frontend npm install
+
+	@echo "$(GREEN)[$(NAME)] Dependencies installed$(RESET)"
+
+# **************************************************************************** #
+#                                   DATABASE                                   #
+# **************************************************************************** #
+
+wait-db:
+	@echo "$(BLUE)[$(NAME)] Waiting for database to be ready...$(RESET)"
+	@until $(COMPOSE) -f $(COMPOSE_FILE) exec postgres pg_isready -U postgres > /dev/null 2>&1; do \
+		sleep 2; \
+	done
+	@echo "$(GREEN)[$(NAME)] Database is ready$(RESET)"
+
+migrate:
+	@echo "$(BLUE)[$(NAME)] Running database migrations...$(RESET)"
+	@$(COMPOSE) -f $(COMPOSE_FILE) exec backend npx prisma migrate deploy
+	@echo "$(GREEN)[$(NAME)] Migrations complete$(RESET)"
+
+reset-db: down up wait-db migrate
+
+# **************************************************************************** #
+#                                 DEV SHELLS                                   #
+# **************************************************************************** #
+
+shell-backend:
+	@$(COMPOSE) -f $(COMPOSE_FILE) exec backend sh
+
+shell-frontend:
+	@$(COMPOSE) -f $(COMPOSE_FILE) exec frontend sh
+
+shell-db:
+	@$(COMPOSE) -f $(COMPOSE_FILE) exec postgres psql -U postgres -d transcendence_db
+
+# **************************************************************************** #
+#                                   EXTRAS                                     #
 # **************************************************************************** #
 
 prune:
