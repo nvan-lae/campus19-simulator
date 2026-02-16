@@ -126,7 +126,7 @@ export const PrivacyPage = () => {
         <section className="legal-section">
           <h2>10. Contact Information</h2>
           <p>
-            For questions about these Terms, please contact us at:<br />
+            For questions about this Privacy Policy, please contact us at:<br />
             <strong>Email:</strong> Coming soon<br />
           </p>
         </section>
