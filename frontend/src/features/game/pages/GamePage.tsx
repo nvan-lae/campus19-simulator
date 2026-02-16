@@ -13,6 +13,7 @@ import { PredictionPanel } from '../components/PredictionPanel';
 import { useGameSound } from '../../../hooks/useGameSound';
 import { useAuth } from '../../../contexts/AuthContext';
 import { TurnTimer } from '../components/TurnTimer';
+import { Footer } from '@/components/layout/Footer';
 
 export const GamePage = () => {
   // 1. CALL ALL HOOKS FIRST (Order must not change)
@@ -370,6 +371,7 @@ export const GamePage = () => {
           </button>
         </div>
       )}
+      <Footer/>
     </div>
   );
 };

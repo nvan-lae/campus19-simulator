@@ -1,5 +1,32 @@
 @import "tailwindcss";
 
+html, body {
+  @apply overflow-hidden;
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  position: fixed;
+}
+
+#root {
+  @apply h-full w-full overflow-hidden;
+}
+
+/* Fixed viewport layout - no scroll */
+.app-wrapper {
+  @apply h-full w-full flex flex-col bg-slate-900;
+  overflow: hidden;
+}
+
+/* Content area takes remaining space and allows internal scroll */
+.app-content {
+  @apply flex-1 w-full;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+}
+
 @theme {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
@@ -264,4 +291,42 @@
 
 .profile-content {
   @apply grid grid-cols-1 lg:grid-cols-2 gap-6;
+}
+
+/* styles for legal pages */
+
+.legal-content {
+  @apply flex-1 overflow-y-auto px-4 pb-8;
+}
+
+.legal-section {
+  @apply mb-8 text-gray-300;
+}
+
+.legal-section h2 {
+  @apply text-2xl font-bold text-white mb-4 mt-6;
+}
+
+.legal-section h3 {
+  @apply text-xl font-semibold text-white mb-3 mt-4;
+}
+
+.legal-section p {
+  @apply mb-4 leading-relaxed;
+}
+
+.legal-section ul {
+  @apply list-disc list-inside mb-4 space-y-2 ml-4;
+}
+
+.legal-section li {
+  @apply leading-relaxed;
+}
+
+.legal-section strong {
+  @apply text-white font-semibold;
+}
+
+.legal-section a {
+  @apply text-blue-400 hover:text-blue-300 underline;
 }
