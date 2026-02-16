@@ -480,40 +480,40 @@ export class GameRoom {
     player.inventory.splice(itemIndex, 1);
 
     switch (itemId) {
-      case 'skip_shield':
+      case 'norminette_pass':
         player.hasShield = true;
-        this.state.lastMoveDescription = `${player.username} activated a Skip Shield!`;
+        this.state.lastMoveDescription = `${player.username} activated Norminette Pass! (code passes norm this time)`;
         break;
 
-      case 'extra_roll':
+      case 'bonus_eval':
         // Allow another roll after current move
         this.state.pendingEvalRoll = true;
-        this.state.lastMoveDescription = `${player.username} uses Extra Roll!`;
+        this.state.lastMoveDescription = `${player.username} booked a Bonus Eval Slot! Rolling again!`;
         break;
 
-      case 'freeze_trap': {
+      case 'segfault_trap': {
         if (!targetPlayerId) throw new Error('Must select a target player');
         const freezeTarget = this.state.players.find(
           (p) => p.id === targetPlayerId,
         );
         if (!freezeTarget) throw new Error('Target player not found');
         freezeTarget.turnsToSkip += 1;
-        this.state.lastMoveDescription = `${player.username} froze ${freezeTarget.username} for 1 turn!`;
+        this.state.lastMoveDescription = `${player.username} caused a Segfault in ${freezeTarget.username}'s program! They skip 1 turn!`;
         break;
       }
 
-      case 'pushback': {
+      case 'git_reset_hard': {
         if (!targetPlayerId) throw new Error('Must select a target player');
         const pushTarget = this.state.players.find(
           (p) => p.id === targetPlayerId,
         );
         if (!pushTarget) throw new Error('Target player not found');
         pushTarget.position = Math.max(0, pushTarget.position - 3);
-        this.state.lastMoveDescription = `${player.username} pushed ${pushTarget.username} back 3 tiles!`;
+        this.state.lastMoveDescription = `${player.username} used Git Reset --Hard on ${pushTarget.username}! Back 3 tiles!`;
         break;
       }
 
-      case 'swap_position': {
+      case 'peer_swap': {
         if (!targetPlayerId) throw new Error('Must select a target player');
         const swapTarget = this.state.players.find(
           (p) => p.id === targetPlayerId,
@@ -524,11 +524,11 @@ export class GameRoom {
         player.position = swapTarget.position;
         swapTarget.position = tempPos;
 
-        this.state.lastMoveDescription = `${player.username} swapped positions with ${swapTarget.username}!`;
+        this.state.lastMoveDescription = `${player.username} initiated a Peer Swap with ${swapTarget.username}!`;
         break;
       }
 
-      case 'chaos_orb': {
+      case 'moulinette_roulette': {
         // Shuffle all positions
         const positions = this.state.players.map((p) => p.position);
         for (let i = positions.length - 1; i > 0; i--) {
@@ -538,7 +538,7 @@ export class GameRoom {
         this.state.players.forEach((p, index) => {
           p.position = positions[index];
         });
-        this.state.lastMoveDescription = `🔮 CHAOS ORB USED! All positions shuffled!`;
+        this.state.lastMoveDescription = `🎰 MOULINETTE ROULETTE! All positions shuffled!`;
         break;
       }
 

@@ -52,7 +52,7 @@ describe('GameRoom Logic', () => {
         gameRoom.startGame(mockUser1.id);
     });
 
-    it('should allow buying and using swap_position', () => {
+    it('should allow buying and using peer_swap', () => {
         const p1 = gameRoom.getState().players[0];
         const p2 = gameRoom.getState().players[1];
 
@@ -63,15 +63,15 @@ describe('GameRoom Logic', () => {
         p1.position = 5;
         p2.position = 10;
 
-        // Buy item (Swap Position cost is 15)
-        gameRoom.purchaseItem(p1.id, 'swap_position');
+        // Buy item (Peer Swap cost is 18)
+        gameRoom.purchaseItem(p1.id, 'peer_swap');
         expect(p1.inventory).toContainEqual(
-            expect.objectContaining({ itemId: 'swap_position' }),
+            expect.objectContaining({ itemId: 'peer_swap' }),
         );
-        expect(p1.coins).toBe(85);
+        expect(p1.coins).toBe(82);
 
         // Use item
-        gameRoom.useItem(p1.id, 'swap_position', p2.id);
+        gameRoom.useItem(p1.id, 'peer_swap', p2.id);
 
         // Verify swap
         expect(p1.position).toBe(10);
