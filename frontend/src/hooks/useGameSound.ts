@@ -46,23 +46,28 @@ export const useGameSound = () => {
         };
     }, []);
 
-    const playMove = () => playTone(300, 'sine', 0.1);
-    const playRoll = () => {
+    const playMove = useCallback(() => {
+        playTone(300, 'sine', 0.1);
+    }, [playTone]);
+
+    const playRoll = useCallback(() => {
         // A quick sequence of random notes
         for (let i = 0; i < 5; i++) {
             setTimeout(() => playTone(400 + Math.random() * 200, 'square', 0.05), i * 50);
         }
-    };
-    const playWin = () => {
+    }, [playTone]);
+
+    const playWin = useCallback(() => {
         playTone(523.25, 'sine', 0.2); // C5
         setTimeout(() => playTone(659.25, 'sine', 0.2), 200); // E5
         setTimeout(() => playTone(783.99, 'sine', 0.4), 400); // G5
         setTimeout(() => playTone(1046.50, 'sine', 0.8), 600); // C6
-    };
-    const playSwap = () => {
+    }, [playTone]);
+
+    const playSwap = useCallback(() => {
         playTone(150, 'sawtooth', 0.3);
         setTimeout(() => playTone(300, 'sawtooth', 0.3), 100);
-    }
+    }, [playTone]);
 
     return { playMove, playRoll, playWin, playSwap };
 };

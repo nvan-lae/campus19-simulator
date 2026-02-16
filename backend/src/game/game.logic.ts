@@ -10,9 +10,12 @@ import {
   TileEffectType,
   CODING_QUESTIONS,
   type GamePlayer,
-  type GameState
+  type GameState,
+  type PendingNegativeTeleport,
 } from '@campus19/shared';
 import { User } from '@prisma/client';
+
+const NEGATIVE_TELEPORT_DELAY_MS = 1800;
 
 export class GameRoom {
   private state: GameState;
@@ -38,6 +41,7 @@ export class GameRoom {
       rollAvailableAt: null,
       turnStartTime: null,
       turnTimeLimit: 60000, // 60 seconds
+      pendingNegativeTeleport: null,
     };
   }
 
@@ -201,7 +205,11 @@ export class GameRoom {
       this.state.winner = player;
       this.state.lastMoveDescription = `🎉 ${player.username} reaches tile ${BOARD_SIZE - 1} and WINS!`;
     }
-    else if (!this.state.pendingEvalRoll && !this.state.activeChallenge) {
+    else if (
+      !this.state.pendingEvalRoll &&
+      !this.state.activeChallenge &&
+      !this.state.pendingNegativeTeleport
+    ) {
       this.nextTurn();
     }
 
@@ -236,12 +244,24 @@ export class GameRoom {
         return position;
 
       case 'stage':
-        this.state.lastMoveDescription = `${player.username} is looking for an internship and goes back to 30!`;
-        return 30;
+        this.state.pendingNegativeTeleport = this.createPendingNegativeTeleport(
+          player,
+          position,
+          30,
+          'stage',
+        );
+        this.state.lastMoveDescription = `${player.username} landed on Internship and will go back to 30...`;
+        return position;
 
       case 'death':
-        this.state.lastMoveDescription = `${player.username} fell into a Black Hole and returns to the start!`;
-        return 0;
+        this.state.pendingNegativeTeleport = this.createPendingNegativeTeleport(
+          player,
+          position,
+          0,
+          'death',
+        );
+        this.state.lastMoveDescription = `${player.username} fell into a Black Hole...`;
+        return position;
 
       case 'challenge': {
         // Pick a random question
@@ -281,6 +301,49 @@ export class GameRoom {
         this.state.lastMoveDescription = `${player.username} moved to tile ${position}`;
         return position;
     }
+  }
+
+  resolvePendingNegativeTeleport(): GameState {
+    const pending = this.state.pendingNegativeTeleport;
+    if (!pending) {
+      throw new Error('No pending negative teleport');
+    }
+
+    const player = this.state.players.find((p) => p.id === pending.playerId);
+    if (!player) {
+      this.state.pendingNegativeTeleport = null;
+      return this.state;
+    }
+
+    player.position = pending.toPosition;
+    this.state.pendingNegativeTeleport = null;
+
+    if (pending.effect === 'stage') {
+      this.state.lastMoveDescription = `${player.username} is looking for an internship and goes back to 30!`;
+    } else {
+      this.state.lastMoveDescription = `${player.username} fell into a Black Hole and returns to the start!`;
+    }
+
+    if (!this.state.pendingEvalRoll && !this.state.activeChallenge) {
+      this.nextTurn();
+    }
+
+    return this.state;
+  }
+
+  private createPendingNegativeTeleport(
+    player: GamePlayer,
+    fromPosition: number,
+    toPosition: number,
+    effect: 'stage' | 'death',
+  ): PendingNegativeTeleport {
+    return {
+      playerId: player.id,
+      fromPosition,
+      toPosition,
+      effect,
+      executeAt: Date.now() + NEGATIVE_TELEPORT_DELAY_MS,
+    };
   }
 
   // Submit challenge answer

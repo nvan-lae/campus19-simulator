@@ -33,6 +33,7 @@ interface AuthenticatedSocket extends Socket {
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('GameGateway');
+  private pendingNegativeTeleportTimers: Map<string, NodeJS.Timeout> = new Map();
 
   constructor(
     private readonly jwtService: JwtService,
@@ -173,9 +174,37 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const newState = this.gameService.processMove(data.gameId, user.id);
       this.server.to(data.gameId).emit('game_state_update', newState);
+
+      const pending = newState.pendingNegativeTeleport;
+      if (pending) {
+        this.schedulePendingNegativeTeleport(data.gameId, pending.executeAt);
+      }
     } catch (e) {
       client.emit('game_error', { message: e.message });
     }
+  }
+
+  private schedulePendingNegativeTeleport(gameId: string, executeAt: number) {
+    const timerKey = gameId;
+    const existingTimer = this.pendingNegativeTeleportTimers.get(timerKey);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+      this.pendingNegativeTeleportTimers.delete(timerKey);
+    }
+
+    const delayMs = Math.max(0, executeAt - Date.now());
+    const timer = setTimeout(() => {
+      try {
+        const updatedState = this.gameService.resolvePendingNegativeTeleport(gameId);
+        this.server.to(gameId).emit('game_state_update', updatedState);
+      } catch (error) {
+        this.logger.warn(`Failed resolving pending negative teleport in game ${gameId}: ${error.message}`);
+      } finally {
+        this.pendingNegativeTeleportTimers.delete(timerKey);
+      }
+    }, delayMs);
+
+    this.pendingNegativeTeleportTimers.set(timerKey, timer);
   }
 
   @SubscribeMessage('pay_escape')
