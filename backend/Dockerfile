@@ -12,6 +12,7 @@ COPY backend/package*.json ./
 COPY backend/prisma ./prisma
 
 RUN npm install
+RUN npx prisma generate
 
 COPY backend .
 
