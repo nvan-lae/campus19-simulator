@@ -31,7 +31,6 @@ export const Navigation = () => {
         setIsDropdownOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -48,13 +47,7 @@ export const Navigation = () => {
           <Link to="/" className="navbar-link">
             Home
           </Link>
-          {isAuthenticated && (
-            <>
-              <Link to="/lobby" className="navbar-link">
-                Lobby
-              </Link>
-            </>
-          )}
+          
           {isAuthenticated ? (
             <div className="user-dropdown" ref={dropdownRef}>
               <button
