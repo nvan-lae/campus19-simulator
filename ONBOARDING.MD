@@ -183,7 +183,7 @@ If you are adding a new game feature, you will likely work in `game.logic.ts`.
 * *Example:* `inflation` increases shop item costs by 50%.
 
 
-* **The Item Shop:** Players can buy items like `chaos_orb` (shuffles everyone's positions) or `skip_shield`. The logic for *using* these items is handled in the `useItem` method.
+* **The Item Shop:** Players can buy items like `moulinette_roulette` (shuffles everyone's positions) or `norminette_pass` (blocks the next negative effect). The logic for *using* these items is handled in the `useItem` method.
 
 ---
 
