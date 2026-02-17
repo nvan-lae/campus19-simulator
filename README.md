@@ -11,7 +11,7 @@ _This project has been created as part of the 42 curriculum by nvan-lae, csteven
 - **Real-time Gameplay**: Live dice rolls and player movement powered by WebSockets.
 - **Interactive Board**: Unique tiles including "Mario Kart" (skip a turn) and "Look for Internship" (move back).
 - **Matchmaking & Lobby**: Create or join game rooms with friends.
-- **Dynamic Shop**: Purchase items like the "Chaos Orb" to shuffle positions.
+- **Dynamic Shop**: Purchase items like the "Moulinette Roulette" to shuffle positions.
 - **Cross-Platform Auth**: Standard email/password login and 42 Intra OAuth integration.
 
 ## 🛠️ Instructions
@@ -39,7 +39,7 @@ Create a `.env` file based on `.env.example`:
 The following command generates SSL certificates, builds the containers, and runs database migrations:
 
 ```
-make init
+make
 ```
 
 4. **Access the Application**:
@@ -62,7 +62,7 @@ make init
 
 ## 💻 Technical Stack
 
-- Frontend: **React 19** with **Vite** for fast builds. Styled using **Tailwind CSS** and **Lucide React** for icons.
+- Frontend: **React** with **Vite** for fast builds. Styled using **Tailwind CSS** and **Lucide React** for icons.
 - Backend: **NestJS** (v11) providing a modular architecture and dependency injection.
 - Database: **PostgreSQL** managed via **Prisma ORM** for type-safe queries.
 - Real-time: **Socket.io** for bidirectional communication.
@@ -76,7 +76,7 @@ The schema is designed to handle transient game states and persistent user stati
 - **Match**: Tracks game sessions, including start/end timestamps.
 - **MatchPlayer**: An explicit link table recording user performance (rank, coins earned, winner status) for match history.
 
-## 🧮 14-Point Module Strategy
+## 🧮 Point Module Strategy
 
 | Category      | Module                    | Type  | Points | Justification                                                                       |
 | ------------- | ------------------------- | ----- | ------ | ----------------------------------------------------------------------------------- |
@@ -85,7 +85,7 @@ The schema is designed to handle transient game states and persistent user stati
 | **Web**       | File upload system        | Minor | 1      | Players are able to upload and change their profile pictures                        |
 | **Gaming**    | Web-based Game            | Major | 2      | Original "Campus19 Simulator" board game with complete win/loss conditions.         |
 | **Gaming**    | Multiplayer 3+            | Major | 2      | Support for up to 4 concurrent players in a single match.                           |
-| **User Mgmt** | Standard User Mgmt        | Major | 2      | Includes profiles, avatar uploads, and basic friend/online status logic.            |
+| **User Mgmt** | Standard User Mgmt        | Major | 2      | Includes profiles, avatar uploads, and basic matchmaking logic.            |
 | **User Mgmt** | Two-Factor Authentication | Minor | 1      | Allow users to enable 2FA on their account                                          |
 | **Web**       | Use of an ORM             | Minor | 1      | **Prisma** is used for all database interactions.                                   |
 | **Gaming**    | Game Customization        | Minor | 1      | Custom tile effects (Evaluation, Black Hole, Internship) and power-ups in the shop. |
