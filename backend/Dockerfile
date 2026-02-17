@@ -15,6 +15,5 @@ RUN npm install
 RUN npx prisma generate
 
 COPY backend .
-
 EXPOSE 3000
-CMD ["npm", "run", "start:dev"]
+CMD sh -c "cd ../shared && npm install && npm run build && cd ../backend && npm run start:dev"
