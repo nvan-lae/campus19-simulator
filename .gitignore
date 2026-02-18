@@ -6,13 +6,16 @@
 node_modules/
 backend/node_modules/
 frontend/node_modules/
+shared/node_modules/
 backend/secrets/
+frontend/secrets/
 
 # 3. Build Artifacts
 dist/
 build/
 backend/dist/
 frontend/dist/
+shared/dist/
 
 # 4. OS & IDE Files
 .DS_Store
@@ -23,5 +26,5 @@ frontend/dist/
 postgres-data/
 *.log
 
-Makefile
-.gitignore
+# 6. Coverage
+coverage/

@@ -1,0 +1,62 @@
+# Version control
+
+.git
+.gitignore
+
+# Node modules (rebuilt in container)
+
+node_modules
+backend/node_modules
+frontend/node_modules
+shared/node_modules
+
+# Build artifacts
+
+dist
+backend/dist
+frontend/dist
+shared/dist
+
+# Environment files
+
+.env
+.env.production
+.env.local
+
+# IDE / OS
+
+.vscode
+.idea
+.DS_Store
+\*.swp
+
+# Docker
+
+docker-compose.yml
+Makefile
+
+# Documentation
+
+README.md
+ONBOARDING.MD
+TODO.md
+\*.md
+
+# Test / coverage
+
+coverage
+backend/coverage
+frontend/coverage
+
+# Logs
+
+\*.log
+
+# Secrets (handled via volumes)
+
+backend/secrets
+frontend/secrets
+
+# Uploads (handled via volumes)
+
+backend/uploads

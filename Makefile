@@ -52,7 +52,7 @@ fclean:
 
 up:
 	@echo "$(PURPLE)[$(NAME)] Starting containers...$(RESET)"
-	@$(COMPOSE) -f $(COMPOSE_FILE) up -d
+	@$(COMPOSE) -f $(COMPOSE_FILE) up -d --build
 	@echo "$(GREEN)[$(NAME)] Stack is up$(RESET)"
 
 down:
@@ -68,6 +68,9 @@ restart: down up
 # **************************************************************************** #
 #                                   SETUP                                      #
 # **************************************************************************** #
+
+env:
+	@sh script/env.sh
 
 certs:
 	@echo "$(BLUE)[$(NAME)] Generating SSL certificates...$(RESET)"
