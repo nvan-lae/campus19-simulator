@@ -204,7 +204,7 @@ export const ProfilePage = () => {
       }
 
       const updatedUser = await res.json();
-      updateUser({ avatar: updatedUser.avatar });
+      updateUser({ avatar: updatedUser.avatarUrl });
       setUploadError(null);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete avatar';
@@ -254,11 +254,11 @@ export const ProfilePage = () => {
 
       const updatedUser = JSON.parse(responseText);
 
-      if (!updatedUser || (typeof updatedUser.avatar !== 'string' && updatedUser.avatar !== null)) {
+      if (!updatedUser || (typeof updatedUser.avatarUrl !== 'string' && updatedUser.avatarUrl !== null)) {
         throw new Error('Invalid response format from server');
       }
 
-      updateUser({ avatar: updatedUser.avatar });
+      updateUser({ avatar: updatedUser.avatarUrl });
       setUploadError(null);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to upload avatar';

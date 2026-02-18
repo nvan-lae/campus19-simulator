@@ -36,6 +36,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'https://localhost:3000';
   }, []);
 
+  // Map backend field names to frontend field names
+  // Backend uses "avatarUrl", frontend User type uses "avatar"
+  const normalizeUser = (data: Record<string, unknown>): Record<string, unknown> => {
+    const { avatarUrl, ...rest } = data;
+    return { ...rest, avatar: avatarUrl ?? data.avatar };
+  };
+
   // On mount, if we have a token, fetch user data in the background (non-blocking)
   useEffect(() => {
     const storedToken = localStorage.getItem('access_token');
@@ -62,7 +69,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (!isMounted) return;
 
         if (res.ok) {
-          const userData = await res.json();
+          const rawData = await res.json();
+          const userData = normalizeUser(rawData);
           console.log('[Auth] User loaded:', userData.username);
           
           // Fetch stats separately
@@ -119,7 +127,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         throw new Error('Failed to verify token');
       }
 
-      const userData = await res.json();
+      const rawLoginData = await res.json();
+      const userData = normalizeUser(rawLoginData);
       
       // Fetch stats
       try {
