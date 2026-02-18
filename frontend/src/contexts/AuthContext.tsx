@@ -36,11 +36,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'https://localhost:3000';
   }, []);
 
+  type BackendUser = Omit<User, 'avatar'> & {
+    avatarUrl?: string;
+  };
+
   // Map backend field names to frontend field names
   // Backend uses "avatarUrl", frontend User type uses "avatar"
-  const normalizeUser = (data: Record<string, unknown>): Record<string, unknown> => {
+  const normalizeUser = (data: BackendUser): User => {
     const { avatarUrl, ...rest } = data;
-    return { ...rest, avatar: avatarUrl ?? data.avatar };
+    return { ...rest, avatar: avatarUrl } as User;
   };
 
   // On mount, if we have a token, fetch user data in the background (non-blocking)
