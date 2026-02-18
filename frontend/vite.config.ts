@@ -20,4 +20,8 @@ export default defineConfig({
       "@campus19/shared": path.resolve(__dirname, "../shared/src"),
     },
   },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+  },
 })

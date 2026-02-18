@@ -1,6 +1,6 @@
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import { ProfilePage } from './ProfilePage';
 import * as AuthContextModule from '../../contexts/AuthContext';
 
@@ -19,7 +19,7 @@ describe('ProfilePage', () => {
         id: 1,
         username: 'testuser',
         email: 'test@example.com',
-        avatarUrl: undefined,
+        avatar: undefined,
         createdAt: '2023-01-01T00:00:00Z',
     };
 
@@ -32,8 +32,22 @@ describe('ProfilePage', () => {
             updateUser: mockUpdateUser,
         });
 
-        // Mock fetch
-        globalThis.fetch = vi.fn();
+        // Mock fetch - return promises for stats and matches
+        globalThis.fetch = vi.fn().mockImplementation((url) => {
+            if (url.includes('/users/me/stats')) {
+                return Promise.resolve({
+                    ok: true,
+                    json: async () => ({ totalMatches: 0, wins: 0, losses: 0, winRate: 0 }),
+                });
+            }
+            if (url.includes('/users/me/matches')) {
+                return Promise.resolve({
+                    ok: true,
+                    json: async () => [],
+                });
+            }
+            return Promise.resolve({ ok: false });
+        });
     });
 
     afterEach(() => {
@@ -47,7 +61,7 @@ describe('ProfilePage', () => {
         expect(screen.getByText('Level 1')).toBeInTheDocument();
     });
 
-    it('displays default avatar when no avatarUrl is present', () => {
+    it('displays default avatar when no avatar is present', () => {
         render(<ProfilePage />);
         const img = screen.getByAltText('testuser') as HTMLImageElement;
         expect(img.src).toContain('data:image/svg+xml');
@@ -55,7 +69,7 @@ describe('ProfilePage', () => {
 
     it('displays correct URL for relative avatar path', () => {
         (AuthContextModule.useAuth as Mock).mockReturnValue({
-            user: { ...mockUser, avatarUrl: '/uploads/avatars/me.jpg' },
+            user: { ...mockUser, avatar: '/uploads/avatars/me.jpg' },
             token: 'fake-token',
             updateUser: mockUpdateUser,
         });
@@ -68,7 +82,7 @@ describe('ProfilePage', () => {
 
     it('displays correct URL for absolute avatar path', () => {
         (AuthContextModule.useAuth as Mock).mockReturnValue({
-            user: { ...mockUser, avatarUrl: 'http://example.com/avatar.jpg' },
+            user: { ...mockUser, avatar: 'http://example.com/avatar.jpg' },
             token: 'fake-token',
             updateUser: mockUpdateUser,
         });
@@ -105,7 +119,7 @@ describe('ProfilePage', () => {
         });
 
         await waitFor(() => {
-            expect(mockUpdateUser).toHaveBeenCalledWith({ avatarUrl: '/uploads/avatars/new.png' });
+            expect(mockUpdateUser).toHaveBeenCalledWith({ avatar: '/uploads/avatars/new.png' });
         });
     });
 
@@ -149,7 +163,7 @@ describe('ProfilePage', () => {
 
     it('deletes avatar successfully', async () => {
         (AuthContextModule.useAuth as Mock).mockReturnValue({
-            user: { ...mockUser, avatarUrl: '/current.jpg' },
+            user: { ...mockUser, avatar: '/current.jpg' },
             token: 'fake-token',
             updateUser: mockUpdateUser,
         });
@@ -177,7 +191,7 @@ describe('ProfilePage', () => {
         });
 
         await waitFor(() => {
-            expect(mockUpdateUser).toHaveBeenCalledWith({ avatarUrl: null });
+            expect(mockUpdateUser).toHaveBeenCalledWith({ avatar: null });
         });
     });
 });
