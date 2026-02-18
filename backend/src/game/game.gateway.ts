@@ -26,6 +26,7 @@ interface AuthenticatedSocket extends Socket {
       'https://localhost:5173',
       'https://127.0.0.1:5173',
       process.env.FRONTEND_URL || 'https://localhost:5173',
+      /\.ngrok-free\.app$/,
     ],
     credentials: true,
   },
