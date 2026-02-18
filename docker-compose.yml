@@ -60,6 +60,21 @@ services:
       - WATCHPACK_POLLING=true
       - VITE_API_URL=${VITE_API_URL}
 
+  # 4. Nginx Reverse Proxy (single entry point for ngrok)
+  nginx:
+    image: nginx:alpine
+    container_name: transcendence_nginx
+    restart: on-failure
+    depends_on:
+      - backend
+      - frontend
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "8080:80"
+    networks:
+      - transcendence_network
+
 # Define persistent storage for the DB
 volumes:
   postgres_data:
