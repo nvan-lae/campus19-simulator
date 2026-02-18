@@ -27,6 +27,17 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+type BackendUser = Omit<User, 'avatar'> & {
+  avatarUrl?: string;
+};
+
+// Map backend field names to frontend field names
+// Backend uses "avatarUrl", frontend User type uses "avatar"
+const normalizeUser = (data: BackendUser): User => {
+  const { avatarUrl, ...rest } = data;
+  return { ...rest, avatar: avatarUrl } as User;
+};
+
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('access_token'));
@@ -35,17 +46,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const apiBase = useMemo(() => {
     return import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'https://localhost:3000';
   }, []);
-
-  type BackendUser = Omit<User, 'avatar'> & {
-    avatarUrl?: string;
-  };
-
-  // Map backend field names to frontend field names
-  // Backend uses "avatarUrl", frontend User type uses "avatar"
-  const normalizeUser = (data: BackendUser): User => {
-    const { avatarUrl, ...rest } = data;
-    return { ...rest, avatar: avatarUrl } as User;
-  };
 
   // On mount, if we have a token, fetch user data in the background (non-blocking)
   useEffect(() => {
